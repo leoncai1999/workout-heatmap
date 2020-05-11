@@ -17,23 +17,21 @@ export class MapContainer extends Component {
     access_token: ''
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     var user_activities = []
     var user_polylines = []
 
-    // need to adjust this to how many activites a given athlete has
-    for (let x = 1; x < 4; x++) {
-      axios
-      .get("https://www.strava.com/api/v3/athlete/activities?", {
-        params: {
-          per_page: '200',
-          page: x,
-          access_token: keys.STRAVA_API_KEY
-        }
-      })
-      .then(response => {
-        const activities = response.data;
+    var activities_left = true
+    var page_num = 1;
+
+    while (activities_left) {
+      const activities = await this.getActivities(page_num);
+
+      if (activities.length === 0) {
+        activities_left = false
+      } else {
         const decodePolyline = require('decode-google-map-polyline');
+
         for (let i = 0; i < activities.length; i++) {
           user_activities.push(activities[i])
           var polyline = activities[i]['map']['summary_polyline']
@@ -41,11 +39,26 @@ export class MapContainer extends Component {
             user_polylines.push(decodePolyline(polyline))
           }
         }
+
         this.setState({ activities : user_activities})
         this.setState({ polylines : user_polylines})
-      });
+        page_num += 1
+      }
     }
 
+  }
+
+  getActivities = async(page_num) => {
+    let results = await axios
+      .get("https://www.strava.com/api/v3/athlete/activities?", {
+        params: {
+          per_page: '200',
+          page: page_num,
+          access_token: keys.STRAVA_API_KEY
+        }
+      })
+
+    return results.data
   }
 
   render() {
