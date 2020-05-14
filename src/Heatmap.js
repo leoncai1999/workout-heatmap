@@ -14,12 +14,15 @@ class Heatmap extends Component {
   state = {
     activities: [],
     polylines: [],
-    access_token: ''
+    access_token: '',
+    map_center: []
   };
 
   async componentDidMount() {
 
     const access_token = await this.updateAccessToken(String(window.location.href))
+
+    window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap')
 
     var user_activities = []
     var user_polylines = []
@@ -28,7 +31,7 @@ class Heatmap extends Component {
     var page_num = 1;
 
     while (activities_left) {
-      const activities = await this.getActivities(page_num, access_token);
+      const activities = await this.getActivities(page_num, access_token)
 
       if (activities.length === 0) {
         activities_left = false
@@ -50,7 +53,7 @@ class Heatmap extends Component {
     }
 
     this.setState({ access_token })
-
+    this.setState({ map_center : this.getMapCenter(user_activities) })
   }
 
   getActivities = async(page_num, access_token) => {
@@ -92,27 +95,52 @@ class Heatmap extends Component {
     return token
   }
 
+  getMapCenter = (activities) => {
+    // center map at starting point of most recent activity with location
+    let location_found = false
+    let activity_num = 0
+    let center_cords = {}
+
+    while (!location_found && activity_num < activities.length) {
+      let activity_cords = activities[activity_num].start_latlng
+      if (activity_cords !== null) {
+        console.log("found")
+        center_cords = activity_cords
+        location_found = true
+      } else {
+        activity_num += 1
+      }
+    }
+
+    if (!location_found) {
+      // Default location is Austin, TX
+      center_cords = { lat: 30.277920, lng: -97.739139 }
+    }
+
+    return center_cords
+  }
+
   render() {
 
     return (
         <div>
-            <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
+          <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
             Authenticate
-            </Button>
-            <Map google={this.props.google}
-            zoom={13} 
-            style={mapStyles}
-            initialCenter={{ lat: 30.277920, lng: -97.739139 }}>
-            {this.state.polylines.map(polyline => {
-                return (
-                <Polyline
-                    path={polyline}
-                    strokeColor='#6F1BC6'
-                    strokeWeight='2'
-                />
-                )} 
-            )}
-            </Map>
+          </Button>
+          <Map google={this.props.google}
+          zoom={13} 
+          style={mapStyles}
+          initialCenter={ { lat: 30.277920, lng: -97.739139 } }>
+          {this.state.polylines.map(polyline => {
+              return (
+              <Polyline
+                  path={polyline}
+                  strokeColor='#6F1BC6'
+                  strokeWeight='2'
+              />
+              )} 
+          )}
+          </Map>
         </div>
     );
   }
