@@ -15,7 +15,8 @@ class Heatmap extends Component {
     activities: [],
     polylines: [],
     access_token: '',
-    map_center: {}
+    map_center: {},
+    cities: []
   };
 
   async componentDidMount() {
@@ -26,6 +27,7 @@ class Heatmap extends Component {
 
     var user_activities = []
     var user_polylines = []
+    var user_cities = []
 
     var activities_left = true
     var page_num = 1;
@@ -40,9 +42,15 @@ class Heatmap extends Component {
 
         for (let i = 0; i < activities.length; i++) {
           user_activities.push(activities[i])
+
           var polyline = activities[i]['map']['summary_polyline']
           if (polyline != null) {
             user_polylines.push(decodePolyline(polyline))
+          }
+
+          let activity_cords = activities[i].start_latlng
+          if (activity_cords !== null) {
+            const city_name = await this.getCityFromCoords(activity_cords)
           }
         }
 
@@ -54,6 +62,19 @@ class Heatmap extends Component {
 
     this.setState({ access_token })
     this.setState({ map_center: this.getMapCenter(user_activities) })
+  }
+
+  getCityFromCoords = async(activity_cords) => {
+    let results = await axios
+      .get("https://api.bigdatacloud.net/data/reverse-geocode-client?", {
+        params: {
+          latitude: activity_cords[0],
+          longitude: activity_cords[1],
+          localityLanguage: 'en'
+        }
+      })
+
+    return results.data.locality + ", " + results.data.principalSubdivision
   }
 
   getActivities = async(page_num, access_token) => {
