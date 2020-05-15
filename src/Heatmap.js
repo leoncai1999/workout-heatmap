@@ -48,11 +48,35 @@ class Heatmap extends Component {
             user_polylines.push(decodePolyline(polyline))
           }
 
-          let activity_cords = activities[i].start_latlng
-          if (activity_cords !== null) {
-            const city_name = await this.getCityFromCoords(activity_cords)
-          }
+          // let activity_cords = activities[i].start_latlng
+          // if (activity_cords !== null) {
+          //   const city_name = await this.getCityFromCoords(activity_cords)
+
+          //   console.log(city_name)
+
+          //   var unique_city = true
+          //   var city_num = 0
+
+          //   while (unique_city === true && city_num < user_cities.length) {
+          //     if (user_cities[city_num]["city"] === city_name) {
+          //       user_cities[city_num]["activities"] += 1
+          //       unique_city = false
+          //     } else {
+          //       city_num += 1
+          //     }
+          //   }
+
+          //   if (unique_city) {
+          //     user_cities.push({'city' : city_name, 'activities' : 1})
+          //   } 
+          // }
         }
+
+
+
+        // user_cities.sort(function(a,b) {
+        //   return b.activities - a.activities
+        // })
 
         this.setState({ activities : user_activities})
         this.setState({ polylines : user_polylines})
@@ -60,22 +84,62 @@ class Heatmap extends Component {
       }
     }
 
+    console.log("show cities")
+    const cities = await this.getCitiesFromActivites(user_activities)
+
     this.setState({ access_token })
     this.setState({ map_center: this.getMapCenter(user_activities) })
   }
 
-  getCityFromCoords = async(activity_cords) => {
-    let results = await axios
-      .get("https://api.bigdatacloud.net/data/reverse-geocode-client?", {
-        params: {
-          latitude: activity_cords[0],
-          longitude: activity_cords[1],
-          localityLanguage: 'en'
-        }
-      })
+  getCitiesFromActivites = async(user_activities) => {
 
-    return results.data.locality + ", " + results.data.principalSubdivision
+    var message_bodies = []
+    var curr_message_body = ''
+    var activity_num = 1
+
+    for (let i = 0; i < user_activities.length; i++) {
+      let activity_cords = user_activities[i].start_latlng
+      if (activity_cords !== null) {
+        let curr_message = 'id=' + activity_num + '&prox=' + activity_cords[0] + ',' + activity_cords[1] + ',500\n'
+        curr_message_body += curr_message
+
+        if (activity_num === 100) {
+          activity_num = 1
+          message_bodies.push(curr_message_body)
+          curr_message_body = ''
+        } else {
+          activity_num += 1
+        }
+      }
+    }
+
+    const options = {
+      'Content-Type': '*',
+      'Cache-Control': 'no-cache'
+    }
+
+    const proxy_url = "https://cors-anywhere.herokuapp.com/"
+    const api_url = "https://reverse.geocoder.ls.hereapi.com/6.2/multi-reversegeocode.json?mode=retrieveAreas&apiKey=" + keys.HERE_API_KEY
+
+    for (let i = 0; i < message_bodies.length; i++) {
+      let results = await axios
+        .post(proxy_url + api_url, message_bodies[i], { headers: options })
+        console.log(results)
+    }
   }
+
+  // getCityFromCoords = async(activity_cords) => {
+  //   let results = await axios
+  //     .get("https://api.bigdatacloud.net/data/reverse-geocode-client?", {
+  //       params: {
+  //         latitude: activity_cords[0],
+  //         longitude: activity_cords[1],
+  //         localityLanguage: 'en'
+  //       }
+  //     })
+
+  //   return results.data.locality + ", " + results.data.principalSubdivision
+  // }
 
   getActivities = async(page_num, access_token) => {
     var invalid_token = false
