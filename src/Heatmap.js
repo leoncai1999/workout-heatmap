@@ -15,7 +15,7 @@ class Heatmap extends Component {
     activities: [],
     polylines: [],
     access_token: '',
-    map_center: []
+    map_center: {}
   };
 
   async componentDidMount() {
@@ -53,10 +53,12 @@ class Heatmap extends Component {
     }
 
     this.setState({ access_token })
-    this.setState({ map_center : this.getMapCenter(user_activities) })
+    this.setState({ map_center: this.getMapCenter(user_activities) })
   }
 
   getActivities = async(page_num, access_token) => {
+    var invalid_token = false
+
     let results = await axios
       .get("https://www.strava.com/api/v3/athlete/activities?", {
         params: {
@@ -64,9 +66,11 @@ class Heatmap extends Component {
           page: page_num,
           access_token: access_token
         }
+      }).catch(error => {
+        invalid_token = true
       })
 
-    return results.data
+    return invalid_token ? [] : results.data
   }
 
   authenticateUser = () => {
@@ -104,8 +108,7 @@ class Heatmap extends Component {
     while (!location_found && activity_num < activities.length) {
       let activity_cords = activities[activity_num].start_latlng
       if (activity_cords !== null) {
-        console.log("found")
-        center_cords = activity_cords
+        center_cords = { lat: activity_cords[0], lng: activity_cords[1] }
         location_found = true
       } else {
         activity_num += 1
@@ -127,19 +130,24 @@ class Heatmap extends Component {
           <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
             Authenticate
           </Button>
-          <Map google={this.props.google}
-          zoom={13} 
-          style={mapStyles}
-          initialCenter={ { lat: 30.277920, lng: -97.739139 } }>
-          {this.state.polylines.map(polyline => {
+          <Map
+            clasName="google-map"
+            google={this.props.google}
+            zoom={13} 
+            style={mapStyles}
+            initialCenter={ { lat: 30.277920, lng: -97.739139 } }
+            center={this.state.map_center}
+            ref={(ref) => { this.map = ref; }}
+          >
+            {this.state.polylines.map(polyline => {
               return (
-              <Polyline
-                  path={polyline}
-                  strokeColor='#6F1BC6'
-                  strokeWeight='2'
-              />
-              )} 
-          )}
+                <Polyline
+                    path={polyline}
+                    strokeColor='#6F1BC6'
+                    strokeWeight='2'
+                />
+              )
+            })}
           </Map>
         </div>
     );
