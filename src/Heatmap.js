@@ -31,31 +31,34 @@ class Heatmap extends Component {
     var activities_left = true
     var page_num = 1;
 
-    while (activities_left) {
-      const activities = await this.getActivities(page_num, access_token)
-
-      if (activities.length === 0) {
-        activities_left = false
-      } else {
-        const decodePolyline = require('decode-google-map-polyline');
-
-        for (let i = 0; i < activities.length; i++) {
-          user_activities.push(activities[i])
-
-          var polyline = activities[i]['map']['summary_polyline']
-          if (polyline != null) {
-            user_polylines.push(decodePolyline(polyline))
+    if (access_token !== '') {
+      while (activities_left) {
+        const activities = await this.getActivities(page_num, access_token)
+  
+        if (activities.length === 0) {
+          activities_left = false
+        } else {
+          const decodePolyline = require('decode-google-map-polyline');
+  
+          for (let i = 0; i < activities.length; i++) {
+            user_activities.push(activities[i])
+  
+            var polyline = activities[i]['map']['summary_polyline']
+            if (polyline != null) {
+              user_polylines.push(decodePolyline(polyline))
+            }
           }
+  
+          this.setState({ activities : user_activities})
+          this.setState({ polylines : user_polylines})
+          page_num += 1
         }
-
-        this.setState({ activities : user_activities})
-        this.setState({ polylines : user_polylines})
-        page_num += 1
       }
     }
 
     const cities = await this.getCitiesFromActivites(user_activities)
-    this.getCityActivityCounts(cities)
+    console.log(cities)
+    this.getCityActivityCounts(cities, user_activities)
 
     this.setState({ access_token })
     this.setState({ map_center: this.getMapCenter(user_activities) })
@@ -104,20 +107,43 @@ class Heatmap extends Component {
     return all_results
   }
 
-  getCityActivityCounts = (cities) => {
+  getCityActivityCounts = (cities, user_activities) => {
     var city_counts = []
+    var last_activity_with_location = 0
 
     // need to account for other countries where State may be null
     for (let i = 0; i < cities.length; i++) {
       let address = cities[i].Result[0].Location.Address
       let city_name = address.City + ", " + address.State
 
+      // Map the geocoding information of an activity to it's Strava details
+      let lat = cities[i].Result[0].Location.DisplayPosition.Latitude
+      let lng = cities[i].Result[0].Location.DisplayPosition.Longitude
+
+      var activity = {}
+      var activity_found = false
+      var x = last_activity_with_location
+
+      while (!activity_found) {
+        let curr_activity = user_activities[x]
+        if (curr_activity["start_latitude"] === lat && curr_activity["start_longitude"] === lng) {
+          activity_found = true
+          activity = curr_activity
+          last_activity_with_location = x + 1
+        } else {
+          x += 1
+        }
+      }
+
+      let activity_miles = activity["distance"] / 1609
+
       var unique_city = true
       var city_num = 0
 
-      while (unique_city === true && city_num < city_counts.length) {
+      while (unique_city && city_num < city_counts.length) {
         if (city_counts[city_num]["city"] === city_name) {
           city_counts[city_num]["activities"] += 1
+          city_counts[city_num]["miles"] += activity_miles
           unique_city = false
         } else {
           city_num += 1
@@ -125,15 +151,18 @@ class Heatmap extends Component {
       }
 
       if (unique_city) {
-        city_counts.push({'city' : city_name, 'activities' : 1})
+        city_counts.push({'city' : city_name, 'activities' : 1, 'miles' : activity_miles })
       } 
 
     }
 
+    // Sort cities by number of activites descending, breaking ties by total mileage
     city_counts.sort(function(a,b) {
-      return b.activities - a.activities
+      return b.activities - a.activities || b.miles - a.miles
     })
 
+    console.log("city_counts")
+    console.log(city_counts)
   }
 
   getActivities = async(page_num, access_token) => {
