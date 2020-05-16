@@ -13,7 +13,8 @@ class Heatmap extends Component {
 
   state = {
     activities: [],
-    polylines: [{"type" : "All", "polylines" : []}],
+    polylines: [{"id" : 0, "type" : "All", "polylines" : []}],
+    activity_type: 0,
     access_token: '',
     map_center: {},
     cities: [],
@@ -28,7 +29,7 @@ class Heatmap extends Component {
     window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap')
 
     var user_activities = []
-    var user_polylines = [{"type" : "All", "polylines" : []}]
+    var user_polylines = [{"id" : 0, "type" : "All", "polylines" : []}]
 
     var activities_left = true
     var page_num = 1;
@@ -64,7 +65,7 @@ class Heatmap extends Component {
               }
 
               if (unique_activity_type) {
-                user_polylines.push({'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
+                user_polylines.push({'id' : user_polylines.length, 'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
               }
             }
           }
@@ -268,8 +269,15 @@ class Heatmap extends Component {
           <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
             Authenticate
           </Button>
+          {this.state.polylines.map(activity_type => {
+            return (
+              <Button onClick={(e) => { this.setState({ activity_type : activity_type["id"] }) }}>
+                {activity_type["type"]}
+              </Button>
+            )
+          })
+          }
           <Map
-            clasName="google-map"
             google={this.props.google}
             zoom={this.state.zoom} 
             style={mapStyles}
@@ -277,7 +285,7 @@ class Heatmap extends Component {
             center={this.state.map_center}
             ref={(ref) => { this.map = ref; }}
           >
-            {this.state.polylines[0]["polylines"].map(polyline => {
+            {this.state.polylines[this.state.activity_type]["polylines"].map(polyline => {
               return (
                 <Polyline
                     path={polyline}
