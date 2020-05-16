@@ -16,13 +16,15 @@ class Heatmap extends Component {
     polylines: [],
     access_token: '',
     map_center: {},
-    cities: []
+    cities: [],
+    zoom: 4
   };
 
   async componentDidMount() {
 
     const access_token = await this.updateAccessToken(String(window.location.href))
 
+    // Revert the url of the site to the default url after authentication is finished
     window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap')
 
     var user_activities = []
@@ -33,6 +35,7 @@ class Heatmap extends Component {
 
     if (access_token !== '') {
       while (activities_left) {
+        // Retrieve Strava Activites in batches of 200 until no activities are left
         const activities = await this.getActivities(page_num, access_token)
   
         if (activities.length === 0) {
@@ -57,11 +60,19 @@ class Heatmap extends Component {
     }
 
     const cities = await this.getCitiesFromActivites(user_activities)
-    console.log(cities)
-    this.getCityActivityCounts(cities, user_activities)
+    const city_counts = this.getCityActivityCounts(cities, user_activities)
 
+    this.setState({ cities: city_counts })
     this.setState({ access_token })
-    this.setState({ map_center: this.getMapCenter(user_activities) })
+
+    const center_cords = await this.getMapCenter(city_counts)
+    this.setState({ map_center: center_cords })
+
+    // Zoom map in if activites with locations have been loaded
+    let default_location = JSON.stringify({ lat: 39.8283, lng: -98.5795 })
+    if (JSON.stringify(center_cords) !== default_location) {
+      this.setState({ zoom : 13})
+    }
   }
 
   getCitiesFromActivites = async(user_activities) => {
@@ -161,8 +172,7 @@ class Heatmap extends Component {
       return b.activities - a.activities || b.miles - a.miles
     })
 
-    console.log("city_counts")
-    console.log(city_counts)
+    return city_counts
   }
 
   getActivities = async(page_num, access_token) => {
@@ -183,12 +193,14 @@ class Heatmap extends Component {
   }
 
   authenticateUser = () => {
+    // User is redirected to Strava's website to login and give site permission to access acount information
     window.location.assign('https://www.strava.com/oauth/authorize?client_id=27965&redirect_uri=http://localhost:3000/workout-heatmap/callback&response_type=code&scope=activity:read_all&approval_prompt=force&state=strava')
   }
 
   updateAccessToken = async(url) => {
     var token = ''
 
+    // Retrieve the code from the authenication process, then exchange the code for a token to access the Strava API
     const tokenized_url = url.split('/')
     if (tokenized_url[4] !== null && tokenized_url[4].substring(0,8) === 'callback') {
         let code_and_scope = tokenized_url[4].substring(27);
@@ -208,25 +220,25 @@ class Heatmap extends Component {
     return token
   }
 
-  getMapCenter = (activities) => {
-    // center map at starting point of most recent activity with location
-    let location_found = false
-    let activity_num = 0
+  getMapCenter = async(cities) => {
+    // center map at the city with the most activites
     let center_cords = {}
 
-    while (!location_found && activity_num < activities.length) {
-      let activity_cords = activities[activity_num].start_latlng
-      if (activity_cords !== null) {
-        center_cords = { lat: activity_cords[0], lng: activity_cords[1] }
-        location_found = true
-      } else {
-        activity_num += 1
-      }
-    }
+    if (cities.length !== 0) {
+      // Account for case where city is undefined
+      let api_url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + cities[0]["city"] + ".json?"
+      let result = await axios
+      .get(api_url, {
+        params: {
+          access_token: keys.GEOCODING_API_KEY
+        }
+      })
 
-    if (!location_found) {
-      // Default location is Austin, TX
-      center_cords = { lat: 30.277920, lng: -97.739139 }
+      let cords = result.data.features[0]
+      center_cords = { lat: cords.center[1], lng: cords.center[0]}
+    } else {
+      // Default location is geographic center of the U.S.
+      center_cords = { lat: 39.8283, lng: -98.5795 }
     }
 
     return center_cords
@@ -242,9 +254,9 @@ class Heatmap extends Component {
           <Map
             clasName="google-map"
             google={this.props.google}
-            zoom={13} 
+            zoom={this.state.zoom} 
             style={mapStyles}
-            initialCenter={ { lat: 30.277920, lng: -97.739139 } }
+            initialCenter={ { lat: 39.8283, lng: -98.5795 } }
             center={this.state.map_center}
             ref={(ref) => { this.map = ref; }}
           >
