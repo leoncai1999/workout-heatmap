@@ -27,7 +27,6 @@ class Heatmap extends Component {
 
     var user_activities = []
     var user_polylines = []
-    var user_cities = []
 
     var activities_left = true
     var page_num = 1;
@@ -47,36 +46,7 @@ class Heatmap extends Component {
           if (polyline != null) {
             user_polylines.push(decodePolyline(polyline))
           }
-
-          // let activity_cords = activities[i].start_latlng
-          // if (activity_cords !== null) {
-          //   const city_name = await this.getCityFromCoords(activity_cords)
-
-          //   console.log(city_name)
-
-          //   var unique_city = true
-          //   var city_num = 0
-
-          //   while (unique_city === true && city_num < user_cities.length) {
-          //     if (user_cities[city_num]["city"] === city_name) {
-          //       user_cities[city_num]["activities"] += 1
-          //       unique_city = false
-          //     } else {
-          //       city_num += 1
-          //     }
-          //   }
-
-          //   if (unique_city) {
-          //     user_cities.push({'city' : city_name, 'activities' : 1})
-          //   } 
-          // }
         }
-
-
-
-        // user_cities.sort(function(a,b) {
-        //   return b.activities - a.activities
-        // })
 
         this.setState({ activities : user_activities})
         this.setState({ polylines : user_polylines})
@@ -84,8 +54,8 @@ class Heatmap extends Component {
       }
     }
 
-    console.log("show cities")
     const cities = await this.getCitiesFromActivites(user_activities)
+    this.getCityActivityCounts(cities)
 
     this.setState({ access_token })
     this.setState({ map_center: this.getMapCenter(user_activities) })
@@ -97,6 +67,7 @@ class Heatmap extends Component {
     var curr_message_body = ''
     var activity_num = 1
 
+    // format activity coordinates into batches of 100 for the Reverse Geocoding API
     for (let i = 0; i < user_activities.length; i++) {
       let activity_cords = user_activities[i].start_latlng
       if (activity_cords !== null) {
@@ -121,25 +92,49 @@ class Heatmap extends Component {
     const proxy_url = "https://cors-anywhere.herokuapp.com/"
     const api_url = "https://reverse.geocoder.ls.hereapi.com/6.2/multi-reversegeocode.json?mode=retrieveAreas&apiKey=" + keys.HERE_API_KEY
 
+    var all_results = []
+
     for (let i = 0; i < message_bodies.length; i++) {
       let results = await axios
         .post(proxy_url + api_url, message_bodies[i], { headers: options })
-        console.log(results)
+
+      Array.prototype.push.apply(all_results, results.data.Response.Item)
     }
+
+    return all_results
   }
 
-  // getCityFromCoords = async(activity_cords) => {
-  //   let results = await axios
-  //     .get("https://api.bigdatacloud.net/data/reverse-geocode-client?", {
-  //       params: {
-  //         latitude: activity_cords[0],
-  //         longitude: activity_cords[1],
-  //         localityLanguage: 'en'
-  //       }
-  //     })
+  getCityActivityCounts = (cities) => {
+    var city_counts = []
 
-  //   return results.data.locality + ", " + results.data.principalSubdivision
-  // }
+    // need to account for other countries where State may be null
+    for (let i = 0; i < cities.length; i++) {
+      let address = cities[i].Result[0].Location.Address
+      let city_name = address.City + ", " + address.State
+
+      var unique_city = true
+      var city_num = 0
+
+      while (unique_city === true && city_num < city_counts.length) {
+        if (city_counts[city_num]["city"] === city_name) {
+          city_counts[city_num]["activities"] += 1
+          unique_city = false
+        } else {
+          city_num += 1
+        }
+      }
+
+      if (unique_city) {
+        city_counts.push({'city' : city_name, 'activities' : 1})
+      } 
+
+    }
+
+    city_counts.sort(function(a,b) {
+      return b.activities - a.activities
+    })
+
+  }
 
   getActivities = async(page_num, access_token) => {
     var invalid_token = false
