@@ -13,7 +13,7 @@ class Heatmap extends Component {
 
   state = {
     activities: [],
-    polylines: [],
+    polylines: [{"type" : "All", "polylines" : []}],
     access_token: '',
     map_center: {},
     cities: [],
@@ -28,7 +28,7 @@ class Heatmap extends Component {
     window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap')
 
     var user_activities = []
-    var user_polylines = []
+    var user_polylines = [{"type" : "All", "polylines" : []}]
 
     var activities_left = true
     var page_num = 1;
@@ -41,14 +41,31 @@ class Heatmap extends Component {
         if (activities.length === 0) {
           activities_left = false
         } else {
-          const decodePolyline = require('decode-google-map-polyline');
+          const decodePolyline = require('decode-google-map-polyline')
   
           for (let i = 0; i < activities.length; i++) {
             user_activities.push(activities[i])
   
             var polyline = activities[i]['map']['summary_polyline']
             if (polyline != null) {
-              user_polylines.push(decodePolyline(polyline))
+              user_polylines[0]["polylines"].push(decodePolyline(polyline))
+
+              // Store all polylines grouped by each type of activity
+              var unique_activity_type = true
+              var type_num = 1
+
+              while (unique_activity_type && type_num < user_polylines.length) {
+                if (user_polylines[type_num]["type"] === activities[i].type) {
+                  user_polylines[type_num]["polylines"].push(decodePolyline(polyline))
+                  unique_activity_type = false
+                } else {
+                  type_num += 1
+                }
+              }
+
+              if (unique_activity_type) {
+                user_polylines.push({'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
+              }
             }
           }
   
@@ -260,7 +277,7 @@ class Heatmap extends Component {
             center={this.state.map_center}
             ref={(ref) => { this.map = ref; }}
           >
-            {this.state.polylines.map(polyline => {
+            {this.state.polylines[0]["polylines"].map(polyline => {
               return (
                 <Polyline
                     path={polyline}
