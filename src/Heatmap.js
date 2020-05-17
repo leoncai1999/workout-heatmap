@@ -3,6 +3,7 @@ import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
 import * as keys from './APIKeys';
 import { Button, Dropdown } from 'react-bootstrap';
+import Welcome from './Welcome';
 
 const mapStyles = {
   width: '100%',
@@ -35,6 +36,8 @@ class Heatmap extends Component {
     var page_num = 1;
 
     if (access_token !== '') {
+      this.setState({ access_token })
+
       while (activities_left) {
         // Retrieve Strava Activites in batches of 200 until no activities are left
         const activities = await this.getActivities(page_num, access_token)
@@ -75,19 +78,18 @@ class Heatmap extends Component {
           page_num += 1
         }
       }
-    }
 
-    const cities = await this.getCitiesFromActivites(user_activities)
-    const city_counts = this.getCityActivityCounts(cities, user_activities)
+      const cities = await this.getCitiesFromActivites(user_activities)
+      const city_counts = this.getCityActivityCounts(cities, user_activities)
 
-    this.setState({ cities: city_counts })
-    this.setState({ access_token })
+      this.setState({ cities: city_counts })
 
-    if (city_counts.length !== 0) {
-      this.recenterMap(0)
-    } else {
-      // Default location is geographic center of the U.S.
-      this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
+      if (city_counts.length !== 0) {
+        this.recenterMap(0)
+      } else {
+        // Default location is geographic center of the U.S.
+        this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
+      }
     }
   }
 
@@ -212,11 +214,6 @@ class Heatmap extends Component {
     return invalid_token ? [] : results.data
   }
 
-  authenticateUser = () => {
-    // User is redirected to Strava's website to login and give site permission to access acount information
-    window.location.assign('https://www.strava.com/oauth/authorize?client_id=27965&redirect_uri=http://localhost:3000/workout-heatmap/callback&response_type=code&scope=activity:read_all&approval_prompt=force&state=strava')
-  }
-
   updateAccessToken = async(url) => {
     var token = ''
 
@@ -256,7 +253,7 @@ class Heatmap extends Component {
 
       let city_counts = this.state.cities
       city_counts[city_id]["cords"] = center_cords
-      
+
       this.setState({ cities : city_counts})
     }
 
@@ -266,65 +263,69 @@ class Heatmap extends Component {
 
   render() {
 
-    return (
-      <div>
-
-          <Dropdown>
-            <Dropdown.Toggle>
-              Select City
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {this.state.cities.map(city => {
-                let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
-                return (
-                  <Dropdown.Item
-                    onClick={() => {
-                      this.recenterMap(city["id"])
-                    }}
-                  >
-                    {description}
-                  </Dropdown.Item>
-                )
-              })}
-            </Dropdown.Menu>
-          </Dropdown>
-
-          <br></br>
-          <br></br>
-
-          <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
-            Authenticate
-          </Button>
-
-          {this.state.polylines.map(activity_type => {
-            return (
-              <Button onClick={(e) => { this.setState({ activity_type : activity_type["id"] }) }}>
-                {activity_type["type"]}
-              </Button>
-            )
-          })}
-
-          <Map
-            google={this.props.google}
-            zoom={this.state.zoom} 
-            style={mapStyles}
-            initialCenter={ { lat: 39.8283, lng: -98.5795 } }
-            center={this.state.map_center}
-            ref={(ref) => { this.map = ref; }}
-          >
-            {this.state.polylines[this.state.activity_type]["polylines"].map(polyline => {
+    if (this.state.access_token === '') {
+      return (
+        <div>
+          <Welcome />
+        </div>
+      )
+    } else {
+      return (
+        <div>
+  
+            <Dropdown>
+              <Dropdown.Toggle>
+                Select City
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {this.state.cities.map(city => {
+                  let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
+                  return (
+                    <Dropdown.Item
+                      onClick={() => {
+                        this.recenterMap(city["id"])
+                      }}
+                    >
+                      {description}
+                    </Dropdown.Item>
+                  )
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+  
+            <br></br>
+            <br></br>
+  
+            {this.state.polylines.map(activity_type => {
               return (
-                <Polyline
-                    path={polyline}
-                    strokeColor='#6F1BC6'
-                    strokeWeight='2'
-                />
+                <Button onClick={(e) => { this.setState({ activity_type : activity_type["id"] }) }}>
+                  {activity_type["type"]}
+                </Button>
               )
             })}
-          </Map>
-
-      </div>
-    );
+  
+            <Map
+              google={this.props.google}
+              zoom={this.state.zoom} 
+              style={mapStyles}
+              initialCenter={ { lat: 39.8283, lng: -98.5795 } }
+              center={this.state.map_center}
+              ref={(ref) => { this.map = ref; }}
+            >
+              {this.state.polylines[this.state.activity_type]["polylines"].map(polyline => {
+                return (
+                  <Polyline
+                      path={polyline}
+                      strokeColor='#6F1BC6'
+                      strokeWeight='2'
+                  />
+                )
+              })}
+            </Map>
+  
+        </div>
+      )
+    } 
   }
 }
 
