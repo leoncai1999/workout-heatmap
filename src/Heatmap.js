@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
 import * as keys from './APIKeys';
-import { Button } from 'react-bootstrap';
+import { Button, Dropdown } from 'react-bootstrap';
 
 const mapStyles = {
   width: '100%',
@@ -83,13 +83,11 @@ class Heatmap extends Component {
     this.setState({ cities: city_counts })
     this.setState({ access_token })
 
-    const center_cords = await this.getMapCenter(city_counts)
-    this.setState({ map_center: center_cords })
-
-    // Zoom map in if activites with locations have been loaded
-    let default_location = JSON.stringify({ lat: 39.8283, lng: -98.5795 })
-    if (JSON.stringify(center_cords) !== default_location) {
-      this.setState({ zoom : 13})
+    if (city_counts.length !== 0) {
+      this.recenterMap(0)
+    } else {
+      // Default location is geographic center of the U.S.
+      this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
     }
   }
 
@@ -190,6 +188,10 @@ class Heatmap extends Component {
       return b.activities - a.activities || b.miles - a.miles
     })
 
+    for (let i = 0; i < city_counts.length; i++) {
+      city_counts[i]["id"] = i
+    }
+
     return city_counts
   }
 
@@ -238,13 +240,10 @@ class Heatmap extends Component {
     return token
   }
 
-  getMapCenter = async(cities) => {
-    // center map at the city with the most activites
-    let center_cords = {}
-
-    if (cities.length !== 0) {
-      // Account for case where city is undefined
-      let api_url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + cities[0]["city"] + ".json?"
+  recenterMap = async(city_id) => {
+    // Store coordinates of cities at first request to avoid excess API calls
+    if (!("cords" in this.state.cities[city_id])) {
+      let api_url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + this.state.cities[city_id]["city"] + ".json?"
       let result = await axios
       .get(api_url, {
         params: {
@@ -253,30 +252,58 @@ class Heatmap extends Component {
       })
 
       let cords = result.data.features[0]
-      center_cords = { lat: cords.center[1], lng: cords.center[0]}
-    } else {
-      // Default location is geographic center of the U.S.
-      center_cords = { lat: 39.8283, lng: -98.5795 }
+      let center_cords = { lat: cords.center[1], lng: cords.center[0]}
+
+      let city_counts = this.state.cities
+      city_counts[city_id]["cords"] = center_cords
+      
+      this.setState({ cities : city_counts})
     }
 
-    return center_cords
+    this.setState({ map_center: this.state.cities[city_id]["cords"] })
+    this.setState({ zoom : 12 })
   }
 
   render() {
 
     return (
-        <div>
+      <div>
+
+          <Dropdown>
+            <Dropdown.Toggle>
+              Select City
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {this.state.cities.map(city => {
+                let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
+                return (
+                  <Dropdown.Item
+                    onClick={() => {
+                      this.recenterMap(city["id"])
+                    }}
+                  >
+                    {description}
+                  </Dropdown.Item>
+                )
+              })}
+            </Dropdown.Menu>
+          </Dropdown>
+
+          <br></br>
+          <br></br>
+
           <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
             Authenticate
           </Button>
+
           {this.state.polylines.map(activity_type => {
             return (
               <Button onClick={(e) => { this.setState({ activity_type : activity_type["id"] }) }}>
                 {activity_type["type"]}
               </Button>
             )
-          })
-          }
+          })}
+
           <Map
             google={this.props.google}
             zoom={this.state.zoom} 
@@ -295,7 +322,8 @@ class Heatmap extends Component {
               )
             })}
           </Map>
-        </div>
+
+      </div>
     );
   }
 }
