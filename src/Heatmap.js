@@ -4,10 +4,11 @@ import axios from 'axios';
 import * as keys from './APIKeys';
 import { Button, Dropdown } from 'react-bootstrap';
 import Welcome from './Welcome';
+import './Heatmap.css';
 
 const mapStyles = {
   width: '100%',
-  height: '90%'
+  height: '100%'
 };
 
 class Heatmap extends Component {
@@ -258,7 +259,7 @@ class Heatmap extends Component {
     }
 
     this.setState({ map_center: this.state.cities[city_id]["cords"] })
-    this.setState({ zoom : 12 })
+    this.setState({ zoom : 13 })
   }
 
   render() {
@@ -271,57 +272,62 @@ class Heatmap extends Component {
       )
     } else {
       return (
-        <div>
+        <div id="container">
   
-            <Dropdown>
-              <Dropdown.Toggle>
-                Select City
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {this.state.cities.map(city => {
-                  let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
+            <div id="map">
+              <Map
+                google={this.props.google}
+                zoom={this.state.zoom} 
+                style={mapStyles}
+                initialCenter={ { lat: 39.8283, lng: -98.5795 } }
+                center={this.state.map_center}
+                ref={(ref) => { this.map = ref; }}
+              >
+                {this.state.polylines[this.state.activity_type]["polylines"].map(polyline => {
                   return (
-                    <Dropdown.Item
-                      onClick={() => {
-                        this.recenterMap(city["id"])
-                      }}
-                    >
-                      {description}
-                    </Dropdown.Item>
+                    <Polyline
+                        path={polyline}
+                        strokeColor='#6F1BC6'
+                        strokeWeight='2'
+                    />
                   )
                 })}
-              </Dropdown.Menu>
-            </Dropdown>
-  
-            <br></br>
-            <br></br>
-  
-            {this.state.polylines.map(activity_type => {
-              return (
-                <Button onClick={(e) => { this.setState({ activity_type : activity_type["id"] }) }}>
-                  {activity_type["type"]}
-                </Button>
-              )
-            })}
-  
-            <Map
-              google={this.props.google}
-              zoom={this.state.zoom} 
-              style={mapStyles}
-              initialCenter={ { lat: 39.8283, lng: -98.5795 } }
-              center={this.state.map_center}
-              ref={(ref) => { this.map = ref; }}
-            >
-              {this.state.polylines[this.state.activity_type]["polylines"].map(polyline => {
+              </Map>
+            </div>
+
+            <div id="cities-search">
+              <Dropdown>
+                <Dropdown.Toggle>
+                  Select City
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {this.state.cities.map(city => {
+                    let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
+                    return (
+                      <Dropdown.Item
+                        onClick={() => {
+                          this.recenterMap(city["id"])
+                        }}
+                      >
+                        {description}
+                      </Dropdown.Item>
+                    )
+                  })}
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+
+            <div id="map-menu">
+              Options
+              <br></br>
+              {this.state.polylines.map(activity_type => {
                 return (
-                  <Polyline
-                      path={polyline}
-                      strokeColor='#6F1BC6'
-                      strokeWeight='2'
-                  />
+                  <Button onClick={(e) => { this.setState({ activity_type : activity_type["id"] }) }}>
+                    {activity_type["type"]}
+                  </Button>
                 )
               })}
-            </Map>
+            </div>
   
         </div>
       )

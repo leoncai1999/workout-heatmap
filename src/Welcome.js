@@ -18,7 +18,7 @@ class Welcome extends Component {
                 <h1> Workout Heatmap </h1>
                 <h5> Build an interactive heatmap of your outdoor activites from your Strava account! </h5>
                 <div class="button-center">
-                    <img src={StravaButton} onClick={(e) => { this.authenticateUser().bind(this) }}></img>
+                    <img class="strava-button" src={StravaButton} onClick={(e) => { this.authenticateUser().bind(this) }}></img>
                 </div>
             </div>
         )
