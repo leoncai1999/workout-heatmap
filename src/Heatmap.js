@@ -323,7 +323,7 @@ class Heatmap extends Component {
             <div id="map-menu">
               Options
               <br></br>
-              Activity Type
+              Sport
               <br></br>
               {this.state.polylines.map(activity_type => {
                 return (
