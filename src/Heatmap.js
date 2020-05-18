@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as keys from './APIKeys';
 import { Button, Dropdown } from 'react-bootstrap';
 import Welcome from './Welcome';
+import Navigation from './Navigation';
 import './Heatmap.css';
 
 const mapStyles = {
@@ -273,6 +274,8 @@ class Heatmap extends Component {
     } else {
       return (
         <div id="container">
+
+          <Navigation />
   
             <div id="map">
               <Map
@@ -319,6 +322,8 @@ class Heatmap extends Component {
 
             <div id="map-menu">
               Options
+              <br></br>
+              Activity Type
               <br></br>
               {this.state.polylines.map(activity_type => {
                 return (

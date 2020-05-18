@@ -12,14 +12,16 @@
 }
 
 #map-menu {
-    background-color: lightblue;
-    top: 100px;
+    background-color: white;
+    top: 165px;
     left: 10px;
+    width: 300px;
+    padding: 8px;
     position: absolute;
 }
 
 #cities-search {
     position: absolute;
-    top: 0px;
+    top: 53px;
     right: 64px;
 }
