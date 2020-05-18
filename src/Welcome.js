@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import './Welcome.css';
+import Logo from './app-logo.svg';
+import StravaButton from './strava-button.png';
 
 class Welcome extends Component {
 
@@ -12,12 +14,11 @@ class Welcome extends Component {
     render() {
         return (
             <div>
+                <img class="img-center" src={Logo}></img>
                 <h1> Workout Heatmap </h1>
-                <h4> Build an interactive heatmap of your outdoor activites from your Strava account! </h4>
+                <h5> Build an interactive heatmap of your outdoor activites from your Strava account! </h5>
                 <div class="button-center">
-                    <Button onClick={(e) => { this.authenticateUser().bind(this) }}>
-                        Connect with Strava
-                    </Button>
+                    <img src={StravaButton} onClick={(e) => { this.authenticateUser().bind(this) }}></img>
                 </div>
             </div>
         )
