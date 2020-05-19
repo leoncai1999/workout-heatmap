@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
 import * as keys from './APIKeys';
-import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
+import { Button, ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
 import Welcome from './Welcome';
 import Navigation from './Navigation';
 import './Heatmap.css';
@@ -21,6 +21,7 @@ class Heatmap extends Component {
     activity_type: 0,
     access_token: '',
     map_center: {},
+    selected_city: 'Select City',
     cities: [],
     zoom: 4
   };
@@ -209,45 +210,48 @@ class Heatmap extends Component {
     // need to account for other countries where State may be null
     for (let i = 0; i < cities.length; i++) {
       let address = cities[i].Result[0].Location.Address
-      let city_name = address.City + ", " + address.State
 
-      // Map the geocoding information of an activity to it's Strava details
-      let lat = cities[i].Result[0].Location.DisplayPosition.Latitude
-      let lng = cities[i].Result[0].Location.DisplayPosition.Longitude
+      if (address.City !== undefined) {
+        let city_name = address.City + ", " + address.State
 
-      var activity = {}
-      var activity_found = false
-      var x = last_activity_with_location
+        // Map the geocoding information of an activity to it's Strava details
+        let lat = cities[i].Result[0].Location.DisplayPosition.Latitude
+        let lng = cities[i].Result[0].Location.DisplayPosition.Longitude
 
-      while (!activity_found) {
-        let curr_activity = user_activities[x]
-        if (curr_activity["start_latitude"] === lat && curr_activity["start_longitude"] === lng) {
-          activity_found = true
-          activity = curr_activity
-          last_activity_with_location = x + 1
-        } else {
-          x += 1
+        var activity = {}
+        var activity_found = false
+        var x = last_activity_with_location
+
+        while (!activity_found) {
+          let curr_activity = user_activities[x]
+          if (curr_activity["start_latitude"] === lat && curr_activity["start_longitude"] === lng) {
+            activity_found = true
+            activity = curr_activity
+            last_activity_with_location = x + 1
+          } else {
+            x += 1
+          }
         }
-      }
 
-      let activity_miles = activity["distance"] / 1609
+        let activity_miles = activity["distance"] / 1609
 
-      var unique_city = true
-      var city_num = 0
+        var unique_city = true
+        var city_num = 0
 
-      while (unique_city && city_num < city_counts.length) {
-        if (city_counts[city_num]["city"] === city_name) {
-          city_counts[city_num]["activities"] += 1
-          city_counts[city_num]["miles"] += activity_miles
-          unique_city = false
-        } else {
-          city_num += 1
+        while (unique_city && city_num < city_counts.length) {
+          if (city_counts[city_num]["city"] === city_name) {
+            city_counts[city_num]["activities"] += 1
+            city_counts[city_num]["miles"] += activity_miles
+            unique_city = false
+          } else {
+            city_num += 1
+          }
         }
-      }
 
-      if (unique_city) {
-        city_counts.push({'city' : city_name, 'activities' : 1, 'miles' : activity_miles })
-      } 
+        if (unique_city) {
+          city_counts.push({'city' : city_name, 'activities' : 1, 'miles' : activity_miles })
+        } 
+      }
 
     }
 
@@ -363,25 +367,25 @@ class Heatmap extends Component {
             </div>
 
             <div id="cities-search">
-              <Dropdown>
-                <Dropdown.Toggle>
-                  Select City
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {this.state.cities.map(city => {
-                    let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
-                    return (
-                      <Dropdown.Item
-                        onClick={() => {
-                          this.recenterMap(city["id"])
-                        }}
-                      >
-                        {description}
-                      </Dropdown.Item>
-                    )
-                  })}
-                </Dropdown.Menu>
-              </Dropdown>
+              <DropdownButton
+                alignRight
+                title={this.state.selected_city}
+                id="dropdown-menu-align-right"
+              >
+                {this.state.cities.map(city => {
+                  let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
+                  return (
+                    <Dropdown.Item
+                      onClick={() => {
+                        this.recenterMap(city["id"])
+                        this.setState({ selected_city : city["city"]})
+                      }}
+                    >
+                      {city["city"]}
+                    </Dropdown.Item>
+                  )
+                })}
+              </DropdownButton>
             </div>
 
             <div id="map-menu">

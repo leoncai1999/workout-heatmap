@@ -31,6 +31,24 @@
     width: 100%;
 }
 
+.dropdown .btn {
+    background: white; 
+    color: black;
+    font-family: 'Open Sans', serif;
+    font-weight: 500;
+    width: 225px;
+    height: 41px;
+}
+
+.dropdown .btn:hover {background: white; color:#000;}
+.dropdown .btn:active {background: white; color:#000;}
+.dropdown .btn:focus {background: white; color:#000;}
+
+.dropdown-menu {
+    height: 400px;
+    overflow-y: scroll;
+}
+
 h3 {
     margin-bottom: 15px;
     font-family: 'Open Sans', serif;
