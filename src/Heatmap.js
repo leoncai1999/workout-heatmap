@@ -33,11 +33,11 @@ class Heatmap extends Component {
     user_polylines[0]["elements"].push({"polylines" : []})
 
     // Sport types
-    user_polylines[1]["elements"].push({"id" : 0, "type" : "Run", "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 1, "type" : "Ride", "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 2, "type" : "Swim", "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 3, "type" : "Walk", "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 4, "type" : "Hike", "polylines" : []})
+    user_polylines[1]["elements"].push({"id" : 0, "type" : "Run", "img": require("./icons/run.svg"), "polylines" : []})
+    user_polylines[1]["elements"].push({"id" : 1, "type" : "Ride", "img": require("./icons/ride.svg"), "polylines" : []})
+    user_polylines[1]["elements"].push({"id" : 2, "type" : "Swim", "img": require("./icons/swim.svg"), "polylines" : []})
+    user_polylines[1]["elements"].push({"id" : 3, "type" : "Walk", "img": require("./icons/walk.svg"), "polylines" : []})
+    user_polylines[1]["elements"].push({"id" : 4, "type" : "Hike", "img": require("./icons/hike.svg"), "polylines" : []})
 
     // Workout types
     user_polylines[2]["elements"].push({"id" : 0, "type" : "Training", "polylines" : []})
@@ -48,11 +48,11 @@ class Heatmap extends Component {
     user_polylines[3]["elements"].push({"id" : 1, "type" : "Group", "polylines" : []})
 
     // Time of Day types
-    user_polylines[4]["elements"].push({"id" : 0, "type" : "Morning", "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 1, "type" : "Lunch", "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 2, "type" : "Afternoon", "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 3, "type" : "Evening", "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 4, "type" : "Night", "polylines" : []})
+    user_polylines[4]["elements"].push({"id" : 0, "type" : require("./icons/morning.svg"), "polylines" : []})
+    user_polylines[4]["elements"].push({"id" : 1, "type" : require("./icons/lunch.svg"), "polylines" : []})
+    user_polylines[4]["elements"].push({"id" : 2, "type" : require("./icons/afternoon.svg"), "polylines" : []})
+    user_polylines[4]["elements"].push({"id" : 3, "type" : require("./icons/evening.svg"), "polylines" : []})
+    user_polylines[4]["elements"].push({"id" : 4, "type" : require("./icons/night.svg"), "polylines" : []})
 
     this.setState({ polylines : user_polylines})
 
@@ -384,13 +384,13 @@ class Heatmap extends Component {
             <div id="map-menu">
               <h3>Options</h3>
               <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 0, activity_type : 0 }) }}>
-                All
+                All Activities
               </Button>
               <h4>Sport</h4>
               {this.state.polylines[1]["elements"].map(activity_type => {
                 return (
                   <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 1, activity_type : activity_type["id"] }) }}>
-                    {activity_type["type"]}
+                    <img src={ activity_type["img"] } style={{width: 25}} />
                   </Button>
                 )
               })}
@@ -414,7 +414,7 @@ class Heatmap extends Component {
               {this.state.polylines[4]["elements"].map(activity_type => {
                 return (
                   <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 4, activity_type : activity_type["id"] }) }}>
-                    {activity_type["type"]}
+                    <img src={ activity_type["type"] } style={{width: 25}} />
                   </Button>
                 )
               })}
