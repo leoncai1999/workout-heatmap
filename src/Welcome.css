@@ -3,17 +3,22 @@
 body {
     background-color: #5dbcd2;
     font-family: 'Open Sans', serif;
-    font-size: 36px;
 }
 
 h1 {
     text-align: center;
     color: white;
+    font-size: 56px;
+    font-weight: 800;
+    margin-top: 5px;
 }
 
 h5 {
     text-align: center;
     color: white;
+    margin-top: 50px;
+    font-size: 24px;
+    font-weight: 600;
 }
 
 .img-center {
@@ -27,4 +32,5 @@ h5 {
 
 .button-center {
     text-align: center;
+    margin-top: 50px;
 }

@@ -15,7 +15,7 @@
 
 #map-menu {
     background-color: white;
-    top: 155px;
+    top: 165px;
     left: 10px;
     width: 225px;
     padding-left: 17px;
@@ -24,7 +24,7 @@
 
 #cities-search {
     position: absolute;
-    top: 53px;
+    top: 70px;
     right: 64px;
 }
 

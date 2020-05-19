@@ -1,28 +1,29 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
-.navbar {
+.color-nav {
+    background-color: #5dbcd2;
+    padding: 0px;
     margin-left: 10px;
-    margin-right: 0px;
+    margin-right: 5px;
     margin-top: 0px;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
 }
 
 .logo-button {
     margin-right: 5px;
+    margin-bottom: 4px;
 }
 
 .nav-brand {
     color: white;
     font-family: 'Open Sans', serif;
-    font-size: 32px;
+    font-size: 30px;
     font-weight: 700;
 }
 
 .nav-item {
     color: white;
-    margin-top: 8px;
-    margin-right: 12px;
     font-family: 'Open Sans', serif;
-    font-size: 26px;
-    font-weight: 500;
+    font-size: 22px;
+    font-weight: 600;
 }
