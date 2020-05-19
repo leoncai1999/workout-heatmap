@@ -27,11 +27,6 @@ class Heatmap extends Component {
 
   async componentDidMount() {
 
-    const access_token = await this.updateAccessToken(String(window.location.href))
-
-    // Revert the url of the site to the default url after authentication is finished
-    window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap/map')
-
     var user_activities = []
     var user_polylines = [{"id" : 0, "type" : "All", "elements" : []}, {"id" : 1, "type" : "Sport", "elements" : []}, {"id" : 2, "type" : "Workout", "elements" : []}, {"id" : 3, "type" : "Members", "elements" : []}, {"id" : 4, "type" : "Time", "elements" : []}]
 
@@ -59,11 +54,18 @@ class Heatmap extends Component {
     user_polylines[4]["elements"].push({"id" : 3, "type" : "Evening", "polylines" : []})
     user_polylines[4]["elements"].push({"id" : 4, "type" : "Night", "polylines" : []})
 
+    this.setState({ polylines : user_polylines})
+
+    const access_token = await this.updateAccessToken(String(window.location.href))
+
     var activities_left = true
     var page_num = 1;
 
     if (access_token !== '') {
       this.setState({ access_token })
+
+      // Revert the url of the site to the default url after authentication is finished
+      window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap/map')
 
       while (activities_left) {
         // Retrieve Strava Activites in batches of 200 until no activities are left
@@ -99,7 +101,7 @@ class Heatmap extends Component {
                 user_polylines[1]["elements"].push({'id' : user_polylines[1]["elements"].length, 'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
               }
 
-              // Store polylines grouped by Workout Type
+              // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
               if (activities[i]['workout_type'] === 1) {
                 user_polylines[2]["elements"][1]["polylines"].push(decodePolyline(polyline))
               } else {
@@ -114,7 +116,11 @@ class Heatmap extends Component {
               }
 
               // Store polylines grouped by Time of Day
-              let start_hour = parseInt(activities[i]["start_date_local"].split(":").slice(-2))
+              let start_hour = parseInt(activities[i]["start_date_local"].split(":")[0].slice(-2))
+
+              console.log("activity description", activities[i]["name"])
+              console.log("activity time", start_hour)
+
               if (start_hour >= 4 && start_hour < 11) {
                 user_polylines[4]["elements"][0]["polylines"].push(decodePolyline(polyline))
               } else if (start_hour >= 11 && start_hour < 14) {
@@ -327,99 +333,95 @@ class Heatmap extends Component {
         </div>
       )
     } else {
-      if (this.state.polylines.length === 0) {
-        return <b> Loading... </b>;
-      } else {
-        return (
-          <div id="container">
+      return (
+        <div id="container">
+
+          <Navigation />
   
-            <Navigation />
-    
-              <div id="map">
-                <Map
-                  google={this.props.google}
-                  zoom={this.state.zoom} 
-                  style={mapStyles}
-                  initialCenter={ { lat: 39.8283, lng: -98.5795 } }
-                  center={this.state.map_center}
-                  ref={(ref) => { this.map = ref; }}
-                >
-                  {this.state.polylines[this.state.filter_type]["elements"][this.state.activity_type]["polylines"].map(polyline => {
+            <div id="map">
+              <Map
+                google={this.props.google}
+                zoom={this.state.zoom} 
+                style={mapStyles}
+                initialCenter={ { lat: 39.8283, lng: -98.5795 } }
+                center={this.state.map_center}
+                ref={(ref) => { this.map = ref; }}
+              >
+                {this.state.polylines[this.state.filter_type]["elements"][this.state.activity_type]["polylines"].map(polyline => {
+                  return (
+                    <Polyline
+                        path={polyline}
+                        strokeColor='#6F1BC6'
+                        strokeWeight='2'
+                    />
+                  )
+                })}
+              </Map>
+            </div>
+
+            <div id="cities-search">
+              <Dropdown>
+                <Dropdown.Toggle>
+                  Select City
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {this.state.cities.map(city => {
+                    let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
                     return (
-                      <Polyline
-                          path={polyline}
-                          strokeColor='#6F1BC6'
-                          strokeWeight='2'
-                      />
+                      <Dropdown.Item
+                        onClick={() => {
+                          this.recenterMap(city["id"])
+                        }}
+                      >
+                        {description}
+                      </Dropdown.Item>
                     )
                   })}
-                </Map>
-              </div>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+
+            <div id="map-menu">
+              <h3>Options</h3>
+              <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 0, activity_type : 0 }) }}>
+                All
+              </Button>
+              <h4>Sport</h4>
+              {this.state.polylines[1]["elements"].map(activity_type => {
+                return (
+                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 1, activity_type : activity_type["id"] }) }}>
+                    {activity_type["type"]}
+                  </Button>
+                )
+              })}
+              <h4>Workout</h4>
+              {this.state.polylines[2]["elements"].map(activity_type => {
+                return (
+                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 2, activity_type : activity_type["id"] }) }}>
+                    {activity_type["type"]}
+                  </Button>
+                )
+              })}
+              <h4>Members</h4>
+              {this.state.polylines[3]["elements"].map(activity_type => {
+                return (
+                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 3, activity_type : activity_type["id"] }) }}>
+                    {activity_type["type"]}
+                  </Button>
+                )
+              })}
+              <h4>Time of Day</h4>
+              {this.state.polylines[4]["elements"].map(activity_type => {
+                return (
+                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 4, activity_type : activity_type["id"] }) }}>
+                    {activity_type["type"]}
+                  </Button>
+                )
+              })}
+            </div>
   
-              <div id="cities-search">
-                <Dropdown>
-                  <Dropdown.Toggle>
-                    Select City
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    {this.state.cities.map(city => {
-                      let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
-                      return (
-                        <Dropdown.Item
-                          onClick={() => {
-                            this.recenterMap(city["id"])
-                          }}
-                        >
-                          {description}
-                        </Dropdown.Item>
-                      )
-                    })}
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
-  
-              <div id="map-menu">
-                <h3>Options</h3>
-                <Button onClick={(e) => { this.setState({ filter_type: 0, activity_type : 0 }) }}>
-                  All
-                </Button>
-                <h4>Sport</h4>
-                {this.state.polylines[1]["elements"].map(activity_type => {
-                  return (
-                    <Button onClick={(e) => { this.setState({ filter_type: 1, activity_type : activity_type["id"] }) }}>
-                      {activity_type["type"]}
-                    </Button>
-                  )
-                })}
-                <h4>Workout</h4>
-                {this.state.polylines[2]["elements"].map(activity_type => {
-                  return (
-                    <Button onClick={(e) => { this.setState({ filter_type: 2, activity_type : activity_type["id"] }) }}>
-                      {activity_type["type"]}
-                    </Button>
-                  )
-                })}
-                <h4>Members</h4>
-                {this.state.polylines[3]["elements"].map(activity_type => {
-                  return (
-                    <Button onClick={(e) => { this.setState({ filter_type: 3, activity_type : activity_type["id"] }) }}>
-                      {activity_type["type"]}
-                    </Button>
-                  )
-                })}
-                <h4>Time of Day</h4>
-                {this.state.polylines[4]["elements"].map(activity_type => {
-                  return (
-                    <Button onClick={(e) => { this.setState({ filter_type: 4, activity_type : activity_type["id"] }) }}>
-                      {activity_type["type"]}
-                    </Button>
-                  )
-                })}
-              </div>
-    
-          </div>
-        )
-      }
+        </div>
+      )
     } 
   }
 }
