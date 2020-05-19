@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
 import * as keys from './APIKeys';
-import { Button, Dropdown } from 'react-bootstrap';
+import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import Welcome from './Welcome';
 import Navigation from './Navigation';
 import './Heatmap.css';
@@ -45,7 +45,8 @@ class Heatmap extends Component {
 
     // Member types
     user_polylines[3]["elements"].push({"id" : 0, "type" : "Solo", "polylines" : []})
-    user_polylines[3]["elements"].push({"id" : 1, "type" : "Group", "polylines" : []})
+    user_polylines[3]["elements"].push({"id" : 1, "type" : "Partner", "polylines" : []})
+    user_polylines[3]["elements"].push({"id" : 2, "type" : "Group", "polylines" : []})
 
     // Time of Day types
     user_polylines[4]["elements"].push({"id" : 0, "type" : require("./icons/morning.svg"), "polylines" : []})
@@ -109,8 +110,10 @@ class Heatmap extends Component {
               }
 
               // Store polylines grouped by Member Type
-              if (activities[i]["athlete_count"] > 1) {
+              if (activities[i]["athlete_count"] === 2) {
                 user_polylines[3]["elements"][1]["polylines"].push(decodePolyline(polyline))
+              } else if (activities[i]["athlete_count"] > 2) {
+                user_polylines[3]["elements"][2]["polylines"].push(decodePolyline(polyline))
               } else {
                 user_polylines[3]["elements"][0]["polylines"].push(decodePolyline(polyline))
               }
@@ -383,41 +386,49 @@ class Heatmap extends Component {
 
             <div id="map-menu">
               <h3>Options</h3>
-              <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 0, activity_type : 0 }) }}>
+              <Button variant="outline-secondary" size="sm" onClick={(e) => { this.setState({ filter_type: 0, activity_type : 0 }) }}>
                 All Activities
               </Button>
               <h4>Sport</h4>
-              {this.state.polylines[1]["elements"].map(activity_type => {
-                return (
-                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 1, activity_type : activity_type["id"] }) }}>
-                    <img src={ activity_type["img"] } style={{width: 25}} />
-                  </Button>
-                )
-              })}
+              <ButtonGroup size="sm">
+                {this.state.polylines[1]["elements"].map(activity_type => {
+                  return (
+                    <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 1, activity_type : activity_type["id"] }) }}>
+                      <img src={ activity_type["img"] } style={{width: 25}} />
+                    </Button>
+                  )
+                })}
+              </ButtonGroup>
               <h4>Workout</h4>
-              {this.state.polylines[2]["elements"].map(activity_type => {
-                return (
-                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 2, activity_type : activity_type["id"] }) }}>
-                    {activity_type["type"]}
-                  </Button>
-                )
-              })}
+              <ButtonGroup size="sm" className="btn-group">
+                {this.state.polylines[2]["elements"].map(activity_type => {
+                  return (
+                    <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 2, activity_type : activity_type["id"] }) }}>
+                      {activity_type["type"]}
+                    </Button>
+                  )
+                })}
+              </ButtonGroup>
               <h4>Members</h4>
-              {this.state.polylines[3]["elements"].map(activity_type => {
-                return (
-                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 3, activity_type : activity_type["id"] }) }}>
-                    {activity_type["type"]}
-                  </Button>
-                )
-              })}
+              <ButtonGroup size="sm" className="btn-group">
+                {this.state.polylines[3]["elements"].map(activity_type => {
+                  return (
+                    <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 3, activity_type : activity_type["id"] }) }}>
+                      {activity_type["type"]}
+                    </Button>
+                  )
+                })}
+              </ButtonGroup>
               <h4>Time of Day</h4>
-              {this.state.polylines[4]["elements"].map(activity_type => {
-                return (
-                  <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 4, activity_type : activity_type["id"] }) }}>
-                    <img src={ activity_type["type"] } style={{width: 25}} />
-                  </Button>
-                )
-              })}
+              <ButtonGroup size="sm">
+                {this.state.polylines[4]["elements"].map(activity_type => {
+                  return (
+                    <Button variant="outline-secondary" onClick={(e) => { this.setState({ filter_type: 4, activity_type : activity_type["id"] }) }}>
+                      <img src={ activity_type["type"] } style={{width: 25}} />
+                    </Button>
+                  )
+                })}
+              </ButtonGroup>
             </div>
   
         </div>
