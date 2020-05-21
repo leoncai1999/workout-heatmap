@@ -8,7 +8,7 @@ class Welcome extends Component {
 
     authenticateUser = () => {
         // User is redirected to Strava's website to login and give site permission to access acount information
-        window.location.assign('https://www.strava.com/oauth/authorize?client_id=27965&redirect_uri=http://localhost:3000/workout-heatmap/callback&response_type=code&scope=activity:read_all&approval_prompt=force&state=strava')
+        window.location.assign('https://www.strava.com/oauth/authorize?client_id=27965&redirect_uri=http://workoutheatmap.me/callback&response_type=code&scope=activity:read_all&approval_prompt=force&state=strava')
     }
 
     render() {
@@ -21,7 +21,7 @@ class Welcome extends Component {
                 <div class="button-center">
                     <img src={StravaButton} onClick={(e) => { this.authenticateUser().bind(this) }}></img>
                 </div>
-                <Nav.Link href="workout-heatmap/map-sample">
+                <Nav.Link href="map-sample">
                     <h6 class="demo-text"> Not a Strava user? See a demo account </h6>
                 </Nav.Link>
             </div>

@@ -67,7 +67,7 @@ class Heatmap extends Component {
     if (access_token === 'sample') {
 
       this.setState({ access_token })
-      window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap/map')
+      window.history.pushState({}, null, 'http://workoutheatmap.me/map')
 
       const activitiesRef = firebase.database().ref('activities')
       activitiesRef.on('value', (snapshot) => {
@@ -92,7 +92,7 @@ class Heatmap extends Component {
       this.setState({ access_token })
 
       // Revert the url of the site to the default url after authentication is finished
-      window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap/map')
+      window.history.pushState({}, null, 'http://workoutheatmap.me/map')
 
       while (activities_left) {
         // Retrieve Strava Activites in batches of 200 until no activities are left
@@ -180,7 +180,7 @@ class Heatmap extends Component {
         this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
       }
     } else {
-      window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap')
+      window.history.pushState({}, null, 'http://workoutheatmap.me/')
     }
   }
 
@@ -313,21 +313,21 @@ class Heatmap extends Component {
 
     // Retrieve the code from the authenication process, then exchange the code for a token to access the Strava API
     const tokenized_url = url.split('/')
-    if (tokenized_url[4] !== null && tokenized_url[4].substring(0,8) === 'callback') {
-        let code_and_scope = tokenized_url[4].substring(27);
-        let code = code_and_scope.substring(0, code_and_scope.indexOf('&'))
+    if (tokenized_url[3] !== null && tokenized_url[3].substring(0,8) === 'callback') {
+      let code_and_scope = tokenized_url[3].substring(27);
+      let code = code_and_scope.substring(0, code_and_scope.indexOf('&'))
 
-        let results = await axios
-            .post("https://www.strava.com/api/v3/oauth/token?", {
-                client_id: '27965',
-                client_secret: keys.STRAVA_SECRET,
-                code: code,
-                grant_type: 'authorization_code'
-        })
+      let results = await axios
+          .post("https://www.strava.com/api/v3/oauth/token?", {
+              client_id: '27965',
+              client_secret: keys.STRAVA_SECRET,
+              code: code,
+              grant_type: 'authorization_code'
+      })
 
-        token = results.data.access_token
+      token = results.data.access_token
 
-    } else if (tokenized_url[4] !== null && tokenized_url[4].substring(0,10) === 'map-sample') {
+    } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
         token = 'sample'
     }
 
