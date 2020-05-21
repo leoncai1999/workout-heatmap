@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import './Welcome.css';
 import Logo from './app-logo.svg';
 import StravaButton from './strava-button.png';
@@ -17,9 +17,13 @@ class Welcome extends Component {
                 <img class="img-center" src={Logo}></img>
                 <h1> Workout Heatmap </h1>
                 <h5> Build an interactive heatmap of your outdoor activites from your Strava account! </h5>
+                <h6> WorkoutHeatmap.io does not collect or store any of your data </h6>
                 <div class="button-center">
                     <img src={StravaButton} onClick={(e) => { this.authenticateUser().bind(this) }}></img>
                 </div>
+                <Nav.Link href="workout-heatmap/map-sample">
+                    <h6 class="demo-text"> Not a Strava user? See a demo account </h6>
+                </Nav.Link>
             </div>
         )
     }

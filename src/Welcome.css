@@ -16,9 +16,26 @@ h1 {
 h5 {
     text-align: center;
     color: white;
-    margin-top: 50px;
+    margin-top: 45px;
     font-size: 28px;
     font-weight: 600;
+}
+
+h6 {
+    margin-top: 40px;
+    margin-bottom: 0px;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+}
+
+.demo-text {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    text-decoration: underline;
 }
 
 .img-center {
@@ -32,5 +49,5 @@ h5 {
 
 .button-center {
     text-align: center;
-    margin-top: 50px;
+    margin-top: 30px;
 }

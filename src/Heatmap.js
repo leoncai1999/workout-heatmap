@@ -6,6 +6,7 @@ import { Button, ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
 import Welcome from './Welcome';
 import Navigation from './Navigation';
 import './Heatmap.css';
+import firebase from './firebase.js';
 
 const mapStyles = {
   width: '100%',
@@ -63,7 +64,31 @@ class Heatmap extends Component {
     var activities_left = true
     var page_num = 1;
 
-    if (access_token !== '') {
+    if (access_token === 'sample') {
+
+      this.setState({ access_token })
+      window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap/map')
+
+      const activitiesRef = firebase.database().ref('activities')
+      activitiesRef.on('value', (snapshot) => {
+        this.setState({ activities: snapshot.val() })
+      })
+
+      const polylinesRef = firebase.database().ref('polylines')
+      polylinesRef.on('value', (snapshot) => {
+        this.setState({ polylines: snapshot.val() })
+      })
+
+      const citiesRef = firebase.database().ref('cities/-M7p7G6JFbFJS0pfIqiy')
+      citiesRef.on('value', (snapshot) => {
+        console.log("cities are", snapshot.val() )
+        this.setState({ cities: snapshot.val() })
+      })
+
+      this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
+      this.setState({ zoom : 13 })
+
+    } else if (access_token !== '') {
       this.setState({ access_token })
 
       // Revert the url of the site to the default url after authentication is finished
@@ -122,9 +147,6 @@ class Heatmap extends Component {
               // Store polylines grouped by Time of Day
               let start_hour = parseInt(activities[i]["start_date_local"].split(":")[0].slice(-2))
 
-              console.log("activity description", activities[i]["name"])
-              console.log("activity time", start_hour)
-
               if (start_hour >= 4 && start_hour < 11) {
                 user_polylines[4]["elements"][0]["polylines"].push(decodePolyline(polyline))
               } else if (start_hour >= 11 && start_hour < 14) {
@@ -157,6 +179,8 @@ class Heatmap extends Component {
         // Default location is geographic center of the U.S.
         this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
       }
+    } else {
+      window.history.pushState({}, null, 'http://localhost:3000/workout-heatmap')
     }
   }
 
@@ -302,6 +326,9 @@ class Heatmap extends Component {
         })
 
         token = results.data.access_token
+
+    } else if (tokenized_url[4] !== null && tokenized_url[4].substring(0,10) === 'map-sample') {
+        token = 'sample'
     }
 
     return token
@@ -327,8 +354,8 @@ class Heatmap extends Component {
       this.setState({ cities : city_counts})
     }
 
-    this.setState({ map_center: this.state.cities[city_id]["cords"] })
     this.setState({ zoom : 13 })
+    this.setState({ map_center: this.state.cities[city_id]["cords"] })
   }
 
   render() {
@@ -348,11 +375,10 @@ class Heatmap extends Component {
             <div id="map">
               <Map
                 google={this.props.google}
-                zoom={this.state.zoom} 
+                zoom={this.state.zoom}
                 style={mapStyles}
                 initialCenter={ { lat: 39.8283, lng: -98.5795 } }
                 center={this.state.map_center}
-                ref={(ref) => { this.map = ref; }}
               >
                 {this.state.polylines[this.state.filter_type]["elements"][this.state.activity_type]["polylines"].map(polyline => {
                   return (
@@ -373,7 +399,7 @@ class Heatmap extends Component {
                 id="dropdown-menu-align-right"
               >
                 {this.state.cities.map(city => {
-                  let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
+                  // let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
                   return (
                     <Dropdown.Item
                       onClick={() => {
