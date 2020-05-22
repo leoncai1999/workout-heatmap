@@ -359,7 +359,6 @@ class Heatmap extends Component {
   }
 
   render() {
-
     if (this.state.access_token === '') {
       return (
         <div>

@@ -1,6 +1,6 @@
 {
-  "homepage": "http://leoncai1999.github.io/workout-heatmap/",
-  "name": "workout-heatmap",
+  "homepage": "http://workoutheatmap.me",
+  "name": "workoutheatmap",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
