@@ -16,7 +16,7 @@ class Navigation extends Component {
                 <Navbar.Collapse id="responsive-navbar-nav">
                   <Nav className="ml-auto">
                     <Nav.Link className="nav-item" href="/">Map</Nav.Link>
-                    <Nav.Link className="nav-item" href="/">Stats</Nav.Link>
+                    <Nav.Link className="nav-item" href="/stats">Stats</Nav.Link>
                     <Nav.Link className="nav-item" href="/">About</Nav.Link>
                   </Nav>
                 </Navbar.Collapse>

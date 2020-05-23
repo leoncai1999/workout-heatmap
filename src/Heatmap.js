@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
 import * as keys from './APIKeys';
-import { Button, ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Button, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Welcome from './Welcome';
 import Navigation from './Navigation';
+import Modal from 'react-bootstrap/Modal';
 import './Heatmap.css';
 import firebase from './firebase.js';
 
@@ -12,6 +13,9 @@ const mapStyles = {
   width: '100%',
   height: '100%'
 };
+
+// url for production is https://workoutheatmap.me/, url for development is http://localhost:3000/
+const base_url = "http://localhost:3000/"
 
 class Heatmap extends Component {
 
@@ -24,7 +28,8 @@ class Heatmap extends Component {
     map_center: {},
     selected_city: 'Select City',
     cities: [],
-    zoom: 4
+    zoom: 4,
+    modal_open: true
   };
 
   async componentDidMount() {
@@ -65,9 +70,9 @@ class Heatmap extends Component {
     var page_num = 1;
 
     if (access_token === 'sample') {
-
+      // sample user account infromation is read in from a Firebase real time database
       this.setState({ access_token })
-      window.history.pushState({}, null, 'http://workoutheatmap.me/map')
+      window.history.pushState({}, null, base_url + 'map')
 
       const activitiesRef = firebase.database().ref('activities')
       activitiesRef.on('value', (snapshot) => {
@@ -76,23 +81,37 @@ class Heatmap extends Component {
 
       const polylinesRef = firebase.database().ref('polylines')
       polylinesRef.on('value', (snapshot) => {
-        this.setState({ polylines: snapshot.val() })
+        user_polylines = snapshot.val()
+
+        // redelcare images as they don't render properly from database
+        user_polylines[1]["elements"][0]["img"] = require("./icons/run.svg")
+        user_polylines[1]["elements"][1]["img"] = require("./icons/ride.svg")
+        user_polylines[1]["elements"][2]["img"] = require("./icons/swim.svg")
+        user_polylines[1]["elements"][3]["img"] = require("./icons/walk.svg")
+        user_polylines[1]["elements"][4]["img"] = require("./icons/hike.svg")
+        user_polylines[4]["elements"][0]["type"] = require("./icons/morning.svg")
+        user_polylines[4]["elements"][1]["type"] = require("./icons/lunch.svg")
+        user_polylines[4]["elements"][2]["type"] = require("./icons/afternoon.svg")
+        user_polylines[4]["elements"][3]["type"] = require("./icons/evening.svg")
+        user_polylines[4]["elements"][4]["type"] = require("./icons/night.svg")
+
+        this.setState({ polylines: user_polylines })
       })
 
       const citiesRef = firebase.database().ref('cities/-M7p7G6JFbFJS0pfIqiy')
       citiesRef.on('value', (snapshot) => {
-        console.log("cities are", snapshot.val() )
         this.setState({ cities: snapshot.val() })
       })
 
       this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
       this.setState({ zoom : 13 })
 
+      this.setState({ modal_open : false})
     } else if (access_token !== '') {
       this.setState({ access_token })
 
       // Revert the url of the site to the default url after authentication is finished
-      window.history.pushState({}, null, 'http://workoutheatmap.me/map')
+      window.history.pushState({}, null, base_url + 'map')
 
       while (activities_left) {
         // Retrieve Strava Activites in batches of 200 until no activities are left
@@ -179,8 +198,10 @@ class Heatmap extends Component {
         // Default location is geographic center of the U.S.
         this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
       }
+
+      this.setState({ modal_open : false})
     } else {
-      window.history.pushState({}, null, 'http://workoutheatmap.me/')
+      window.history.pushState({}, null, base_url)
     }
   }
 
@@ -368,6 +389,20 @@ class Heatmap extends Component {
     } else {
       return (
         <div id="container">
+
+          <Modal 
+            show={this.state.modal_open}
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Body>
+              <div className="loading-center">
+                <p className="loading-text">Fetching activities from Strava ...</p>
+                <p className="loading-subtext">Loading may take a while for a large number of activites</p>
+                <Spinner animation="border" className="loading-spinner" />
+              </div>
+            </Modal.Body>
+          </Modal>
 
           <Navigation />
   
