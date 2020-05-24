@@ -2,11 +2,10 @@
 
 .color-nav {
     background-color: #5dbcd2;
-    padding: 0px;
-    margin-left: 10px;
-    margin-right: 5px;
-    margin-top: 0px;
-    margin-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 5px;
 }
 
 .logo-button {

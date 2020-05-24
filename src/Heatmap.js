@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as keys from './APIKeys';
 import { Button, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Welcome from './Welcome';
+import Stats from './Stats';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
 import './Heatmap.css';
@@ -29,10 +30,19 @@ class Heatmap extends Component {
     selected_city: 'Select City',
     cities: [],
     zoom: 4,
-    modal_open: true
+    modal_open: true,
+    mode: "map"
   };
 
   async componentDidMount() {
+
+    if (String(window.location.href) === base_url + 'stats') {
+      document.body.style.background = "#e8e1eb"
+      this.setState({ mode: "stats" })
+    } else {
+      document.body.style.background = "#5dbcd2"
+      this.setState({ mode: "map" })
+    }
 
     var user_activities = []
     var user_polylines = [{"id" : 0, "type" : "All", "elements" : []}, {"id" : 1, "type" : "Sport", "elements" : []}, {"id" : 2, "type" : "Workout", "elements" : []}, {"id" : 3, "type" : "Members", "elements" : []}, {"id" : 4, "type" : "Time", "elements" : []}]
@@ -349,7 +359,10 @@ class Heatmap extends Component {
       token = results.data.access_token
 
     } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
-        token = 'sample'
+      token = 'sample'
+    } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'stats') {
+      // temporary solution. Change later
+      token = 'sample'
     }
 
     return token
@@ -386,7 +399,7 @@ class Heatmap extends Component {
           <Welcome />
         </div>
       )
-    } else {
+    } else if (this.state.mode === 'map') {
       return (
         <div id="container">
 
@@ -497,7 +510,13 @@ class Heatmap extends Component {
   
         </div>
       )
-    } 
+    } else {
+      return(
+        <div>
+          <Stats data={this.state} />
+        </div>
+      )
+    }
   }
 }
 

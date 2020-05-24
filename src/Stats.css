@@ -1,0 +1,16 @@
+.black-header {
+    text-align: center;
+    color: black;
+    font-size: 46px;
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+.img-stats {
+    display: block;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 15px;
+    width: 15%;
+}
