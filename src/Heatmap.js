@@ -84,12 +84,12 @@ class Heatmap extends Component {
       this.setState({ access_token })
       window.history.pushState({}, null, base_url + 'map')
 
-      const activitiesRef = firebase.database().ref('activities')
+      const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
       activitiesRef.on('value', (snapshot) => {
         this.setState({ activities: snapshot.val() })
       })
 
-      const polylinesRef = firebase.database().ref('polylines')
+      const polylinesRef = firebase.database().ref('polylines/-M8E-287MG8ZC9Xw71ls')
       polylinesRef.on('value', (snapshot) => {
         user_polylines = snapshot.val()
 
@@ -108,7 +108,7 @@ class Heatmap extends Component {
         this.setState({ polylines: user_polylines })
       })
 
-      const citiesRef = firebase.database().ref('cities/-M7p7G6JFbFJS0pfIqiy')
+      const citiesRef = firebase.database().ref('cities/-M8E-QYO2E65Yckec5Eh')
       citiesRef.on('value', (snapshot) => {
         this.setState({ cities: snapshot.val() })
       })
@@ -210,6 +210,15 @@ class Heatmap extends Component {
       }
 
       this.setState({ modal_open : false})
+
+      // uncomment if sample account in firebase needs to be updated
+      /* const activitiesRef = firebase.database().ref('activities')
+      activitiesRef.push(user_activities)
+
+      const polylinesRef = firebase.database().ref('polylines')
+      polylinesRef.remove()
+      polylinesRef.push(user_polylines) */
+
     } else {
       window.history.pushState({}, null, base_url)
     }
@@ -289,6 +298,8 @@ class Heatmap extends Component {
         }
 
         let activity_miles = activity["distance"] / 1609
+        let activity_elevation = activity["total_elevation_gain"] * 3.28084
+        let activity_time = activity["moving_time"]
 
         var unique_city = true
         var city_num = 0
@@ -297,6 +308,8 @@ class Heatmap extends Component {
           if (city_counts[city_num]["city"] === city_name) {
             city_counts[city_num]["activities"] += 1
             city_counts[city_num]["miles"] += activity_miles
+            city_counts[city_num]["elevation"] += activity_elevation
+            city_counts[city_num]["hours"] += activity_time
             unique_city = false
           } else {
             city_num += 1
@@ -304,7 +317,7 @@ class Heatmap extends Component {
         }
 
         if (unique_city) {
-          city_counts.push({'city' : city_name, 'activities' : 1, 'miles' : activity_miles })
+          city_counts.push({'city' : city_name, 'activities' : 1, 'miles' : activity_miles, 'elevation' : activity_elevation, 'hours' : activity_time })
         } 
       }
 
@@ -317,6 +330,9 @@ class Heatmap extends Component {
 
     for (let i = 0; i < city_counts.length; i++) {
       city_counts[i]["id"] = i
+      city_counts[i]["miles"] = parseFloat(city_counts[i]["miles"].toFixed(2))
+      city_counts[i]["elevation"] = parseFloat(city_counts[i]["elevation"].toFixed(2))
+      city_counts[i]["hours"] = parseInt(city_counts[i]["hours"] / 3600)
     }
 
     return city_counts
@@ -386,6 +402,12 @@ class Heatmap extends Component {
       city_counts[city_id]["cords"] = center_cords
 
       this.setState({ cities : city_counts})
+
+      // uncomment if sample account in firebase needs to be updated
+      /* const citiesRef = firebase.database().ref('cities')
+      if (city_id === 17) {
+        citiesRef.push(city_counts)
+      } */
     }
 
     this.setState({ zoom : 13 })
