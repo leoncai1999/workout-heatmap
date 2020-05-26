@@ -27,6 +27,7 @@ class Heatmap extends Component {
     activity_type: 0,
     access_token: '',
     map_center: {},
+    heart_rate_zones: [],
     selected_city: 'Select City',
     cities: [],
     zoom: 4,
@@ -115,6 +116,11 @@ class Heatmap extends Component {
         this.setState({ cities: snapshot.val() })
       })
 
+      const heartRateRef = firebase.database().ref('heartrate/-M8I0R4qpZGkFi9iPIss')
+      heartRateRef.on('value', (snapshot) => {
+        this.setState({ heart_rate_zones: snapshot.val() })
+      })
+
       this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
       this.setState({ zoom : 13 })
 
@@ -124,6 +130,9 @@ class Heatmap extends Component {
 
       // Revert the url of the site to the default url after authentication is finished
       window.history.pushState({}, null, base_url + 'map')
+
+      var heart_rate_zones = await this.getHeartRateZones(access_token)
+      this.setState({ heart_rate_zones })
 
       while (activities_left) {
         // Retrieve Strava Activites in batches of 200 until no activities are left
@@ -219,11 +228,27 @@ class Heatmap extends Component {
 
       const polylinesRef = firebase.database().ref('polylines')
       polylinesRef.remove()
-      polylinesRef.push(user_polylines) */
+      polylinesRef.push(user_polylines)
+
+      const heartRateRef = firebase.database().ref('heartrate')
+      heartRateRef.push(heart_rate_zones) */
 
     } else {
       window.history.pushState({}, null, base_url)
     }
+  }
+
+  getHeartRateZones = async(access_token) => {
+    let results = await axios
+      .get("https://www.strava.com/api/v3/athlete/zones?", {
+        params: {
+          access_token: access_token
+        }
+      }).catch(error => {
+        // need to account for this if user denies permission
+      })
+
+    return results.data["heart_rate"]["zones"]
   }
 
   getCitiesFromActivites = async(user_activities) => {

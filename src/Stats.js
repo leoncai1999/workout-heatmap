@@ -26,17 +26,17 @@ class Stats extends Component {
               data: [0, 0, 0, 0, 0, 0, 0]
             },
             {
-              label: "My Second dataset",
+              label: "Average Intensity of Workout (based on Heart Rate)",
               backgroundColor: "rgba(71, 225, 167, 0.5)",
               borderColor: "rgb(71, 225, 167)",
-              data: [28, 48, 40, 19, 96, 27,100]
+              data: [0, 0, 0, 0, 0, 0, 0]
             }
           ]
         },
         dataCalled: false
     }
 
-    getWorkoutLikelihoodByDay = () => {
+    getWorkoutStatsByDay = () => {
         let user_activities = this.props.data.activities.reverse()
         console.log("user activities are ", user_activities)
 
@@ -64,28 +64,58 @@ class Stats extends Component {
         }
 
         /* Calculate percent likelihood of working out each day. For example, likelihood of working out on
-        Monday is number of Monday activities divided by number of Mondays between the two dates */
+        Monday is number of Monday activities divided by number of Mondays between the two dates. Also calculate
+        the average workout intensity for each day. */
         var used_dates = []
         var day_counts = [0, 0, 0, 0, 0, 0, 0]
+        var intensity_counts = [0, 0, 0, 0, 0, 0, 0]
+        var activity_counts = [0, 0, 0, 0, 0, 0, 0]
         for (let i = 0; i < user_activities.length; i++) {
             let activity_day = new Date(user_activities[i]["start_date_local"].split("T")[0])
             let activity_day_of_week = activity_day.getDay()
-            console.log("getting day of week", activity_day_of_week )
             if (!(used_dates.includes(activity_day))) {
                 day_counts[activity_day_of_week] += 1
                 used_dates.push(activity_day)
             }
+
+            if (user_activities[i]["has_heartrate"]) {
+              intensity_counts[activity_day_of_week] += this.getWorkoutIntensity(user_activities[i]["average_heartrate"])
+              activity_counts[activity_day_of_week] += 1
+            }
         }
         for (let i = 0; i < day_counts.length; i++) {
             day_counts[i] = (day_counts[i] / week_counts[i]) * 100
+            intensity_counts[i] = intensity_counts[i] / activity_counts[i]
         }
-
-        console.log("day counts were", day_counts)
 
         let dataRadarState = this.state.dataRadar
         dataRadarState.datasets[0].data = day_counts
+        dataRadarState.datasets[1].data = intensity_counts
         console.log("day counts are", day_counts)
         this.setState({ dataRadar : dataRadarState })
+    }
+
+    // An activity with an average heart rate in zone 2 up to 40% intensity, zone 3 is up to 60% intensity, etc
+    getWorkoutIntensity = (heart_rate) => {
+      let heart_rate_zones = this.props.data.heart_rate_zones
+      let workout_intensity = 0
+      
+      for (let i = 0; i < heart_rate_zones.length; i++) {
+        if (heart_rate <= heart_rate_zones[i]["max"] || heart_rate_zones[i]["max"] === -1) {
+
+          if (i === 0) {
+            workout_intensity = 20
+          } else if (i === 4) {
+            workout_intensity = 100
+          } else {
+            let heart_zone_range = heart_rate_zones[i]["max"] - heart_rate_zones[i]["min"]
+            workout_intensity = (i * 20) + (((heart_rate - heart_rate_zones[i]["min"]) * 20) / heart_zone_range)
+          }
+          break;
+        }
+      }
+
+      return workout_intensity
     }
 
     render() {
@@ -121,8 +151,8 @@ class Stats extends Component {
             }
         ]
 
-        if (this.props.data.activities.length > 0 && !this.state.dataCalled) {
-            this.getWorkoutLikelihoodByDay()
+        if ((this.props.data.activities.length > 0 && this.props.data.heart_rate_zones.length > 0) && !this.state.dataCalled) {
+            this.getWorkoutStatsByDay()
             this.setState({ dataCalled: true})
         }
         

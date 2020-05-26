@@ -16,7 +16,7 @@ class Welcome extends Component {
 
     authenticateUser = () => {
         // User is redirected to Strava's website to login and give site permission to access acount information
-        window.location.assign('https://www.strava.com/oauth/authorize?client_id=27965&redirect_uri='+ base_url + 'callback&response_type=code&scope=activity:read_all&approval_prompt=force&state=strava')
+        window.location.assign('https://www.strava.com/oauth/authorize?client_id=27965&redirect_uri='+ base_url + 'callback&response_type=code&scope=activity:read_all,profile:read_all&approval_prompt=force&state=strava')
     }
 
     render() {
