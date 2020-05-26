@@ -31,7 +31,8 @@ class Heatmap extends Component {
     cities: [],
     zoom: 4,
     modal_open: true,
-    mode: "map"
+    mode: "map",
+    is_sample: false
   };
 
   async componentDidMount() {
@@ -82,6 +83,7 @@ class Heatmap extends Component {
     if (access_token === 'sample') {
       // sample user account infromation is read in from a Firebase real time database
       this.setState({ access_token })
+      this.setState({ is_sample : true })
       window.history.pushState({}, null, base_url + 'map')
 
       const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
@@ -468,7 +470,6 @@ class Heatmap extends Component {
                 id="dropdown-menu-align-right"
               >
                 {this.state.cities.map(city => {
-                  // let description = city["city"] + ": " + city["activities"] + " Activites, " + city["miles"].toFixed(2) + " Miles"
                   return (
                     <Dropdown.Item
                       onClick={() => {
