@@ -72,3 +72,14 @@ table thead .navbar-fixed-bottom .dropdown .caret {
     color: black;
     border-color: black;
 }
+
+.radar-chart {
+    width: 55%;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.day-table {
+    display: inline-block;
+    width: 42%;
+}
