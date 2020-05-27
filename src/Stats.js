@@ -5,13 +5,19 @@ import { Spinner } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
-import { Radar } from "react-chartjs-2";
+import { Radar, Bar } from "react-chartjs-2";
 import './Stats.css';
 
 const paginationOptions = {
     paginationSize: 10,
     hideSizePerPage: true
 }
+
+const red = ["rgba(255, 134,159,0.4)", "rgba(255, 134,159,1)"]
+const blue = ["rgba(98,  182, 239,0.4)", "rgba(98,  182, 239,1)"]
+const green = ["rgba(113, 205, 205,0.4)", "rgba(113, 205, 205,1)"]
+const purple = ["rgba(170, 128, 252,0.4)", "rgba(170, 128, 252,1)"]
+const orange = ["rgba(255, 177, 101,0.4)", "rgba(255, 177, 101,0.4)"]
 
 class Stats extends Component {
 
@@ -30,6 +36,18 @@ class Stats extends Component {
             backgroundColor: "rgba(71, 225, 167, 0.5)",
             borderColor: "rgb(71, 225, 167)",
             data: [0, 0, 0, 0, 0, 0, 0]
+          }
+        ]
+      },
+      dataBar: {
+        labels: ["12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM", "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM"],
+        datasets: [
+          {
+            label: "Number of Activities",
+            data: [],
+            backgroundColor: [red[0], red[0], red[0], red[0], blue[0], blue[0], blue[0], blue[0], blue[0], blue[0], blue[0], orange[0], orange[0], orange[0], green[0], green[0], green[0], purple[0], purple[0], purple[0], purple[0], red[0], red[0], red[0]],
+            borderWidth: 2,
+            borderColor: [red[1], red[1], red[1], red[1], blue[1], blue[1], blue[1], blue[1], blue[1], blue[1], blue[1], orange[1], orange[1], orange[1], green[1], green[1], green[1], purple[1], purple[1], purple[1], purple[1], red[1], red[1], red[1]]
           }
         ]
       },
@@ -143,6 +161,19 @@ class Stats extends Component {
       return result
     }
 
+    // Get number of workout activities started at each hour
+    getWorkoutStatsByTimeOfDay = () => {
+      let user_activities = this.props.data.activities
+      let hours = new Array(24).fill(0)
+      for (let i = 0; i < user_activities.length; i++) {
+        let activity_hour = parseInt(user_activities[i]["start_date_local"].split(":")[0].slice(-2))
+        hours[activity_hour] += 1
+      }
+      let dataBarState = this.state.dataBar
+      dataBarState.datasets[0].data = hours
+      this.setState({ dataBar : dataBarState})
+    }
+
     render() {
 
       const city_columns = [
@@ -197,6 +228,7 @@ class Stats extends Component {
 
         if ((this.props.data.activities.length > 0 && this.props.data.heart_rate_zones.length > 0) && !this.state.dataCalled) {
           this.getWorkoutStatsByDay()
+          this.getWorkoutStatsByTimeOfDay()
           this.setState({ dataCalled: true})
         }
         
@@ -221,7 +253,6 @@ class Stats extends Component {
               <h1 className="black-header"> Workout Statistics </h1>
 
               <h3 className="stats-header">Activities by City</h3>
-
               <div class="bootstrap-table">
                 <BootstrapTable 
                   keyField='id' 
@@ -252,6 +283,14 @@ class Stats extends Component {
                   hover
                   condensed
                 />
+              </div>
+
+              <h3 className="stats-header">Activities by Time of Day</h3>
+              <div class="time-bar-chart">
+                <Bar 
+                  data={this.state.dataBar}
+                  height={450}
+                  options={{ maintainAspectRatio: false }} />
               </div>
 
           </div>

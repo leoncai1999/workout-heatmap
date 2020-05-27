@@ -83,3 +83,7 @@ table thead .navbar-fixed-bottom .dropdown .caret {
     display: inline-block;
     width: 42%;
 }
+
+.time-bar-chart {
+    margin: 15px;
+}
