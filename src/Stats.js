@@ -5,7 +5,7 @@ import { Spinner } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
-import { Radar, Bar } from "react-chartjs-2";
+import { Line, Radar, Bar } from "react-chartjs-2";
 import './Stats.css';
 
 const paginationOptions = {
@@ -13,11 +13,8 @@ const paginationOptions = {
     hideSizePerPage: true
 }
 
-const red = ["rgba(255, 134,159,0.4)", "rgba(255, 134,159,1)"]
-const blue = ["rgba(98,  182, 239,0.4)", "rgba(98,  182, 239,1)"]
-const green = ["rgba(113, 205, 205,0.4)", "rgba(113, 205, 205,1)"]
-const purple = ["rgba(170, 128, 252,0.4)", "rgba(170, 128, 252,1)"]
-const orange = ["rgba(255, 177, 101,0.4)", "rgba(255, 177, 101,0.4)"]
+// colors are red, blue, orange, green, purple, yellow, grey
+const colors = [["rgba(255, 134,159,0.4)", "rgba(255, 134,159,1)"], ["rgba(98,  182, 239,0.4)", "rgba(98,  182, 239,1)"], ["rgba(113, 205, 205,0.4)", "rgba(113, 205, 205,1)"], ["rgba(170, 128, 252,0.4)", "rgba(170, 128, 252,1)"], ["rgba(255, 177, 101,0.4)", "rgba(255, 177, 101,1)"], ["rgba(255, 218, 128,0.4)", "rgba(255, 218, 128,1)"], ['rgba(201, 203, 207, 0.4)', 'rgba(201, 203, 207, 1)']]
 
 class Stats extends Component {
 
@@ -45,14 +42,102 @@ class Stats extends Component {
           {
             label: "Number of Activities",
             data: [],
-            backgroundColor: [red[0], red[0], red[0], red[0], blue[0], blue[0], blue[0], blue[0], blue[0], blue[0], blue[0], orange[0], orange[0], orange[0], green[0], green[0], green[0], purple[0], purple[0], purple[0], purple[0], red[0], red[0], red[0]],
+            backgroundColor: [colors[0][0], colors[0][0], colors[0][0], colors[0][0], colors[1][0], colors[1][0], colors[1][0], colors[1][0], colors[1][0], colors[1][0], colors[1][0], colors[2][0], colors[2][0], colors[2][0], colors[3][0], colors[3][0], colors[3][0], colors[4][0], colors[4][0], colors[4][0], colors[4][0], colors[0][0], colors[0][0], colors[0][0]],
             borderWidth: 2,
-            borderColor: [red[1], red[1], red[1], red[1], blue[1], blue[1], blue[1], blue[1], blue[1], blue[1], blue[1], orange[1], orange[1], orange[1], green[1], green[1], green[1], purple[1], purple[1], purple[1], purple[1], red[1], red[1], red[1]]
+            borderColor: [colors[0][1], colors[0][1], colors[0][1], colors[0][1], colors[1][1], colors[1][1], colors[1][1], colors[1][1], colors[1][1], colors[1][1], colors[1][1], colors[2][1], colors[2][1], colors[2][1], colors[3][1], colors[3][1], colors[3][1], colors[4][1], colors[4][1], colors[4][1], colors[4][1], colors[0][1], colors[0][1], colors[0][1]]
           }
         ]
       },
+      dataLine: {
+        labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        datasets: []
+      },
       dataCalled: false,
       day_mile_counts: []
+    }
+
+    getWorkoutStatsByMonth = () => {
+
+      let user_activities = this.props.data.activities.reverse()
+      let current_year = user_activities[0]["start_date_local"].split("-")[0]
+      let year_data = new Array(12).fill(0)
+      let user_datasets = []
+      let curr_color = 0
+
+      for (let i = 0; i < user_activities.length; i++) {
+        let activity_year = user_activities[i]["start_date_local"].split("-")[0]
+        let activity_month = parseInt(user_activities[i]["start_date_local"].split("-")[1]) - 1
+
+        if (activity_year !== current_year) {
+          user_datasets.push({
+            label: current_year,
+            fill: true,
+            lineTension: 0.3,
+            backgroundColor: colors[curr_color][0],
+            borderColor: colors[curr_color][1],
+            borderCapStyle: "butt",
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: "miter",
+            pointBorderColor: colors[curr_color][1],
+            pointBackgroundColor: colors[curr_color][1],
+            pointBorderWidth: 10,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: colors[curr_color][0],
+            pointHoverBorderColor: colors[curr_color][1],
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: this.convertMetersToMiles(year_data)
+          })
+
+          if (curr_color === 6) {
+            curr_color = 0
+          } else {
+            curr_color += 1
+          }
+          year_data = new Array(12).fill(0)
+          current_year = activity_year
+        }
+
+        year_data[activity_month] += user_activities[i]["distance"]
+
+        if (i === user_activities.length - 1) {
+          user_datasets.push({
+            label: activity_year,
+            fill: true,
+            lineTension: 0.3,
+            backgroundColor: colors[curr_color][0],
+            borderColor: colors[curr_color][1],
+            borderCapStyle: "butt",
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: "miter",
+            pointBorderColor: colors[curr_color][1],
+            pointBackgroundColor: colors[curr_color][1],
+            pointBorderWidth: 10,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: colors[curr_color][0],
+            pointHoverBorderColor: colors[curr_color][1],
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: this.convertMetersToMiles(year_data)
+          })
+        }
+      }
+
+      let dataLineState = this.state.dataLine
+      dataLineState.datasets = user_datasets  
+      this.setState({ dataLine: dataLineState})
+    }
+
+    convertMetersToMiles = (meters) => {
+      let result = meters
+      for (let i = 0; i < result.length; i++) {
+        result[i] = parseFloat((result[i] / 1609.344).toFixed(2))
+      }
+      return result
     }
 
     getWorkoutStatsByDay = () => {
@@ -227,6 +312,7 @@ class Stats extends Component {
       ]
 
         if ((this.props.data.activities.length > 0 && this.props.data.heart_rate_zones.length > 0) && !this.state.dataCalled) {
+          this.getWorkoutStatsByMonth()
           this.getWorkoutStatsByDay()
           this.getWorkoutStatsByTimeOfDay()
           this.setState({ dataCalled: true})
@@ -258,12 +344,20 @@ class Stats extends Component {
                   keyField='id' 
                   data={ this.props.data.cities } 
                   columns={ city_columns } 
-                  bordered={ true }
+                  bordecolors={ true }
                   striped
                   hover
                   condensed
                   pagination={paginationFactory(paginationOptions)}
                 />
+              </div>
+
+              <h3 className="stats-header">Activities by Year and Month</h3>
+              <div className="stats-chart">
+                <Line 
+                  data={this.state.dataLine} 
+                  height={450}
+                  options={{ responsive: true, maintainAspectRatio: false }} />
               </div>
 
               <h3 className="stats-header">Activities by Day of Week</h3>
@@ -278,7 +372,7 @@ class Stats extends Component {
                   keyField='id' 
                   data={ this.state.day_mile_counts } 
                   columns={ day_columns } 
-                  bordered={ true }
+                  bordecolors={ true }
                   striped
                   hover
                   condensed
@@ -286,7 +380,7 @@ class Stats extends Component {
               </div>
 
               <h3 className="stats-header">Activities by Time of Day</h3>
-              <div class="time-bar-chart">
+              <div class="stats-chart">
                 <Bar 
                   data={this.state.dataBar}
                   height={450}
