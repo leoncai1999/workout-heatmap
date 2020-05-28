@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
 import StatsIcon from './icons/stats.svg';
-import { Spinner } from 'react-bootstrap';
+import { Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
@@ -13,8 +13,8 @@ const paginationOptions = {
     hideSizePerPage: true
 }
 
-// colors are red, blue, orange, green, purple, yellow, grey
-const colors = [["rgba(255, 134,159,0.4)", "rgba(255, 134,159,1)"], ["rgba(98,  182, 239,0.4)", "rgba(98,  182, 239,1)"], ["rgba(113, 205, 205,0.4)", "rgba(113, 205, 205,1)"], ["rgba(170, 128, 252,0.4)", "rgba(170, 128, 252,1)"], ["rgba(255, 177, 101,0.4)", "rgba(255, 177, 101,1)"], ["rgba(255, 218, 128,0.4)", "rgba(255, 218, 128,1)"], ['rgba(201, 203, 207, 0.4)', 'rgba(201, 203, 207, 1)']]
+// colors are red, blue, green, orange, purple, yellow, grey
+const colors = [["rgba(255, 134,159,0.4)", "rgba(255, 134,159,1)"], ["rgba(98,  182, 239,0.4)", "rgba(98,  182, 239,1)"], ["rgba(113, 205, 205,0.4)", "rgba(113, 205, 205,1)"], ["rgba(255, 177, 101,0.4)", "rgba(255, 177, 101,1)"], ["rgba(170, 128, 252,0.4)", "rgba(170, 128, 252,1)"], ["rgba(255, 218, 128,0.4)", "rgba(255, 218, 128,1)"],['rgba(201, 203, 207, 0.4)', 'rgba(201, 203, 207, 1)']]
 
 class Stats extends Component {
 
@@ -52,15 +52,28 @@ class Stats extends Component {
         labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         datasets: []
       },
+      dataLineOptions: {
+        responsive: true, 
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              reverse: true
+            }
+          }]
+        }
+      },
       dataCalled: false,
-      day_mile_counts: []
+      day_mile_counts: [],
+      selected_attr: 'Select Attribute'
     }
 
-    getWorkoutStatsByMonth = () => {
+    getWorkoutStatsByMonth = (attr) => {
 
       let user_activities = this.props.data.activities.reverse()
       let current_year = user_activities[0]["start_date_local"].split("-")[0]
       let year_data = new Array(12).fill(0)
+      let distance_per_month = new Array(12).fill(0)
       let user_datasets = []
       let curr_color = 0
 
@@ -69,9 +82,12 @@ class Stats extends Component {
         let activity_month = parseInt(user_activities[i]["start_date_local"].split("-")[1]) - 1
 
         if (activity_year !== current_year) {
+          if (attr === 'pace') {
+            year_data = this.formatPaceData(year_data, distance_per_month)
+          }
           user_datasets.push({
             label: current_year,
-            fill: true,
+            fill: attr !== 'pace',
             lineTension: 0.3,
             backgroundColor: colors[curr_color][0],
             borderColor: colors[curr_color][1],
@@ -88,7 +104,7 @@ class Stats extends Component {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: this.convertMetersToMiles(year_data)
+            data: this.formatData(year_data, attr)
           })
 
           if (curr_color === 6) {
@@ -97,15 +113,28 @@ class Stats extends Component {
             curr_color += 1
           }
           year_data = new Array(12).fill(0)
+          distance_per_month = new Array(12).fill(0)
           current_year = activity_year
         }
 
-        year_data[activity_month] += user_activities[i]["distance"]
+        if (attr === 'miles') {
+          year_data[activity_month] += user_activities[i]["distance"]
+        } else if (attr === 'elevation') {
+          year_data[activity_month] += user_activities[i]["total_elevation_gain"]
+        } else if (attr === 'activities') {
+          year_data[activity_month] += 1
+        } else {
+          year_data[activity_month] += user_activities[i]["moving_time"]
+          distance_per_month[activity_month] += user_activities[i]["distance"]
+        }
 
         if (i === user_activities.length - 1) {
+          if (attr === 'pace') {
+            year_data = this.formatPaceData(year_data, distance_per_month)
+          }
           user_datasets.push({
             label: activity_year,
-            fill: true,
+            fill: attr !== 'pace',
             lineTension: 0.3,
             backgroundColor: colors[curr_color][0],
             borderColor: colors[curr_color][1],
@@ -122,20 +151,51 @@ class Stats extends Component {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: this.convertMetersToMiles(year_data)
+            data: this.formatData(year_data, attr)
           })
         }
       }
 
       let dataLineState = this.state.dataLine
-      dataLineState.datasets = user_datasets  
-      this.setState({ dataLine: dataLineState})
+      dataLineState.datasets = user_datasets
+      let dataLineOptionsState = this.state.dataLineOptions
+      if (attr === 'pace') {
+        dataLineOptionsState.scales.yAxes[0].ticks.reverse = true
+      } else {
+        dataLineOptionsState.scales.yAxes[0].ticks.reverse = false
+      }
+      this.setState({ dataLine: dataLineState })
+      this.setState({ dataLineOptions: dataLineOptionsState })
+
+      if (attr === 'miles') {
+        this.setState({ selected_attr: 'Distance (Miles)'})
+      } else if (attr === 'elevation') {
+        this.setState({ selected_attr: 'Elevation Gain (Feet)'})
+      } else if (attr === 'activities') {
+        this.setState({ selected_attr: 'Number of Activities'})
+      } else {
+        this.setState({ selected_attr: 'Pace (Minutes per Mile)'})
+      }
     }
 
-    convertMetersToMiles = (meters) => {
-      let result = meters
+    formatData = (data, attr) => {
+      let result = data
       for (let i = 0; i < result.length; i++) {
-        result[i] = parseFloat((result[i] / 1609.344).toFixed(2))
+        if (result[i] === 0) {
+          result[i] = NaN
+        } else if (attr === 'miles') {
+          result[i] = parseFloat((result[i] / 1609.344).toFixed(2))
+        } else if (attr === 'elevation') {
+          result[i] = parseFloat((result[i] * 3.28084).toFixed(2))
+        }
+      }
+      return result
+    }
+
+    formatPaceData = (time, dist) => {
+      let result = time
+      for (let i = 0; i < result.length; i++) {
+        result[i] = parseFloat(((time[i] / 60) / (dist[i] / 1609.344)).toFixed(2))
       }
       return result
     }
@@ -312,7 +372,7 @@ class Stats extends Component {
       ]
 
         if ((this.props.data.activities.length > 0 && this.props.data.heart_rate_zones.length > 0) && !this.state.dataCalled) {
-          this.getWorkoutStatsByMonth()
+          this.getWorkoutStatsByMonth('miles')
           this.getWorkoutStatsByDay()
           this.getWorkoutStatsByTimeOfDay()
           this.setState({ dataCalled: true})
@@ -354,10 +414,16 @@ class Stats extends Component {
 
               <h3 className="stats-header">Activities by Year and Month</h3>
               <div className="stats-chart">
+              <DropdownButton id="dropdown-basic-button" title={this.state.selected_attr}>
+                <Dropdown.Item onClick={(e) => {this.getWorkoutStatsByMonth('miles')}}>Distance (Miles)</Dropdown.Item>
+                <Dropdown.Item onClick={(e) => {this.getWorkoutStatsByMonth('elevation')}}>Elevation Gain (Feet)</Dropdown.Item>
+                <Dropdown.Item onClick={(e) => {this.getWorkoutStatsByMonth('activities')}}>Number of Activities</Dropdown.Item>
+                <Dropdown.Item onClick={(e) => {this.getWorkoutStatsByMonth('pace')}}>Pace (Minutes per Mile)</Dropdown.Item>
+              </DropdownButton>
                 <Line 
                   data={this.state.dataLine} 
                   height={450}
-                  options={{ responsive: true, maintainAspectRatio: false }} />
+                  options={this.state.dataLineOptions} />
               </div>
 
               <h3 className="stats-header">Activities by Day of Week</h3>

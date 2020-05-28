@@ -45,7 +45,8 @@
 .dropdown .btn:focus {background: white; color:#000;}
 
 .dropdown-menu {
-    height: 400px;
+    max-height: 400px;
+    width: 225px;
     overflow-y: scroll;
 }
 
