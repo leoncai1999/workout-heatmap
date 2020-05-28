@@ -5,7 +5,7 @@ import { Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
-import { Line, Radar, Bar } from "react-chartjs-2";
+import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
 import './Stats.css';
 
 const paginationOptions = {
@@ -24,15 +24,15 @@ class Stats extends Component {
         datasets: [
           {
             label: "Likelihood of Working Out",
-            backgroundColor: "rgba(194, 116, 161, 0.5)",
-            borderColor: "rgb(194, 116, 161)",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            backgroundColor: colors[1][0],
+            borderColor: colors[1][1],
+            data: []
           },
           {
             label: "Average Intensity of Workout (based on Heart Rate)",
-            backgroundColor: "rgba(71, 225, 167, 0.5)",
-            borderColor: "rgb(71, 225, 167)",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            backgroundColor: colors[0][0],
+            borderColor: colors[0][1],
+            data: []
           }
         ]
       },
@@ -63,9 +63,21 @@ class Stats extends Component {
           }]
         }
       },
+      dataDoughnut: {
+        labels: ["Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5"],
+        datasets: [
+          {
+            data: [],
+            backgroundColor: [colors[6][1], colors[2][1], colors[5][1], colors[3][1], colors[0][1]],
+            hoverBackgroundColor: [colors[6][0], colors[2][0], colors[5][0], colors[3][0], colors[0][0]]
+          }
+        ]
+      },
       dataCalled: false,
       day_mile_counts: [],
-      selected_attr: 'Select Attribute'
+      selected_attr: 'Select Attribute',
+      heart_rate_zone_counts: [],
+      selected_attr_doughnut: 'Select Attirbute'
     }
 
     getWorkoutStatsByMonth = (attr) => {
@@ -268,7 +280,7 @@ class Stats extends Component {
       this.setState({ day_mile_counts })
     }
 
-    // An activity with an average heart rate in zone 2 at least 40% intensity, zone 3 is at least 60% intensity, etc
+    // An activity with an average heart rate in zone 2 at least 60% intensity, zone 3 is at least 70% intensity, etc
     getWorkoutIntensity = (heart_rate) => {
       let heart_rate_zones = this.props.data.heart_rate_zones
       let workout_intensity = 0
@@ -277,12 +289,12 @@ class Stats extends Component {
         if (heart_rate <= heart_rate_zones[i]["max"] || heart_rate_zones[i]["max"] === -1) {
 
           if (i === 0) {
-            workout_intensity = 20
+            workout_intensity = 50
           } else if (i === 4) {
             workout_intensity = 100
           } else {
             let heart_zone_range = heart_rate_zones[i]["max"] - heart_rate_zones[i]["min"]
-            workout_intensity = ((i + 1) * 20) + (((heart_rate - heart_rate_zones[i]["min"]) * 20) / heart_zone_range)
+            workout_intensity = (50 + (i*10)) + (((heart_rate - heart_rate_zones[i]["min"]) * 10) / heart_zone_range)
           }
           break;
         }
@@ -316,7 +328,62 @@ class Stats extends Component {
       }
       let dataBarState = this.state.dataBar
       dataBarState.datasets[0].data = hours
-      this.setState({ dataBar : dataBarState})
+      this.setState({ dataBar : dataBarState })
+    }
+
+    getWorkoutStatsByIntensity = (mode, compute_table) => {
+      let user_activities = this.props.data.activities
+      let heart_rate_zones = this.props.data.heart_rate_zones
+      var heart_rate_zone_counts = [{'id': 0, 'zone': 'Zone 1: Very Light', 'descr': 'Recovery / Cross Train'}, {'id': 1, 'zone': 'Zone 2: Light', 'descr': 'Endurance'}, {'id': 2, 'zone': 'Zone 3: Moderate', 'descr': 'Tempo Run'}, {'id': 3, 'zone': 'Zone 4: Hard', 'descr' : 'Speed Work / Distance Race'}, {'id': 4, 'zone': 'Zone 5: Very Hard', 'descr' : 'Sprint'}]
+      var zone_counts = [0, 0, 0, 0, 0]
+      var zone_time = [0, 0, 0, 0, 0]
+      var zone_dist = [0, 0, 0, 0, 0]
+      for (let i = 0; i < user_activities.length; i++) {
+        if (user_activities[i]["has_heartrate"]) {
+          let heart_rate = user_activities[i]["average_heartrate"]
+          for (let j = 0; j < heart_rate_zones.length; j++) {
+            if (heart_rate <= heart_rate_zones[j]["max"] || heart_rate_zones[j]["max"] === -1) {
+              if (mode === 'activities') {
+                zone_counts[j] += 1
+              } else {
+                zone_counts[j] += user_activities[i]["moving_time"]
+              }
+              if (compute_table) {
+                zone_time[j] += user_activities[i]["moving_time"]
+                zone_dist[j] += user_activities[i]["distance"]
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      if (compute_table) {
+        for (let i = 0; i < heart_rate_zones.length; i++) {
+          if (i === 4) {
+            heart_rate_zone_counts[i]["heart_rate"] = heart_rate_zones[i]["min"] + "+"
+          } else {
+            heart_rate_zone_counts[i]["heart_rate"] = heart_rate_zones[i]["min"] + " to " + heart_rate_zones[i]["max"]
+          }
+          heart_rate_zone_counts[i]["intensity"] = (50 + (i*10)) + "% to " + (50 + ((i + 1)*10)) + "%"
+          heart_rate_zone_counts[i]["pace"] = zone_time[i] === 0 ? "N/A" : this.paceConversionFormat(zone_time[i], zone_dist[i])
+        }
+        this.setState({ heart_rate_zone_counts })
+      }
+
+      if (mode === 'activities') {
+        this.setState({ selected_attr_doughnut : 'Number of Activities' })
+      } else {
+        // converting total time in seconds to hours
+        for (let i = 0; i < zone_counts.length; i++) {
+          zone_counts[i] = parseFloat(((zone_counts[i]) / 3600).toFixed(2))
+        }
+        this.setState({ selected_attr_doughnut : 'Total Time (Hours)' })
+      }
+
+      let dataDoughnutState = this.state.dataDoughnut
+      dataDoughnutState.datasets[0].data = zone_counts
+      this.setState({ dataDoughnut : dataDoughnutState })
     }
 
     render() {
@@ -371,10 +438,38 @@ class Stats extends Component {
         }
       ]
 
+      const heart_rate_columns = [
+        {
+          dataField: "id",
+          hidden: true
+        },
+        {
+          dataField: "zone",
+          text: "Zone"
+        },
+        {
+          dataField: "descr",
+          text: "Activity Types"
+        },
+        {
+          dataField: "heart_rate",
+          text: "Heart Rate"
+        },
+        {
+          dataField: "intensity",
+          text: "Intensity"
+        },
+        {
+          dataField: "pace",
+          text: "Average Pace"
+        }
+      ]
+
         if ((this.props.data.activities.length > 0 && this.props.data.heart_rate_zones.length > 0) && !this.state.dataCalled) {
           this.getWorkoutStatsByMonth('miles')
           this.getWorkoutStatsByDay()
           this.getWorkoutStatsByTimeOfDay()
+          this.getWorkoutStatsByIntensity('activities', true)
           this.setState({ dataCalled: true})
         }
         
@@ -453,6 +548,28 @@ class Stats extends Component {
                   options={{ maintainAspectRatio: false }} />
               </div>
 
+              <h3 className="stats-header">Activities by Intensity</h3>
+              <DropdownButton className="button-position" title={this.state.selected_attr_doughnut}>
+                <Dropdown.Item onClick={(e) => {this.getWorkoutStatsByIntensity('activities', false)}}>Number of Activities</Dropdown.Item>
+                <Dropdown.Item onClick={(e) => {this.getWorkoutStatsByIntensity('time', false)}}>Total Time (Hours)</Dropdown.Item>
+              </DropdownButton>
+              <div class="doughnut-chart">
+                <Doughnut 
+                  data={this.state.dataDoughnut} 
+                  options={{ responsive: true, maintainAspectRatio: true  }} 
+                />
+              </div>
+              <div class="heart-rate-table">
+              <BootstrapTable 
+                  keyField='id' 
+                  data={ this.state.heart_rate_zone_counts } 
+                  columns={ heart_rate_columns } 
+                  bordecolors={ true }
+                  striped
+                  hover
+                  condensed
+                />
+              </div>
           </div>
         )
     }
