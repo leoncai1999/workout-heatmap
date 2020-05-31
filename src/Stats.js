@@ -68,7 +68,8 @@ class Stats extends Component {
         datasets: [
           {
             data: [],
-            backgroundColor: [colors[6][1], colors[2][1], colors[5][1], colors[3][1], colors[0][1]],
+            backgroundColor: [colors[6][0], colors[2][0], colors[5][0], colors[3][0], colors[0][0]],
+            borderColor: [colors[6][1], colors[2][1], colors[5][1], colors[3][1], colors[0][1]],
             hoverBackgroundColor: [colors[6][0], colors[2][0], colors[5][0], colors[3][0], colors[0][0]]
           }
         ]
@@ -77,7 +78,9 @@ class Stats extends Component {
       day_mile_counts: [],
       selected_attr: 'Select Attribute',
       heart_rate_zone_counts: [],
-      selected_attr_doughnut: 'Select Attirbute'
+      selected_attr_doughnut: 'Select Attirbute',
+      total_distance: '',
+      total_time: ''
     }
 
     getWorkoutStatsByMonth = (attr) => {
@@ -322,19 +325,26 @@ class Stats extends Component {
     getWorkoutStatsByTimeOfDay = () => {
       let user_activities = this.props.data.activities
       let hours = new Array(24).fill(0)
+      let total_miles = 0
+      let total_seconds = 0
       for (let i = 0; i < user_activities.length; i++) {
         let activity_hour = parseInt(user_activities[i]["start_date_local"].split(":")[0].slice(-2))
         hours[activity_hour] += 1
+
+        total_miles += user_activities[i]["distance"]
+        total_seconds += user_activities[i]["moving_time"]
       }
       let dataBarState = this.state.dataBar
       dataBarState.datasets[0].data = hours
       this.setState({ dataBar : dataBarState })
+      this.setState({ total_distance : (total_miles / 1609.344).toFixed(2)})
+      this.setState({ total_time : (total_seconds / 3600).toFixed(0)})
     }
 
     getWorkoutStatsByIntensity = (mode, compute_table) => {
       let user_activities = this.props.data.activities
       let heart_rate_zones = this.props.data.heart_rate_zones
-      var heart_rate_zone_counts = [{'id': 0, 'zone': 'Zone 1: Very Light', 'descr': 'Recovery / Cross Train'}, {'id': 1, 'zone': 'Zone 2: Light', 'descr': 'Endurance'}, {'id': 2, 'zone': 'Zone 3: Moderate', 'descr': 'Tempo Run'}, {'id': 3, 'zone': 'Zone 4: Hard', 'descr' : 'Speed Work / Distance Race'}, {'id': 4, 'zone': 'Zone 5: Very Hard', 'descr' : 'Sprint'}]
+      var heart_rate_zone_counts = [{'id': 0, 'zone': 'Zone 1: Recovery / Cross Train'}, {'id': 1, 'zone': 'Zone 2: Endurance'}, {'id': 2, 'zone': 'Zone 3: Tempo Run'}, {'id': 3, 'zone': 'Zone 4: Speed Work / Distance Race'}, {'id': 4, 'zone': 'Zone 5: Sprint'}]
       var zone_counts = [0, 0, 0, 0, 0]
       var zone_time = [0, 0, 0, 0, 0]
       var zone_dist = [0, 0, 0, 0, 0]
@@ -361,9 +371,9 @@ class Stats extends Component {
       if (compute_table) {
         for (let i = 0; i < heart_rate_zones.length; i++) {
           if (i === 4) {
-            heart_rate_zone_counts[i]["heart_rate"] = heart_rate_zones[i]["min"] + "+"
+            heart_rate_zone_counts[i]["heart_rate"] = heart_rate_zones[i]["min"] + "+ bpm"
           } else {
-            heart_rate_zone_counts[i]["heart_rate"] = heart_rate_zones[i]["min"] + " to " + heart_rate_zones[i]["max"]
+            heart_rate_zone_counts[i]["heart_rate"] = heart_rate_zones[i]["min"] + " to " + heart_rate_zones[i]["max"] + " bpm"
           }
           heart_rate_zone_counts[i]["intensity"] = (50 + (i*10)) + "% to " + (50 + ((i + 1)*10)) + "%"
           heart_rate_zone_counts[i]["pace"] = zone_time[i] === 0 ? "N/A" : this.paceConversionFormat(zone_time[i], zone_dist[i])
@@ -448,16 +458,12 @@ class Stats extends Component {
           text: "Zone"
         },
         {
-          dataField: "descr",
-          text: "Activity Types"
+          dataField: "intensity",
+          text: "Intensity"
         },
         {
           dataField: "heart_rate",
           text: "Heart Rate"
-        },
-        {
-          dataField: "intensity",
-          text: "Intensity"
         },
         {
           dataField: "pace",
@@ -492,6 +498,8 @@ class Stats extends Component {
 
               <img class="img-stats" src={StatsIcon}></img>
               <h1 className="black-header"> Workout Statistics </h1>
+
+              <h2 className="stats-description">You've worked out {this.props.data.activities.length} times for a total of {this.state.total_time} hours, and traveled {this.state.total_distance} miles</h2>
 
               <h3 className="stats-header">Activities by City</h3>
               <div class="bootstrap-table">

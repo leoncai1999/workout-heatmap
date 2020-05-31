@@ -46,196 +46,202 @@ class Heatmap extends Component {
       this.setState({ mode: "map" })
     }
 
-    var user_activities = []
-    var user_polylines = [{"id" : 0, "type" : "All", "elements" : []}, {"id" : 1, "type" : "Sport", "elements" : []}, {"id" : 2, "type" : "Workout", "elements" : []}, {"id" : 3, "type" : "Members", "elements" : []}, {"id" : 4, "type" : "Time", "elements" : []}]
-
-    user_polylines[0]["elements"].push({"polylines" : []})
-
-    // Sport types
-    user_polylines[1]["elements"].push({"id" : 0, "type" : "Run", "img": require("./icons/run.svg"), "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 1, "type" : "Ride", "img": require("./icons/ride.svg"), "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 2, "type" : "Swim", "img": require("./icons/swim.svg"), "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 3, "type" : "Walk", "img": require("./icons/walk.svg"), "polylines" : []})
-    user_polylines[1]["elements"].push({"id" : 4, "type" : "Hike", "img": require("./icons/hike.svg"), "polylines" : []})
-
-    // Workout types
-    user_polylines[2]["elements"].push({"id" : 0, "type" : "Training", "polylines" : []})
-    user_polylines[2]["elements"].push({"id" : 1, "type" : "Race", "polylines" : []})
-
-    // Member types
-    user_polylines[3]["elements"].push({"id" : 0, "type" : "Solo", "polylines" : []})
-    user_polylines[3]["elements"].push({"id" : 1, "type" : "Partner", "polylines" : []})
-    user_polylines[3]["elements"].push({"id" : 2, "type" : "Group", "polylines" : []})
-
-    // Time of Day types
-    user_polylines[4]["elements"].push({"id" : 0, "type" : require("./icons/morning.svg"), "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 1, "type" : require("./icons/lunch.svg"), "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 2, "type" : require("./icons/afternoon.svg"), "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 3, "type" : require("./icons/evening.svg"), "polylines" : []})
-    user_polylines[4]["elements"].push({"id" : 4, "type" : require("./icons/night.svg"), "polylines" : []})
-
-    this.setState({ polylines : user_polylines})
-
-    const access_token = await this.updateAccessToken(String(window.location.href))
-
-    var activities_left = true
-    var page_num = 1;
-
-    if (access_token === 'sample') {
-      // sample user account infromation is read in from a Firebase real time database
-      this.setState({ access_token })
-      this.setState({ is_sample : true })
-      window.history.pushState({}, null, base_url + 'map')
-
-      const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
-      activitiesRef.on('value', (snapshot) => {
-        this.setState({ activities: snapshot.val() })
-      })
-
-      const polylinesRef = firebase.database().ref('polylines/-M8E-287MG8ZC9Xw71ls')
-      polylinesRef.on('value', (snapshot) => {
-        user_polylines = snapshot.val()
-
-        // redelcare images as they don't render properly from database
-        user_polylines[1]["elements"][0]["img"] = require("./icons/run.svg")
-        user_polylines[1]["elements"][1]["img"] = require("./icons/ride.svg")
-        user_polylines[1]["elements"][2]["img"] = require("./icons/swim.svg")
-        user_polylines[1]["elements"][3]["img"] = require("./icons/walk.svg")
-        user_polylines[1]["elements"][4]["img"] = require("./icons/hike.svg")
-        user_polylines[4]["elements"][0]["type"] = require("./icons/morning.svg")
-        user_polylines[4]["elements"][1]["type"] = require("./icons/lunch.svg")
-        user_polylines[4]["elements"][2]["type"] = require("./icons/afternoon.svg")
-        user_polylines[4]["elements"][3]["type"] = require("./icons/evening.svg")
-        user_polylines[4]["elements"][4]["type"] = require("./icons/night.svg")
-
-        this.setState({ polylines: user_polylines })
-      })
-
-      const citiesRef = firebase.database().ref('cities/-M8E-QYO2E65Yckec5Eh')
-      citiesRef.on('value', (snapshot) => {
-        this.setState({ cities: snapshot.val() })
-      })
-
-      const heartRateRef = firebase.database().ref('heartrate/-M8I0R4qpZGkFi9iPIss')
-      heartRateRef.on('value', (snapshot) => {
-        this.setState({ heart_rate_zones: snapshot.val() })
-      })
-
-      this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
-      this.setState({ zoom : 13 })
-
-      this.setState({ modal_open : false})
-    } else if (access_token !== '') {
-      this.setState({ access_token })
-
-      // Revert the url of the site to the default url after authentication is finished
-      window.history.pushState({}, null, base_url + 'map')
-
-      var heart_rate_zones = await this.getHeartRateZones(access_token)
-      this.setState({ heart_rate_zones })
-
-      while (activities_left) {
-        // Retrieve Strava Activites in batches of 200 until no activities are left
-        const activities = await this.getActivities(page_num, access_token)
-  
-        if (activities.length === 0) {
-          activities_left = false
-        } else {
-          const decodePolyline = require('decode-google-map-polyline')
-  
-          for (let i = 0; i < activities.length; i++) {
-            user_activities.push(activities[i])
-  
-            var polyline = activities[i]['map']['summary_polyline']
-            if (polyline != null) {
-              user_polylines[0]["elements"][0]["polylines"].push(decodePolyline(polyline))
-
-              // Store polylines grouped by Sport
-              var unique_activity_type = true
-              var type_num = 0
-
-              // Sports other than the default 5 can also be added
-              while (unique_activity_type && type_num < user_polylines[1]["elements"].length) {
-                if (user_polylines[1]["elements"][type_num]["type"] === activities[i].type) {
-                  user_polylines[1]["elements"][type_num]["polylines"].push(decodePolyline(polyline))
-                  unique_activity_type = false
-                } else {
-                  type_num += 1
-                }
-              }
-
-              if (unique_activity_type) {
-                user_polylines[1]["elements"].push({'id' : user_polylines[1]["elements"].length, 'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
-              }
-
-              // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
-              if (activities[i]['workout_type'] === 1) {
-                user_polylines[2]["elements"][1]["polylines"].push(decodePolyline(polyline))
-              } else {
-                user_polylines[2]["elements"][0]["polylines"].push(decodePolyline(polyline))
-              }
-
-              // Store polylines grouped by Member Type
-              if (activities[i]["athlete_count"] === 2) {
-                user_polylines[3]["elements"][1]["polylines"].push(decodePolyline(polyline))
-              } else if (activities[i]["athlete_count"] > 2) {
-                user_polylines[3]["elements"][2]["polylines"].push(decodePolyline(polyline))
-              } else {
-                user_polylines[3]["elements"][0]["polylines"].push(decodePolyline(polyline))
-              }
-
-              // Store polylines grouped by Time of Day
-              let start_hour = parseInt(activities[i]["start_date_local"].split(":")[0].slice(-2))
-
-              if (start_hour >= 4 && start_hour < 11) {
-                user_polylines[4]["elements"][0]["polylines"].push(decodePolyline(polyline))
-              } else if (start_hour >= 11 && start_hour < 14) {
-                user_polylines[4]["elements"][1]["polylines"].push(decodePolyline(polyline))
-              } else if (start_hour >= 14 && start_hour < 17) {
-                user_polylines[4]["elements"][2]["polylines"].push(decodePolyline(polyline))
-              } else if (start_hour >= 17 && start_hour < 21) {
-                user_polylines[4]["elements"][3]["polylines"].push(decodePolyline(polyline))
-              } else {
-                user_polylines[4]["elements"][4]["polylines"].push(decodePolyline(polyline))
-              }
-
-            }
-          }
-  
-          this.setState({ activities : user_activities})
-          this.setState({ polylines : user_polylines})
-          page_num += 1
-        }
-      }
-
-      const cities = await this.getCitiesFromActivites(user_activities)
-      const city_counts = this.getCityActivityCounts(cities, user_activities)
-
-      this.setState({ cities: city_counts })
-
-      if (city_counts.length !== 0) {
-        this.recenterMap(0)
-      } else {
-        // Default location is geographic center of the U.S.
-        this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
-      }
-
-      this.setState({ modal_open : false})
-
-      // uncomment if sample account in firebase needs to be updated
-      /* const activitiesRef = firebase.database().ref('activities')
-      activitiesRef.push(user_activities)
-
-      const polylinesRef = firebase.database().ref('polylines')
-      polylinesRef.remove()
-      polylinesRef.push(user_polylines)
-
-      const heartRateRef = firebase.database().ref('heartrate')
-      heartRateRef.push(heart_rate_zones) */
-
+    // stores state locally between page navigation and refreshing to avoid recomputation, but doesn't store user info in a database
+    if (1 === 2) {
+      // TODO: Retrieve saved state here
     } else {
-      window.history.pushState({}, null, base_url)
-    }
+
+      var user_activities = []
+      var user_polylines = [{"id" : 0, "type" : "All", "elements" : []}, {"id" : 1, "type" : "Sport", "elements" : []}, {"id" : 2, "type" : "Workout", "elements" : []}, {"id" : 3, "type" : "Members", "elements" : []}, {"id" : 4, "type" : "Time", "elements" : []}]
+
+      user_polylines[0]["elements"].push({"polylines" : []})
+
+      // Sport types
+      user_polylines[1]["elements"].push({"id" : 0, "type" : "Run", "img": require("./icons/run.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 1, "type" : "Ride", "img": require("./icons/ride.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 2, "type" : "Swim", "img": require("./icons/swim.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 3, "type" : "Walk", "img": require("./icons/walk.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 4, "type" : "Hike", "img": require("./icons/hike.svg"), "polylines" : []})
+
+      // Workout types
+      user_polylines[2]["elements"].push({"id" : 0, "type" : "Training", "polylines" : []})
+      user_polylines[2]["elements"].push({"id" : 1, "type" : "Race", "polylines" : []})
+
+      // Member types
+      user_polylines[3]["elements"].push({"id" : 0, "type" : "Solo", "polylines" : []})
+      user_polylines[3]["elements"].push({"id" : 1, "type" : "Partner", "polylines" : []})
+      user_polylines[3]["elements"].push({"id" : 2, "type" : "Group", "polylines" : []})
+
+      // Time of Day types
+      user_polylines[4]["elements"].push({"id" : 0, "type" : require("./icons/morning.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 1, "type" : require("./icons/lunch.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 2, "type" : require("./icons/afternoon.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 3, "type" : require("./icons/evening.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 4, "type" : require("./icons/night.svg"), "polylines" : []})
+
+      this.setState({ polylines : user_polylines})
+
+      const access_token = await this.updateAccessToken(String(window.location.href))
+
+      var activities_left = true
+      var page_num = 1;
+
+      if (access_token === 'sample') {
+        // sample user account infromation is read in from a Firebase real time database
+        this.setState({ access_token })
+        this.setState({ is_sample : true })
+        window.history.pushState({}, null, base_url + 'map')
+
+        const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
+        activitiesRef.on('value', (snapshot) => {
+          this.setState({ activities: snapshot.val() })
+        })
+
+        const polylinesRef = firebase.database().ref('polylines/-M8E-287MG8ZC9Xw71ls')
+        polylinesRef.on('value', (snapshot) => {
+          user_polylines = snapshot.val()
+
+          // redelcare images as they don't render properly from database
+          user_polylines[1]["elements"][0]["img"] = require("./icons/run.svg")
+          user_polylines[1]["elements"][1]["img"] = require("./icons/ride.svg")
+          user_polylines[1]["elements"][2]["img"] = require("./icons/swim.svg")
+          user_polylines[1]["elements"][3]["img"] = require("./icons/walk.svg")
+          user_polylines[1]["elements"][4]["img"] = require("./icons/hike.svg")
+          user_polylines[4]["elements"][0]["type"] = require("./icons/morning.svg")
+          user_polylines[4]["elements"][1]["type"] = require("./icons/lunch.svg")
+          user_polylines[4]["elements"][2]["type"] = require("./icons/afternoon.svg")
+          user_polylines[4]["elements"][3]["type"] = require("./icons/evening.svg")
+          user_polylines[4]["elements"][4]["type"] = require("./icons/night.svg")
+
+          this.setState({ polylines: user_polylines })
+        })
+
+        const citiesRef = firebase.database().ref('cities/-M8E-QYO2E65Yckec5Eh')
+        citiesRef.on('value', (snapshot) => {
+          this.setState({ cities: snapshot.val() })
+        })
+
+        const heartRateRef = firebase.database().ref('heartrate/-M8I0R4qpZGkFi9iPIss')
+        heartRateRef.on('value', (snapshot) => {
+          this.setState({ heart_rate_zones: snapshot.val() })
+        })
+
+        this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
+        this.setState({ zoom : 13 })
+        this.setState({ modal_open : false})
+
+      } else if (access_token !== '') {
+        this.setState({ access_token })
+
+        // Revert the url of the site to the default url after authentication is finished
+        window.history.pushState({}, null, base_url + 'map')
+
+        var heart_rate_zones = await this.getHeartRateZones(access_token)
+        this.setState({ heart_rate_zones })
+
+        while (activities_left) {
+          // Retrieve Strava Activites in batches of 200 until no activities are left
+          const activities = await this.getActivities(page_num, access_token)
+    
+          if (activities.length === 0) {
+            activities_left = false
+          } else {
+            const decodePolyline = require('decode-google-map-polyline')
+    
+            for (let i = 0; i < activities.length; i++) {
+              user_activities.push(activities[i])
+    
+              var polyline = activities[i]['map']['summary_polyline']
+              if (polyline != null) {
+                user_polylines[0]["elements"][0]["polylines"].push(decodePolyline(polyline))
+
+                // Store polylines grouped by Sport
+                var unique_activity_type = true
+                var type_num = 0
+
+                // Sports other than the default 5 can also be added
+                while (unique_activity_type && type_num < user_polylines[1]["elements"].length) {
+                  if (user_polylines[1]["elements"][type_num]["type"] === activities[i].type) {
+                    user_polylines[1]["elements"][type_num]["polylines"].push(decodePolyline(polyline))
+                    unique_activity_type = false
+                  } else {
+                    type_num += 1
+                  }
+                }
+
+                if (unique_activity_type) {
+                  user_polylines[1]["elements"].push({'id' : user_polylines[1]["elements"].length, 'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
+                }
+
+                // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
+                if (activities[i]['workout_type'] === 1) {
+                  user_polylines[2]["elements"][1]["polylines"].push(decodePolyline(polyline))
+                } else {
+                  user_polylines[2]["elements"][0]["polylines"].push(decodePolyline(polyline))
+                }
+
+                // Store polylines grouped by Member Type
+                if (activities[i]["athlete_count"] === 2) {
+                  user_polylines[3]["elements"][1]["polylines"].push(decodePolyline(polyline))
+                } else if (activities[i]["athlete_count"] > 2) {
+                  user_polylines[3]["elements"][2]["polylines"].push(decodePolyline(polyline))
+                } else {
+                  user_polylines[3]["elements"][0]["polylines"].push(decodePolyline(polyline))
+                }
+
+                // Store polylines grouped by Time of Day
+                let start_hour = parseInt(activities[i]["start_date_local"].split(":")[0].slice(-2))
+
+                if (start_hour >= 4 && start_hour < 11) {
+                  user_polylines[4]["elements"][0]["polylines"].push(decodePolyline(polyline))
+                } else if (start_hour >= 11 && start_hour < 14) {
+                  user_polylines[4]["elements"][1]["polylines"].push(decodePolyline(polyline))
+                } else if (start_hour >= 14 && start_hour < 17) {
+                  user_polylines[4]["elements"][2]["polylines"].push(decodePolyline(polyline))
+                } else if (start_hour >= 17 && start_hour < 21) {
+                  user_polylines[4]["elements"][3]["polylines"].push(decodePolyline(polyline))
+                } else {
+                  user_polylines[4]["elements"][4]["polylines"].push(decodePolyline(polyline))
+                }
+
+              }
+            }
+    
+            this.setState({ activities : user_activities})
+            this.setState({ polylines : user_polylines})
+            page_num += 1
+          }
+        }
+
+        const cities = await this.getCitiesFromActivites(user_activities)
+        const city_counts = this.getCityActivityCounts(cities, user_activities)
+
+        this.setState({ cities: city_counts })
+
+        if (city_counts.length !== 0) {
+          this.recenterMap(0)
+        } else {
+          // Default location is geographic center of the U.S.
+          this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
+        }
+
+        this.setState({ modal_open : false})
+
+        // uncomment if sample account in firebase needs to be updated
+        /* const activitiesRef = firebase.database().ref('activities')
+        activitiesRef.push(user_activities)
+
+        const polylinesRef = firebase.database().ref('polylines')
+        polylinesRef.remove()
+        polylinesRef.push(user_polylines)
+
+        const heartRateRef = firebase.database().ref('heartrate')
+        heartRateRef.push(heart_rate_zones) */
+
+      } else {
+        window.history.pushState({}, null, base_url)
+      }
+    } 
   }
 
   getHeartRateZones = async(access_token) => {
