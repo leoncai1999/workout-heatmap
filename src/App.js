@@ -4,7 +4,7 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 import Heatmap from './Heatmap'
 import Welcome from './Welcome'
-import Stats from './Stats'
+import About from './About'
 
 class App extends Component {
 
@@ -17,6 +17,7 @@ class App extends Component {
         <Route path={'/map-sample'} component={Heatmap} />
         <Route path={'/callback'} component={Heatmap} />
         <Route path={'/stats'} component={Heatmap}/>
+        <Route path={'/about'} component={About}/>
       </BrowserRouter>
     );
   }

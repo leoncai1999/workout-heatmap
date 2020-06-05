@@ -1,6 +1,6 @@
 {
   "homepage": "https://workoutheatmap.me",
-  "name": "workoutheatmap",
+  "name": "workout-heatmap",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
