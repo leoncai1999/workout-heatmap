@@ -5,6 +5,7 @@ import * as keys from './APIKeys';
 import { Button, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Welcome from './Welcome';
 import Stats from './Stats';
+import Routes from './Routes';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
 import './Heatmap.css';
@@ -41,6 +42,9 @@ class Heatmap extends Component {
     if (String(window.location.href) === base_url + 'stats') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "stats" })
+    } if (String(window.location.href) === base_url + 'routes') {
+      document.body.style.background = "#e8e1eb"
+      this.setState({ mode: "routes" })
     } else {
       document.body.style.background = "#5dbcd2"
       this.setState({ mode: "map" })
@@ -154,6 +158,10 @@ class Heatmap extends Component {
               var polyline = activities[i]['map']['summary_polyline']
               if (polyline != null) {
                 user_polylines[0]["elements"][0]["polylines"].push(decodePolyline(polyline))
+
+                // if (activities[i]["start_date"] === "2020-01-30T23:17:23Z" || activities[i]["start_date"] === "2020-01-21T23:17:44Z") {
+                //   console.log(JSON.stringify(decodePolyline(polyline)))
+                // }
 
                 // Store polylines grouped by Sport
                 var unique_activity_type = true
@@ -409,7 +417,7 @@ class Heatmap extends Component {
 
     } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
       token = 'sample'
-    } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'stats') {
+    } else if (tokenized_url[3] !== null && (tokenized_url[3].substring(0,10) === 'stats' || tokenized_url[3].substring(0,10) === 'routes')) {
       // temporary solution. Change later
       token = 'sample'
     }
@@ -564,10 +572,16 @@ class Heatmap extends Component {
   
         </div>
       )
-    } else {
+    } else if (this.state.mode === 'stats') {
       return(
         <div>
           <Stats data={this.state} />
+        </div>
+      )
+    } else {
+      return(
+        <div>
+          <Routes data={this.state} />
         </div>
       )
     }

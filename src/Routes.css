@@ -1,0 +1,15 @@
+.routes-header {
+    text-align: center;
+    color: black;
+    font-size: 46px;
+    font-weight: 800;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.route-card {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}

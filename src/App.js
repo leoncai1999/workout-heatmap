@@ -17,6 +17,7 @@ class App extends Component {
         <Route path={'/map-sample'} component={Heatmap} />
         <Route path={'/callback'} component={Heatmap} />
         <Route path={'/stats'} component={Heatmap}/>
+        <Route path={'/routes'} component={Heatmap}/>
         <Route path={'/about'} component={About}/>
       </BrowserRouter>
     );

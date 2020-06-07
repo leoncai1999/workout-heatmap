@@ -3,6 +3,7 @@ import Navigation from './Navigation';
 import MapScreen from './screenshots/map_screen.png';
 import GithubIcon from './icons/github.svg';
 import StravaIcon from './icons/strava.svg';
+import MailIcon from './icons/mail.svg';
 import './About.css';
 
 class About extends Component {
@@ -49,6 +50,12 @@ class About extends Component {
                         <div className="link">
                             <img class="icon" src={StravaIcon}></img>
                             <p className="icon-text">Strava API</p>
+                        </div>
+                    </a>
+                    <a href={"mailto:leoncai197@gmail.com"}>
+                        <div className="link">
+                            <img class="icon" src={MailIcon}></img>
+                            <p className="icon-text">Email Me</p>
                         </div>
                     </a>
                 </div>
