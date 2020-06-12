@@ -7,6 +7,39 @@
     margin-bottom: 10px;
 }
 
+.img-routes {
+    display: block;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    width: 15%;
+}
+
+.card-deck {
+    margin-bottom: 10px;
+}
+
+.routes-description {
+    color: black;
+    font-size: 23px;
+    font-weight: 500;
+    margin: 20px;
+    text-align: center;
+}
+
+.list-group-item {
+    padding: 5px;
+    border: 0px;
+    height: 40px;
+    font-weight: 500;
+    font-size: 17px;
+}
+
+#bold-text {
+    font-weight: 700;
+}
+
 .route-card {
     margin-left: 20px;
     margin-right: 20px;

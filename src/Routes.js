@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
+import RoutesIcon from './icons/routes.svg';
 import * as keys from './APIKeys';
 import { Card, CardDeck, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
 import './Routes.css';
@@ -65,6 +66,7 @@ class Routes extends Component {
         var idx_2 = 0
         var total_length = 0
 
+        // start comparison between two routes closest to where both routes begin
         var start_found = false
         var shortest_start_dist = Number.MAX_SAFE_INTEGER
         while (!start_found && (idx_1 < shorter_route.length && idx_2 < longer_route.length)) {
@@ -77,6 +79,7 @@ class Routes extends Component {
             }
         }
 
+        // compare average distance between each point of the two different routes
         while (idx_1 < shorter_route.length && idx_2 < longer_route.length) {
             avg_dist += geolib.getDistance(shorter_route[idx_1], longer_route[idx_2])
             idx_1 += 1
@@ -112,18 +115,18 @@ class Routes extends Component {
                             style={{ height: '300px' }}
                         />
                         <Card.Body>       
-                            <ListGroup className="list-group-flush">
+                            <ListGroup>
                             <ListGroupItem>
-                                <p>Distance: {(route[0]['distance'] / 1609.344).toFixed(2)} mi</p>
+                                <p><span id="bold-text">Distance:</span> {(route[0]['distance'] / 1609.344).toFixed(2)} mi</p>
                             </ListGroupItem>
                             <ListGroupItem>
-                                <p>Elevation Gain: {(route[0]['total_elevation_gain'] * 3.281).toFixed(2)} ft</p>
+                                <p><span id="bold-text">Elevation Gain:</span> {(route[0]['total_elevation_gain'] * 3.281).toFixed(2)} ft</p>
                             </ListGroupItem>
                             <ListGroupItem>
-                                <p>Occurances: {route.length}</p>
+                                <p><span id="bold-text">Occurances:</span> {route.length}</p>
                             </ListGroupItem>
                             <ListGroupItem>
-                                <p>Activity Type: {route[0]['type']}</p>
+                                <p><span id="bold-text">Activity Type:</span> {route[0]['type']}</p>
                             </ListGroupItem>
                             </ListGroup>
                         </Card.Body>
@@ -164,11 +167,16 @@ class Routes extends Component {
 
                 <Navigation />
 
-                <h1 className="routes-header"> Routes </h1>
+                <img class="img-routes" src={RoutesIcon}></img>
 
-                <CardDeck className="justify-content-center">
-                    {this.displayRoutes(this.state.routes)}
-                </CardDeck>
+                <h1 className="routes-header">Routes</h1>
+                <h2 className="routes-description">Any similar routes that you have completed three or more times will appear below</h2>
+
+                <div className="card-deck">
+                    <CardDeck className="justify-content-center">
+                        {this.displayRoutes(this.state.routes)}
+                    </CardDeck>
+                </div>
 
             </div>
         )
