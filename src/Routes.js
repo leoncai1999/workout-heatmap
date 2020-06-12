@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
+import * as keys from './APIKeys';
 import { Card, CardDeck, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
 import './Routes.css';
 
@@ -22,7 +23,7 @@ class Routes extends Component {
                 var repeat_route = false
                 for (let j = 0; j < route_groupings.length; j++) {
                     // check if distance and elevation gain are similar before checking similarity of route path
-                    if (Math.abs(route_groupings[j][0]['distance'] - user_activities[i]['distance']) <= 500) {
+                    if (Math.abs(route_groupings[j][0]['distance'] - user_activities[i]['distance']) <= 600) {
                         if (Math.abs(route_groupings[j][0]['total_elevation_gain'] - user_activities[i]['total_elevation_gain']) <= 40) {
                             if (this.isSimilarRoute(route_groupings[j][0]['map']['summary_polyline'], user_activities[i]['map']['summary_polyline'])) {
                                 route_groupings[j].push(user_activities[i])
@@ -60,27 +61,57 @@ class Routes extends Component {
         let longer_route = shorter_route === cords1 ? cords2 : cords1
         var avg_dist = 0
 
-        for (let i = 0; i < shorter_route.length; i++) {
-            avg_dist += geolib.getDistance(shorter_route[i], longer_route[i])
+        var idx_1 = 0
+        var idx_2 = 0
+        var total_length = 0
+
+        var start_found = false
+        var shortest_start_dist = Number.MAX_SAFE_INTEGER
+        while (!start_found && (idx_1 < shorter_route.length && idx_2 < longer_route.length)) {
+            var curr_start_dist = geolib.getDistance(shorter_route[idx_1], longer_route[idx_2])
+            if (curr_start_dist <= shortest_start_dist) {
+                shortest_start_dist = curr_start_dist
+                idx_2 += 1
+            } else {
+                start_found = true
+            }
         }
 
-        avg_dist = avg_dist / shorter_route.length
+        while (idx_1 < shorter_route.length && idx_2 < longer_route.length) {
+            avg_dist += geolib.getDistance(shorter_route[idx_1], longer_route[idx_2])
+            idx_1 += 1
+            idx_2 += 1
+            total_length += 1
+        }
 
-        return avg_dist <= 200
+        avg_dist = avg_dist / total_length
+
+        return avg_dist <= 500
     }
 
     displayRoutes = (routes) => {
         let rows = []
-        for (let r = 0; r < 5; r++) {
+        var routes_left = true
+        var r = 0
+        while (routes_left) {
             let children = []
             for (let c = 0; c < 4; c++) {
                 if (routes.length <= c + 4 * r) {
                     break;
                 }
                 var route = routes[c + 4 * r]
+                if (route.length <= 2) {
+                    routes_left = false
+                    break;
+                }
                 children.push(
                     <Card className="route-card">
-                        <Card.Body>
+                        <Card.Img
+                            variant="top"
+                            src={"https://maps.googleapis.com/maps/api/staticmap?size=300x300&path=weight:3%7Ccolor:blue%7Cenc:" + escape(route[0]["map"]["summary_polyline"]) + "&key=" + keys.GOOGLE_MAPS_API_KEY}
+                            style={{ height: '300px' }}
+                        />
+                        <Card.Body>       
                             <ListGroup className="list-group-flush">
                             <ListGroupItem>
                                 <p>Distance: {(route[0]['distance'] / 1609.344).toFixed(2)} mi</p>
@@ -103,6 +134,7 @@ class Routes extends Component {
             rows.push(<br></br>)
             rows.push(<div className="row">{children}</div>)
             if (routes.length < 4 * r) break;
+            r += 1
         }
 
         return rows
