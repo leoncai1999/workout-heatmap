@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as keys from './APIKeys';
 import { Button, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Welcome from './Welcome';
+import List from './List';
 import Stats from './Stats';
 import Routes from './Routes';
 import Navigation from './Navigation';
@@ -42,9 +43,12 @@ class Heatmap extends Component {
     if (String(window.location.href) === base_url + 'stats') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "stats" })
-    } if (String(window.location.href) === base_url + 'routes') {
+    } else if (String(window.location.href) === base_url + 'routes') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "routes" })
+    } else if (String(window.location.href) === base_url + 'list') {
+      document.body.style.background = "#e8e1eb"
+      this.setState({ mode: "list" })
     } else {
       document.body.style.background = "#5dbcd2"
       this.setState({ mode: "map" })
@@ -417,7 +421,7 @@ class Heatmap extends Component {
 
     } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
       token = 'sample'
-    } else if (tokenized_url[3] !== null && (tokenized_url[3].substring(0,10) === 'stats' || tokenized_url[3].substring(0,10) === 'routes')) {
+    } else if (tokenized_url[3] !== null && (tokenized_url[3].substring(0,10) === 'stats' || tokenized_url[3].substring(0,10) === 'routes' || tokenized_url[3].substring(0,10) === 'list')) {
       // temporary solution. Change later
       token = 'sample'
     }
@@ -570,6 +574,12 @@ class Heatmap extends Component {
               </ButtonGroup>
             </div>
   
+        </div>
+      )
+    } else if (this.state.mode === 'list') {
+      return(
+        <div>
+          <List data={this.state} />
         </div>
       )
     } else if (this.state.mode === 'stats') {
