@@ -4,6 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import { Spinner } from 'react-bootstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
+import ToolkitProvider, { CSVExport } from 'react-bootstrap-table2-toolkit';
 import './Stats.css';
 
 const paginationOptions = {
@@ -106,6 +107,8 @@ class List extends Component {
 
     render () {
 
+        const { ExportCSVButton } = CSVExport
+
         if (this.props.data.activities.length > 0 && !this.state.dataCalled) {
             this.formatData()
             this.setState({ dataCalled : true })
@@ -196,18 +199,32 @@ class List extends Component {
 
                 <h1 className="black-header"> List of Activities </h1>
 
-                <div class="bootstrap-table">
-                    <BootstrapTable 
-                        keyField='id' 
-                        data={ this.state.formatted_activities } 
-                        columns={ columns } 
-                        bordecolors={ true }
-                        striped
-                        hover
-                        condensed
-                        pagination={paginationFactory(paginationOptions)}
-                    />
-                </div>
+                <ToolkitProvider
+                    keyField='id' 
+                    data={ this.state.formatted_activities } 
+                    columns={ columns }
+                    exportCSV
+                >
+                    {
+                        props => (
+                            <div class="bootstrap-table">
+                                <ExportCSVButton>
+                                    Export CSV!
+                                </ExportCSVButton>
+                                <BootstrapTable 
+                                    keyField='id' 
+                                    data={ this.state.formatted_activities } 
+                                    columns={ columns } 
+                                    bordecolors={ true }
+                                    striped
+                                    hover
+                                    condensed
+                                    pagination={paginationFactory(paginationOptions)}
+                                />
+                            </div>
+                        )
+                    }
+                </ToolkitProvider>
             </div>
         )
 

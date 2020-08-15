@@ -40,6 +40,8 @@ class Heatmap extends Component {
 
   async componentDidMount() {
 
+    var is_map = false
+
     if (String(window.location.href) === base_url + 'stats') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "stats" })
@@ -52,11 +54,16 @@ class Heatmap extends Component {
     } else {
       document.body.style.background = "#5dbcd2"
       this.setState({ mode: "map" })
+      is_map = true
     }
 
-    // stores state locally between page navigation and refreshing to avoid recomputation, but doesn't store user info in a database
-    if (1 === 2) {
-      // TODO: Retrieve saved state here
+    if (localStorage.getItem('activities') !== null && !is_map) {
+      /* state is persisted locally but not stored externally. Avoids having to redo API
+         calls to obtain data we've already retrieved before. */
+      this.setState({ is_sample : localStorage.getItem('is_sample') })
+      this.setState({ activities : JSON.parse(localStorage.getItem('activities')) })
+      this.setState({ heart_rate_zones : JSON.parse(localStorage.getItem('heart_rate_zones')) })
+      this.setState({ cities : JSON.parse(localStorage.getItem('cities')) })
     } else {
 
       var user_activities = []
@@ -95,14 +102,16 @@ class Heatmap extends Component {
       var page_num = 1;
 
       if (access_token === 'sample') {
-        // sample user account infromation is read in from a Firebase real time database
+        // sample user account information is read in from a Firebase real time database
         this.setState({ access_token })
         this.setState({ is_sample : true })
+        localStorage.setItem('is_sample', true)
         window.history.pushState({}, null, base_url + 'map')
 
         const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
         activitiesRef.on('value', (snapshot) => {
           this.setState({ activities: snapshot.val() })
+          localStorage.setItem('activities', JSON.stringify(snapshot.val()))
         })
 
         const polylinesRef = firebase.database().ref('polylines/-M8E-287MG8ZC9Xw71ls')
@@ -127,11 +136,13 @@ class Heatmap extends Component {
         const citiesRef = firebase.database().ref('cities/-M8E-QYO2E65Yckec5Eh')
         citiesRef.on('value', (snapshot) => {
           this.setState({ cities: snapshot.val() })
+          localStorage.setItem('cities', JSON.stringify(snapshot.val()))
         })
 
         const heartRateRef = firebase.database().ref('heartrate/-M8I0R4qpZGkFi9iPIss')
         heartRateRef.on('value', (snapshot) => {
           this.setState({ heart_rate_zones: snapshot.val() })
+          localStorage.setItem('heart_rate_zones', JSON.stringify(snapshot.val()))
         })
 
         this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
@@ -144,8 +155,11 @@ class Heatmap extends Component {
         // Revert the url of the site to the default url after authentication is finished
         window.history.pushState({}, null, base_url + 'map')
 
+        localStorage.setItem('is_sample', false)
+
         var heart_rate_zones = await this.getHeartRateZones(access_token)
         this.setState({ heart_rate_zones })
+        localStorage.setItem('heart_rate_zones', JSON.stringify(heart_rate_zones))
 
         while (activities_left) {
           // Retrieve Strava Activites in batches of 200 until no activities are left
@@ -220,6 +234,7 @@ class Heatmap extends Component {
             }
     
             this.setState({ activities : user_activities})
+            localStorage.setItem('activities', JSON.stringify(user_activities))
             this.setState({ polylines : user_polylines})
             page_num += 1
           }
@@ -229,6 +244,7 @@ class Heatmap extends Component {
         const city_counts = this.getCityActivityCounts(cities, user_activities)
 
         this.setState({ cities: city_counts })
+        localStorage.setItem('cities', JSON.stringify(city_counts))
 
         if (city_counts.length !== 0) {
           this.recenterMap(0)
@@ -405,7 +421,9 @@ class Heatmap extends Component {
 
     // Retrieve the code from the authenication process, then exchange the code for a token to access the Strava API
     const tokenized_url = url.split('/')
-    if (tokenized_url[3] !== null && tokenized_url[3].substring(0,8) === 'callback') {
+    if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
+      token = 'sample'
+    } else if (tokenized_url[3] !== null  && tokenized_url[3].substring(0,8) === 'callback') {
       let code_and_scope = tokenized_url[3].substring(27);
       let code = code_and_scope.substring(0, code_and_scope.indexOf('&'))
 
@@ -419,12 +437,16 @@ class Heatmap extends Component {
 
       token = results.data.access_token
 
-    } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
-      token = 'sample'
-    } else if (tokenized_url[3] !== null && (tokenized_url[3].substring(0,10) === 'stats' || tokenized_url[3].substring(0,10) === 'routes' || tokenized_url[3].substring(0,10) === 'list')) {
-      // temporary solution. Change later
-      token = 'sample'
+    } else {
+      token = this.state.access_token
     }
+
+    // else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,8) === 'callback') {
+    
+    // else if (tokenized_url[3] !== null && (tokenized_url[3].substring(0,10) === 'stats' || tokenized_url[3].substring(0,10) === 'routes' || tokenized_url[3].substring(0,10) === 'list')) {
+    //   // temporary solution. Change later
+    //   token = 'sample'
+    // }
 
     return token
   }
@@ -460,13 +482,13 @@ class Heatmap extends Component {
   }
 
   render() {
-    if (this.state.access_token === '') {
+    if (this.state.access_token === '' && localStorage.getItem('activities') === null) {
       return (
         <div>
           <Welcome />
         </div>
       )
-    } else if (this.state.mode === 'map') {
+    } else if (this.state.mode === 'map' && this.state.access_token !== '') {
       return (
         <div id="container">
 
