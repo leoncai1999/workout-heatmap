@@ -22,7 +22,7 @@ class About extends Component {
                     Workout Heatmap provides additional insights on your Strava activites including
                     an interactive map of everywhere that you've exercised, and statistics describing
                     when, where and how you workout. The data is retrieved by connecting your Strava
-                    account, and none of your data is stored or uploaded to any servers. Additionally,
+                    account, and none of your data uploaded externally to any servers. Additionally,
                     you may revoke access to your Strava account at any time.
                 </p>
                 <p className="about-description">

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
+import ListIcon from './icons/list.svg';
 import Modal from 'react-bootstrap/Modal';
 import { Spinner } from 'react-bootstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -7,8 +8,10 @@ import paginationFactory from "react-bootstrap-table2-paginator";
 import ToolkitProvider, { CSVExport } from 'react-bootstrap-table2-toolkit';
 import './Stats.css';
 
+const { ExportCSVButton } = CSVExport;
+
 const paginationOptions = {
-    paginationSize: 50,
+    sizePerPage: 50,
     hideSizePerPage: true
 }
 
@@ -60,6 +63,8 @@ class List extends Component {
             return "12:" + minutes + "AM"
         } else if (hour === 12) {
             return time + " PM"
+        } else if (hour < 10) {
+            return hour.substring(1) + ":" + minutes + " AM"
         } else {
             return time + " AM"
         }
@@ -105,9 +110,17 @@ class List extends Component {
         return result
     }
 
-    render () {
+    getCSVName = () => {
+        if (localStorage.getItem('is_sample')) {
+            let date = new Date()
+            let date_string = (date.getMonth() + 1) + '-' + date.getDate() + '-' + date.getFullYear()
+            return 'Strava Activity Data ' + date_string + '.csv'
+        } else {
+            return 'Sample Strava Activity Data.csv'
+        }
+    }
 
-        const { ExportCSVButton } = CSVExport
+    render () {
 
         if (this.props.data.activities.length > 0 && !this.state.dataCalled) {
             this.formatData()
@@ -116,12 +129,12 @@ class List extends Component {
 
         const columns = [
             {
-              dataField: "id",
-              hidden: true
+                dataField: "id",
+                hidden: true
             },
             {
-              dataField: "name",
-              text: "Name"
+                dataField: "name",
+                text: "Name"
             },
             {
                 dataField: "date",
@@ -134,14 +147,14 @@ class List extends Component {
                 sort: true
             },
             {
-              dataField: "distance",
-              text: "Distance (Mi)",
-              sort: true
+                dataField: "distance",
+                text: "Distance (Mi)",
+                sort: true
             },
             {
-              dataField: "moving_time",
-              text: "Moving Time",
-              sort: true
+                dataField: "moving_time",
+                text: "Moving Time",
+                sort: true
             },
             {
                 dataField: "elapsed_time",
@@ -154,14 +167,14 @@ class List extends Component {
                 sort: true
               },
             {
-              dataField: "total_elevation_gain",
-              text: "Elevation Gain (Ft)",
-              sort: true
+                dataField: "total_elevation_gain",
+                text: "Elevation Gain (Ft)",
+                sort: true
             },
             {
-              dataField: "type",
-              text: "Type",
-              sort: true
+                dataField: "type",
+                text: "Type",
+                sort: true
             },
             {
                 dataField: "athlete_count",
@@ -169,15 +182,15 @@ class List extends Component {
                 sort: true
               },
             {
-              dataField: "average_heartrate",
-              text: "Average Heart Rate",
-              sort: true
+                dataField: "average_heartrate",
+                text: "Average Heart Rate",
+                sort: true
             },
             {
                 dataField: "max_heartrate",
                 text: "Max Heart Rate",
                 sort: true
-              }
+            }
         ]
 
         return (
@@ -197,29 +210,33 @@ class List extends Component {
 
                 <Navigation />
 
+                <img class="img-stats" src={ListIcon}></img>
                 <h1 className="black-header"> List of Activities </h1>
 
                 <ToolkitProvider
                     keyField='id' 
                     data={ this.state.formatted_activities } 
                     columns={ columns }
-                    exportCSV
+                    exportCSV={ {
+                        fileName: this.getCSVName()
+                    } }
                 >
                     {
                         props => (
                             <div class="bootstrap-table">
-                                <ExportCSVButton>
-                                    Export CSV!
+                                <ExportCSVButton { ...props.csvProps } class="csv-btn">
+                                    Export to CSV
                                 </ExportCSVButton>
                                 <BootstrapTable 
                                     keyField='id' 
                                     data={ this.state.formatted_activities } 
                                     columns={ columns } 
-                                    bordecolors={ true }
+                                    bordercolors={ true }
                                     striped
                                     hover
                                     condensed
                                     pagination={paginationFactory(paginationOptions)}
+                                    { ...props.baseProps }
                                 />
                             </div>
                         )

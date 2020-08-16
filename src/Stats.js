@@ -9,7 +9,7 @@ import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
 import './Stats.css';
 
 const paginationOptions = {
-    paginationSize: 10,
+    sizePerPage: 10,
     hideSizePerPage: true
 }
 
@@ -221,11 +221,7 @@ class Stats extends Component {
       let first_day = new Date(user_activities[0]["start_date_local"].split("T")[0])
       let first_day_of_week = first_day.getDay()
 
-      // last day is either the current date, or day of last activity if sample account is used
-      let last_day = new Date()
-      if (this.props.data.is_sample === true) {
-          last_day = new Date(user_activities[user_activities.length - 1]["start_date_local"].split("T")[0])
-      }
+      let last_day = new Date(user_activities[user_activities.length - 1]["start_date_local"].split("T")[0])
 
       // count number of each type of day between between two days
       let days_between = Math.round((first_day - last_day) / (24 * 60 * 60 * 1000))
@@ -507,7 +503,7 @@ class Stats extends Component {
                   keyField='id' 
                   data={ this.props.data.cities } 
                   columns={ city_columns } 
-                  bordecolors={ true }
+                  bordercolors={ true }
                   striped
                   hover
                   condensed

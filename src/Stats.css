@@ -114,3 +114,15 @@ table thead .navbar-fixed-bottom .dropdown .caret {
     display: inline-block;
     width: 49%;
 }
+
+.csv-btn {
+    background-color: #5dbcd2;
+    border-color: transparent;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    color: white;
+    font-weight: 600;
+    font-size: 19px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
