@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
-import MapScreen from './screenshots/map_screen.png';
-import GithubIcon from './icons/github.svg';
-import StravaIcon from './icons/strava.svg';
-import MailIcon from './icons/mail.svg';
-import './About.css';
+import MapScreen from '../Images/map_screen.png';
+import GithubIcon from '../Icons/github.svg';
+import StravaIcon from '../Icons/strava.svg';
+import MailIcon from '../Icons/mail.svg';
+import '../Styles/About.css';
 
 class About extends Component {
 

@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import { BrowserRouter, HashRouter, Route } from "react-router-dom"
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css"
-import Heatmap from './Heatmap'
-import Welcome from './Welcome'
-import About from './About'
+import Heatmap from './Pages/Heatmap'
+import Welcome from './Pages/Welcome'
+import About from './Pages/About'
 
 class App extends Component {
 

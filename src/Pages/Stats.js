@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
-import StatsIcon from './icons/stats.svg';
+import StatsIcon from '../Icons/stats.svg';
 import { Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
 import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
-import './Stats.css';
+import '../Styles/Stats.css';
 
 const paginationOptions = {
     sizePerPage: 10,

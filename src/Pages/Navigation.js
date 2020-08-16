@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Nav, Navbar } from 'react-bootstrap';
-import Logo from './app-logo.svg';
-import './Navigation.css';
+import Logo from '../Icons/app-logo.svg';
+import '../Styles/Navigation.css';
 
 class Navigation extends Component {
     render() {

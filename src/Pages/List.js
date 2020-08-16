@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
-import ListIcon from './icons/list.svg';
+import ListIcon from '../Icons/list.svg';
 import Modal from 'react-bootstrap/Modal';
 import { Spinner } from 'react-bootstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
 import ToolkitProvider, { CSVExport } from 'react-bootstrap-table2-toolkit';
-import './Stats.css';
+import '../Styles/Stats.css';
 
 const { ExportCSVButton } = CSVExport;
 

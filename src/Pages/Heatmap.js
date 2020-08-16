@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
-import * as keys from './APIKeys';
+import * as keys from '../APIKeys';
 import { Button, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Welcome from './Welcome';
 import List from './List';
@@ -9,8 +9,8 @@ import Stats from './Stats';
 import Routes from './Routes';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
-import './Heatmap.css';
-import firebase from './firebase.js';
+import '../Styles/Heatmap.css';
+import firebase from '../firebase.js';
 
 const mapStyles = {
   width: '100%',
@@ -75,11 +75,11 @@ class Heatmap extends Component {
       user_polylines[0]["elements"].push({"polylines" : []})
 
       // Sport types
-      user_polylines[1]["elements"].push({"id" : 0, "type" : "Run", "img": require("./icons/run.svg"), "polylines" : []})
-      user_polylines[1]["elements"].push({"id" : 1, "type" : "Ride", "img": require("./icons/ride.svg"), "polylines" : []})
-      user_polylines[1]["elements"].push({"id" : 2, "type" : "Swim", "img": require("./icons/swim.svg"), "polylines" : []})
-      user_polylines[1]["elements"].push({"id" : 3, "type" : "Walk", "img": require("./icons/walk.svg"), "polylines" : []})
-      user_polylines[1]["elements"].push({"id" : 4, "type" : "Hike", "img": require("./icons/hike.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 0, "type" : "Run", "img": require("../Icons/run.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 1, "type" : "Ride", "img": require("../Icons/ride.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 2, "type" : "Swim", "img": require("../Icons/swim.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 3, "type" : "Walk", "img": require("../Icons/walk.svg"), "polylines" : []})
+      user_polylines[1]["elements"].push({"id" : 4, "type" : "Hike", "img": require("../Icons/hike.svg"), "polylines" : []})
 
       // Workout types
       user_polylines[2]["elements"].push({"id" : 0, "type" : "Training", "polylines" : []})
@@ -91,11 +91,11 @@ class Heatmap extends Component {
       user_polylines[3]["elements"].push({"id" : 2, "type" : "Group", "polylines" : []})
 
       // Time of Day types
-      user_polylines[4]["elements"].push({"id" : 0, "type" : require("./icons/morning.svg"), "polylines" : []})
-      user_polylines[4]["elements"].push({"id" : 1, "type" : require("./icons/lunch.svg"), "polylines" : []})
-      user_polylines[4]["elements"].push({"id" : 2, "type" : require("./icons/afternoon.svg"), "polylines" : []})
-      user_polylines[4]["elements"].push({"id" : 3, "type" : require("./icons/evening.svg"), "polylines" : []})
-      user_polylines[4]["elements"].push({"id" : 4, "type" : require("./icons/night.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 0, "type" : require("../Icons/morning.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 1, "type" : require("../Icons/lunch.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 2, "type" : require("../Icons/afternoon.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 3, "type" : require("../Icons/evening.svg"), "polylines" : []})
+      user_polylines[4]["elements"].push({"id" : 4, "type" : require("../Icons/night.svg"), "polylines" : []})
 
       this.setState({ polylines : user_polylines})
 
@@ -125,16 +125,16 @@ class Heatmap extends Component {
           user_polylines = snapshot.val()
 
           // redelcare images as they don't render properly from database
-          user_polylines[1]["elements"][0]["img"] = require("./icons/run.svg")
-          user_polylines[1]["elements"][1]["img"] = require("./icons/ride.svg")
-          user_polylines[1]["elements"][2]["img"] = require("./icons/swim.svg")
-          user_polylines[1]["elements"][3]["img"] = require("./icons/walk.svg")
-          user_polylines[1]["elements"][4]["img"] = require("./icons/hike.svg")
-          user_polylines[4]["elements"][0]["type"] = require("./icons/morning.svg")
-          user_polylines[4]["elements"][1]["type"] = require("./icons/lunch.svg")
-          user_polylines[4]["elements"][2]["type"] = require("./icons/afternoon.svg")
-          user_polylines[4]["elements"][3]["type"] = require("./icons/evening.svg")
-          user_polylines[4]["elements"][4]["type"] = require("./icons/night.svg")
+          user_polylines[1]["elements"][0]["img"] = require("../Icons/run.svg")
+          user_polylines[1]["elements"][1]["img"] = require("../Icons/ride.svg")
+          user_polylines[1]["elements"][2]["img"] = require("../Icons/swim.svg")
+          user_polylines[1]["elements"][3]["img"] = require("../Icons/walk.svg")
+          user_polylines[1]["elements"][4]["img"] = require("../Icons/hike.svg")
+          user_polylines[4]["elements"][0]["type"] = require("../Icons/morning.svg")
+          user_polylines[4]["elements"][1]["type"] = require("../Icons/lunch.svg")
+          user_polylines[4]["elements"][2]["type"] = require("../Icons/afternoon.svg")
+          user_polylines[4]["elements"][3]["type"] = require("../Icons/evening.svg")
+          user_polylines[4]["elements"][4]["type"] = require("../Icons/night.svg")
 
           this.setState({ polylines: user_polylines })
         })
@@ -451,13 +451,6 @@ class Heatmap extends Component {
     } else if (localStorage.getItem('access_token') !== null) {
       token = localStorage.getItem('access_token')
     }
-
-    // else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,8) === 'callback') {
-    
-    // else if (tokenized_url[3] !== null && (tokenized_url[3].substring(0,10) === 'stats' || tokenized_url[3].substring(0,10) === 'routes' || tokenized_url[3].substring(0,10) === 'list')) {
-    //   // temporary solution. Change later
-    //   token = 'sample'
-    // }
 
     return token
   }

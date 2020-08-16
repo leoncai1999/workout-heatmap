@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
-import RoutesIcon from './icons/routes.svg';
-import * as keys from './APIKeys';
+import RoutesIcon from '../Icons/routes.svg';
+import * as keys from '../APIKeys';
 import { Card, CardDeck, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
-import './Routes.css';
+import '../Styles/Routes.css';
 
 class Routes extends Component {
 
@@ -19,7 +19,7 @@ class Routes extends Component {
 
         // determining which routes have been ran multiple times and how many times they've been repeated
         for (let i = 0; i < user_activities.length; i++) {
-            if (user_activities[i]['map']['summary_polyline'] !== null) {
+            if (user_activities[i]['map']['summary_polyline'] !== null && user_activities[i]['map']['summary_polyline'] !== undefined) {
 
                 var repeat_route = false
                 for (let j = 0; j < route_groupings.length; j++) {
@@ -54,9 +54,6 @@ class Routes extends Component {
     isSimilarRoute = (route1, route2) => {
         const decodePolyline = require('decode-google-map-polyline')
         const geolib = require('geolib')
-
-        console.log("route1", route1)
-        console.log("route2", route2)
 
         let cords1 = decodePolyline(route1)
         let cords2 = decodePolyline(route2)
