@@ -40,24 +40,27 @@ class Heatmap extends Component {
 
   async componentDidMount() {
 
+    var data_can_persist = false
     var is_map = false
 
     if (String(window.location.href) === base_url + 'stats') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "stats" })
+      data_can_persist = true
     } else if (String(window.location.href) === base_url + 'routes') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "routes" })
     } else if (String(window.location.href) === base_url + 'list') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "list" })
+      data_can_persist = true
     } else {
       document.body.style.background = "#5dbcd2"
       this.setState({ mode: "map" })
       is_map = true
     }
 
-    if (localStorage.getItem('activities') !== null && !is_map) {
+    if (localStorage.getItem('activities') !== null && data_can_persist) {
       /* state is persisted locally but not stored externally. Avoids having to redo API
          calls to obtain data we've already retrieved before. */
       this.setState({ is_sample : localStorage.getItem('is_sample') })
@@ -106,7 +109,10 @@ class Heatmap extends Component {
         this.setState({ access_token })
         this.setState({ is_sample : true })
         localStorage.setItem('is_sample', true)
-        window.history.pushState({}, null, base_url + 'map')
+
+        if (is_map) {
+          window.history.pushState({}, null, base_url + 'map')
+        }
 
         const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
         activitiesRef.on('value', (snapshot) => {
@@ -148,12 +154,15 @@ class Heatmap extends Component {
         this.setState({ map_center : { lat: 30.2711, lng: -97.7437 } })
         this.setState({ zoom : 13 })
         this.setState({ modal_open : false})
+        localStorage.setItem('access_token', 'sample')
 
       } else if (access_token !== '') {
         this.setState({ access_token })
 
         // Revert the url of the site to the default url after authentication is finished
-        window.history.pushState({}, null, base_url + 'map')
+        if (is_map) {
+          window.history.pushState({}, null, base_url + 'map')
+        }
 
         localStorage.setItem('is_sample', false)
 
@@ -254,6 +263,8 @@ class Heatmap extends Component {
         }
 
         this.setState({ modal_open : false})
+
+        localStorage.setItem('access_token', access_token)
 
         // uncomment if sample account in firebase needs to be updated
         /* const activitiesRef = firebase.database().ref('activities')
@@ -437,8 +448,8 @@ class Heatmap extends Component {
 
       token = results.data.access_token
 
-    } else {
-      token = this.state.access_token
+    } else if (localStorage.getItem('access_token') !== null) {
+      token = localStorage.getItem('access_token')
     }
 
     // else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,8) === 'callback') {
@@ -610,11 +621,15 @@ class Heatmap extends Component {
           <Stats data={this.state} />
         </div>
       )
-    } else {
+    } else if (this.state.mode === 'routes'){
       return(
         <div>
           <Routes data={this.state} />
         </div>
+      )
+    } else {
+      return(
+        <div></div>
       )
     }
   }

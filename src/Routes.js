@@ -19,7 +19,7 @@ class Routes extends Component {
 
         // determining which routes have been ran multiple times and how many times they've been repeated
         for (let i = 0; i < user_activities.length; i++) {
-            if (user_activities[i]['map']['summary_polyline'] !== undefined) {
+            if (user_activities[i]['map']['summary_polyline'] !== null) {
 
                 var repeat_route = false
                 for (let j = 0; j < route_groupings.length; j++) {
@@ -54,6 +54,9 @@ class Routes extends Component {
     isSimilarRoute = (route1, route2) => {
         const decodePolyline = require('decode-google-map-polyline')
         const geolib = require('geolib')
+
+        console.log("route1", route1)
+        console.log("route2", route2)
 
         let cords1 = decodePolyline(route1)
         let cords2 = decodePolyline(route2)
@@ -159,7 +162,7 @@ class Routes extends Component {
                     >
                     <Modal.Body>
                     <div className="loading-center">
-                        <p className="loading-text">Loading Routes ...</p>
+                        <p className="loading-text">Calculating Similar Routes ...</p>
                         <Spinner animation="border" className="loading-spinner" />
                     </div>
                     </Modal.Body>
