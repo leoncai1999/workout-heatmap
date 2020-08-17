@@ -4,9 +4,9 @@ import '../Styles/Welcome.css';
 import Logo from '../Icons/app-logo.svg';
 import StravaButton from '../Images/strava-button.png';
 
-// url for production is https://workoutheatmap.me/, url for development is http://localhost:3000/
+// url for production is https://www.workoutheatmap.me/, url for development is http://localhost:3000/
 // change the authorized callback url in the Strava API settings accordingly
-const base_url = "https://workoutheatmap.me/"
+const base_url = "https://www.workoutheatmap.me/"
 
 class Welcome extends Component {
 

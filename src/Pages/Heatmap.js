@@ -17,8 +17,8 @@ const mapStyles = {
   height: '100%'
 };
 
-// url for production is https://workoutheatmap.me/, url for development is http://localhost:3000/
-const base_url = "https://workoutheatmap.me/"
+// url for production is https://www.workoutheatmap.me/, url for development is http://localhost:3000/
+const base_url = "https://www.workoutheatmap.me/"
 
 class Heatmap extends Component {
 
