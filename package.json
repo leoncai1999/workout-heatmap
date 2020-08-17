@@ -1,5 +1,5 @@
 {
-  "homepage": "https://workoutheatmap.me",
+  "homepage": "https://workout-heatmap.herokuapp.com/",
   "name": "workout-heatmap",
   "version": "0.1.0",
   "private": true,
@@ -11,6 +11,7 @@
     "bootstrap": "^4.5.0",
     "chart.js": "^2.9.3",
     "decode-google-map-polyline": "^1.0.1",
+    "express": "^4.17.1",
     "geolib": "^3.3.1",
     "gh-pages": "^2.2.0",
     "google-maps-react": "^2.0.2",
@@ -26,7 +27,7 @@
     "serve": "^11.3.2"
   },
   "scripts": {
-    "start": "serve -s build",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
