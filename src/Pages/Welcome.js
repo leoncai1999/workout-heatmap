@@ -6,7 +6,7 @@ import StravaButton from '../Images/strava-button.png';
 
 // url for production is https://workoutheatmap.me/, url for development is http://localhost:3000/
 // change the authorized callback url in the Strava API settings accordingly
-const base_url = "https://workout-heatmap.herokuapp.com/"
+const base_url = "https://workoutheatmap.me/"
 
 class Welcome extends Component {
 

@@ -18,7 +18,7 @@ const mapStyles = {
 };
 
 // url for production is https://workoutheatmap.me/, url for development is http://localhost:3000/
-const base_url = "https://workout-heatmap.herokuapp.com/"
+const base_url = "https://workoutheatmap.me/"
 
 class Heatmap extends Component {
 
