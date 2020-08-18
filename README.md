@@ -62,7 +62,8 @@ Set the base_url in the code to localhost:3000.
 
 To run the project in production, create a project in Heroku and link it to the GitHub repository of your project.
 Specifiy the Heroku domain as the base_url in the code and the authorized callback domain in the Strava API
-application. Every subsequent Git commit will trigger a deployment of the site.
+application. In the Heroku project settings, define config vars identical to the API keys in the .env file.
+Every subsequent Git commit will trigger a deployment of the site.
 
 If you have questions, suggestions, or would like to report any issues, please feel free to reach out to me
 via email!
