@@ -19,7 +19,6 @@ const mapStyles = {
 
 // url for production is https://www.workoutheatmap.me/, url for development is http://localhost:3000/
 const base_url = "https://www.workoutheatmap.me/"
-const sample_base_url = "www.workoutheatmap.me/"
 
 class Heatmap extends Component {
 
@@ -112,7 +111,7 @@ class Heatmap extends Component {
         localStorage.setItem('is_sample', true)
 
         if (is_map) {
-          window.history.pushState({}, null, sample_base_url + 'map')
+          window.history.pushState({}, null, 'map')
         }
 
         const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
