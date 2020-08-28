@@ -11,7 +11,7 @@ Below are the features of the app.
 ## Heatmap
 [![MapScreen](https://i.postimg.cc/tJPzgfZV/Map-Screen.png)](https://postimg.cc/kRJS1Tyn)
 The interactive Heatmap allows the user to filter activites by sport, workout type, number of members and
-time of day in the left pannel. The right dropdown consists of all the cities the user has outdoor activites
+time of day in the left panel. The right dropdown consists of all the cities the user has outdoor activites
 logged in and selecting a particular city will reposition the map as appropriate.
 
 ## List
