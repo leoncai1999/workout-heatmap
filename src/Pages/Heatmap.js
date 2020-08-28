@@ -111,7 +111,7 @@ class Heatmap extends Component {
         localStorage.setItem('is_sample', true)
 
         if (is_map) {
-          window.history.pushState({}, null, base_url + 'map')
+          window.history.pushState(null, null, base_url + 'map')
         }
 
         const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
