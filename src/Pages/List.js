@@ -6,6 +6,7 @@ import { Spinner } from 'react-bootstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
 import ToolkitProvider, { CSVExport } from 'react-bootstrap-table2-toolkit';
+import Branding from '../Images/powered_by_strava.png';
 import '../Styles/Stats.css';
 
 const { ExportCSVButton } = CSVExport;
@@ -77,11 +78,11 @@ class List extends Component {
         var seconds = secs - (hours * 3600) - (minutes * 60)
         var time = ""
 
-        if (hours != 0) {
+        if (hours !== 0) {
             time = hours + ":"
         }
 
-        if (minutes != 0 || time !== "") {
+        if (minutes !== 0 || time !== "") {
             minutes = (minutes < 10 && time !== "") ? "0" + minutes : String(minutes)
             time += minutes + ":"
         }
@@ -219,7 +220,11 @@ class List extends Component {
             },
             {
                 dataField: "name",
-                text: "Name"
+                text: "Name",
+                classes: "linked-activity",
+                events: {
+                    onClick: (e, column, columnIndex, row, rowIndex) => {  window.open("https://www.strava.com/activities/" + row.id) }
+                }
             },
             {
                 dataField: "date",
@@ -357,6 +362,9 @@ class List extends Component {
                         )
                     }
                 </ToolkitProvider>
+                <div id="branding">
+                    <img src={Branding}/>
+                </div>
             </div>
         )
 

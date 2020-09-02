@@ -18,7 +18,8 @@ logged in and selecting a particular city will reposition the map as appropriate
 [![ListScreen](https://i.postimg.cc/LXF5pbpW/List-Screen.png)](https://postimg.cc/v1Xb7XD7)
 The list includes all types of activities that the user has granted access to (either public activites only,
 or public and private activities) and includes activities that cannot be shown on the map. The activites can
-be sorted by various attributes and downloaded to Excel.
+be sorted by various attributes and downloaded to Excel. Clicking on an activity name opens the
+activity details in an external Strava link.
 
 ## Stats
 [![StatsCities](https://i.postimg.cc/ZRmNcRC0/Stats-Cities.png)](https://postimg.cc/qtmgBpcd)

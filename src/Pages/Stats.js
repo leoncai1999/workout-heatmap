@@ -6,6 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from "react-bootstrap-table2-paginator";
 import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
+import Branding from '../Images/powered_by_strava.png';
 import '../Styles/Stats.css';
 
 const paginationOptions = {
@@ -573,6 +574,9 @@ class Stats extends Component {
                   hover
                   condensed
                 />
+              </div>
+              <div id="branding">
+                <img src={Branding}/>
               </div>
           </div>
         )

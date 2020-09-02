@@ -3,6 +3,7 @@ import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
 import RoutesIcon from '../Icons/routes.svg';
 import * as keys from '../APIKeys';
+import Branding from '../Images/powered_by_strava.png';
 import { Card, CardDeck, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
 import '../Styles/Routes.css';
 
@@ -178,6 +179,9 @@ class Routes extends Component {
                     </CardDeck>
                 </div>
 
+                <div id="branding">
+                    <img src={Branding}/>
+                </div>
             </div>
         )
     }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Nav } from 'react-bootstrap';
 import '../Styles/Welcome.css';
 import Logo from '../Icons/app-logo.svg';
-import StravaButton from '../Images/strava-button.png';
+import StravaButton from '../Images/connect_with_strava.png';
 
 // url for production is https://www.workoutheatmap.me/, url for development is http://localhost:3000/
 // change the authorized callback url in the Strava API settings accordingly

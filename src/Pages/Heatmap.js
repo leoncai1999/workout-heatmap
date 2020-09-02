@@ -9,6 +9,7 @@ import Stats from './Stats';
 import Routes from './Routes';
 import Navigation from './Navigation';
 import Modal from 'react-bootstrap/Modal';
+import Branding from '../Images/powered_by_strava.png';
 import '../Styles/Heatmap.css';
 import firebase from '../firebase.js';
 
@@ -186,10 +187,6 @@ class Heatmap extends Component {
               if (polyline != null) {
                 user_polylines[0]["elements"][0]["polylines"].push(decodePolyline(polyline))
 
-                // if (activities[i]["start_date"] === "2020-01-30T23:17:23Z" || activities[i]["start_date"] === "2020-01-21T23:17:44Z") {
-                //   console.log(JSON.stringify(decodePolyline(polyline)))
-                // }
-
                 // Store polylines grouped by Sport
                 var unique_activity_type = true
                 var type_num = 0
@@ -290,7 +287,7 @@ class Heatmap extends Component {
           access_token: access_token
         }
       }).catch(error => {
-        // need to account for this if user denies permission
+        // TODO: Account for scenario where user denies permission
       })
 
     return results.data["heart_rate"]["zones"]
@@ -599,7 +596,9 @@ class Heatmap extends Component {
                 })}
               </ButtonGroup>
             </div>
-  
+            <div id="branding">
+              <img src={Branding}/>
+            </div>
         </div>
       )
     } else if (this.state.mode === 'list') {

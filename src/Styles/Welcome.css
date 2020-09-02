@@ -50,4 +50,5 @@ h6 {
 .button-center {
     text-align: center;
     margin-top: 30px;
+    cursor: pointer;
 }
