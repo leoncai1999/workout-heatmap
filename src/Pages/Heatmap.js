@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, Polyline } from 'google-maps-react';
 import axios from 'axios';
-import * as keys from '../APIKeys';
+import * as keys from '../Components/APIKeys';
 import { Button, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Welcome from './Welcome';
 import List from './List';
 import Stats from './Stats';
 import Routes from './Routes';
-import Navigation from './Navigation';
+import Navigation from '../Components/Navigation';
 import Modal from 'react-bootstrap/Modal';
 import Branding from '../Images/powered_by_strava.png';
 import '../Styles/Heatmap.css';
-import firebase from '../firebase.js';
+import Firebase from '../Components/Firebase.js';
 
 const mapStyles = {
   width: '100%',
@@ -116,13 +116,13 @@ class Heatmap extends Component {
           window.history.pushState({}, null, 'map')
         }
 
-        const activitiesRef = firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
+        const activitiesRef = Firebase.database().ref('activities/-M8E-22JV1rYTVc9ItVj')
         activitiesRef.on('value', (snapshot) => {
           this.setState({ activities: snapshot.val() })
           localStorage.setItem('activities', JSON.stringify(snapshot.val()))
         })
 
-        const polylinesRef = firebase.database().ref('polylines/-M8E-287MG8ZC9Xw71ls')
+        const polylinesRef = Firebase.database().ref('polylines/-M8E-287MG8ZC9Xw71ls')
         polylinesRef.on('value', (snapshot) => {
           user_polylines = snapshot.val()
 
@@ -141,13 +141,13 @@ class Heatmap extends Component {
           this.setState({ polylines: user_polylines })
         })
 
-        const citiesRef = firebase.database().ref('cities/-M8E-QYO2E65Yckec5Eh')
+        const citiesRef = Firebase.database().ref('cities/-M8E-QYO2E65Yckec5Eh')
         citiesRef.on('value', (snapshot) => {
           this.setState({ cities: snapshot.val() })
           localStorage.setItem('cities', JSON.stringify(snapshot.val()))
         })
 
-        const heartRateRef = firebase.database().ref('heartrate/-M8I0R4qpZGkFi9iPIss')
+        const heartRateRef = Firebase.database().ref('heartrate/-M8I0R4qpZGkFi9iPIss')
         heartRateRef.on('value', (snapshot) => {
           this.setState({ heart_rate_zones: snapshot.val() })
           localStorage.setItem('heart_rate_zones', JSON.stringify(snapshot.val()))
@@ -265,14 +265,14 @@ class Heatmap extends Component {
         localStorage.setItem('access_token', access_token)
 
         // uncomment if sample account in firebase needs to be updated
-        /* const activitiesRef = firebase.database().ref('activities')
+        /* const activitiesRef = Firebase.database().ref('activities')
         activitiesRef.push(user_activities)
 
-        const polylinesRef = firebase.database().ref('polylines')
+        const polylinesRef = Firebase.database().ref('polylines')
         polylinesRef.remove()
         polylinesRef.push(user_polylines)
 
-        const heartRateRef = firebase.database().ref('heartrate')
+        const heartRateRef = Firebase.database().ref('heartrate')
         heartRateRef.push(heart_rate_zones) */
 
       } else {
@@ -473,7 +473,7 @@ class Heatmap extends Component {
       this.setState({ cities : city_counts})
 
       // uncomment if sample account in firebase needs to be updated
-      /* const citiesRef = firebase.database().ref('cities')
+      /* const citiesRef = Firebase.database().ref('cities')
       if (city_id === 17) {
         citiesRef.push(city_counts)
       } */

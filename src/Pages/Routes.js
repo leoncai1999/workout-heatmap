@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import Navigation from './Navigation';
+import Navigation from '../Components/Navigation';
 import Modal from 'react-bootstrap/Modal';
 import RoutesIcon from '../Icons/routes.svg';
-import * as keys from '../APIKeys';
+import * as keys from '../Components/APIKeys';
 import Branding from '../Images/powered_by_strava.png';
 import { Card, CardDeck, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
 import '../Styles/Routes.css';
@@ -25,7 +25,7 @@ class Routes extends Component {
                 var repeat_route = false
                 for (let j = 0; j < route_groupings.length; j++) {
                     // check if distance and elevation gain are similar before checking similarity of route path
-                    if (Math.abs(route_groupings[j][0]['distance'] - user_activities[i]['distance']) <= 600) {
+                    if (Math.abs(route_groupings[j][0]['distance'] - user_activities[i]['distance']) <= 300) {
                         if (Math.abs(route_groupings[j][0]['total_elevation_gain'] - user_activities[i]['total_elevation_gain']) <= 40) {
                             if (this.isSimilarRoute(route_groupings[j][0]['map']['summary_polyline'], user_activities[i]['map']['summary_polyline'])) {
                                 route_groupings[j].push(user_activities[i])

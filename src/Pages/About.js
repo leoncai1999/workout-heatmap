@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Navigation from './Navigation';
+import Navigation from '../Components/Navigation';
 import MapScreen from '../Images/map_screen.png';
 import GithubIcon from '../Icons/github.svg';
 import StravaIcon from '../Icons/strava.svg';

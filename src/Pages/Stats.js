@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Navigation from './Navigation';
+import Navigation from '../Components/Navigation';
 import StatsIcon from '../Icons/stats.svg';
 import { Dropdown, DropdownButton, Spinner } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
