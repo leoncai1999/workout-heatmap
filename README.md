@@ -9,13 +9,13 @@ page refreshes. This site is free to use and anyone can access it at workoutheat
 Below are the features of the app.
 
 ## Heatmap
-[![MapScreen](https://i.postimg.cc/tJPzgfZV/Map-Screen.png)](https://postimg.cc/kRJS1Tyn)
+[![MapScreen](https://i.postimg.cc/QCphpsLn/Map-Screen.png)](https://postimg.cc/zHXsrsGn)
 The interactive Heatmap allows the user to filter activites by sport, workout type, number of members and
 time of day in the left panel. The right dropdown consists of all the cities the user has outdoor activites
 logged in and selecting a particular city will reposition the map as appropriate.
 
 ## List
-[![ListScreen](https://i.postimg.cc/LXF5pbpW/List-Screen.png)](https://postimg.cc/v1Xb7XD7)
+[![ListScreen](https://i.postimg.cc/SQGPzjHb/List-Screen.png)](https://postimg.cc/PNPygftS)
 The list includes all types of activities that the user has granted access to (either public activites only,
 or public and private activities) and includes activities that cannot be shown on the map. The activites can
 be sorted by various attributes and downloaded to Excel. Clicking on an activity name opens the
