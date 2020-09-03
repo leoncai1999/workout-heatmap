@@ -4,6 +4,7 @@ import MapScreen from '../Images/map_screen.png';
 import GithubIcon from '../Icons/github.svg';
 import StravaIcon from '../Icons/strava.svg';
 import MailIcon from '../Icons/mail.svg';
+import Branding from '../Images/powered_by_strava.png';
 import '../Styles/About.css';
 
 class About extends Component {
@@ -58,6 +59,9 @@ class About extends Component {
                             <p className="icon-text">Email Me</p>
                         </div>
                     </a>
+                </div>
+                <div id="branding">
+                    <img src={Branding}/>
                 </div>
             </div>
         )

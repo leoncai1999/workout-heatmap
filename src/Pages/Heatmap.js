@@ -43,15 +43,16 @@ class Heatmap extends Component {
 
     var data_can_persist = false
     var is_map = false
+    let url_elements = String(window.location.href).split("/")
 
-    if (String(window.location.href) === base_url + 'stats') {
+    if (url_elements.slice(-1)[0] === 'stats') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "stats" })
       data_can_persist = true
-    } else if (String(window.location.href) === base_url + 'routes') {
+    } else if (url_elements.slice(-1)[0] === 'routes') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "routes" })
-    } else if (String(window.location.href) === base_url + 'list') {
+    } else if (url_elements.slice(-1)[0] === 'list') {
       document.body.style.background = "#e8e1eb"
       this.setState({ mode: "list" })
       data_can_persist = true

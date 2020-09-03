@@ -3,6 +3,7 @@ import { Nav } from 'react-bootstrap';
 import '../Styles/Welcome.css';
 import Logo from '../Icons/app-logo.svg';
 import StravaButton from '../Images/connect_with_strava.png';
+import Branding from '../Images/powered_by_strava.png';
 
 // url for production is https://www.workoutheatmap.me/, url for development is http://localhost:3000/
 // change the authorized callback url in the Strava API settings accordingly
@@ -32,6 +33,9 @@ class Welcome extends Component {
                 <Nav.Link href="/map-sample">
                     <h6 class="demo-text"> Not a Strava user? See a demo account </h6>
                 </Nav.Link>
+                <div id="branding">
+                    <img src={Branding}/>
+                </div>
             </div>
         )
     }
