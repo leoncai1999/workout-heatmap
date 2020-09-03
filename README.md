@@ -49,6 +49,8 @@ Firebase Js SDK
 
 **Domain:** GoDaddy
 
+**SSL Certification and DNS Management:** Cloudflare
+
 **Database:** Firebase Realtime Database (for storing and retrieving Demo account data)
 
 ## Recreating the Project
