@@ -42,8 +42,7 @@ routes to each other based on path, distance and elevation gain. Commonly repeat
 
 **APIs:** [Strava API](http://developers.strava.com/docs/reference/) (user authentication and accessing workout data), [Google Maps API](https://developers.google.com/maps/documentation/javascript/overview) (heatmap and individual route cards), [Here API](https://developer.here.com/develop/rest-apis) (retrieving the cities of activites), [Mapbox API](https://docs.mapbox.com/api/) (geocoding the cities of activities)
 
-**Dependencies:** React Bootstrap, React Bootstrap Table 2, React ChartJs 2, Geolib, React Router, Axios, Decode Google Map Polyline Js, Express,
-Firebase Js SDK
+**Dependencies:** React Bootstrap, React Bootstrap Table 2, React ChartJs 2, Geolib, React Router, Axios, Decode Google Map Polyline Js, Express, Express HTTP Proxy, Firebase Js SDK
 
 **Hosting:** Heroku with automatic GitHub deployment
 

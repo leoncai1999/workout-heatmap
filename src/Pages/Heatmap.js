@@ -322,14 +322,13 @@ class Heatmap extends Component {
       'Cache-Control': 'no-cache'
     }
 
-    const proxy_url = "https://cors-anywhere.herokuapp.com/"
-    const api_url = "https://reverse.geocoder.ls.hereapi.com/6.2/multi-reversegeocode.json?mode=retrieveAreas&apiKey=" + keys.HERE_API_KEY
+    const api_url = base_url + "proxy/6.2/multi-reversegeocode.json?mode=retrieveAreas&apiKey=" + keys.HERE_API_KEY
 
     var all_results = []
 
     for (let i = 0; i < message_bodies.length; i++) {
       let results = await axios
-        .post(proxy_url + api_url, message_bodies[i], { headers: options })
+        .post(api_url, message_bodies[i], { headers: options })
 
       Array.prototype.push.apply(all_results, results.data.Response.Item)
     }
