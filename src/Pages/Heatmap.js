@@ -482,6 +482,14 @@ class Heatmap extends Component {
     this.setState({ map_center: this.state.cities[city_id]["cords"] })
   }
 
+  polylineElements = (polyline_elements) => {
+    if (polyline_elements !== undefined) {
+      return polyline_elements
+    } else {
+      return []
+    }
+  }
+
   render() {
     if (this.state.access_token === '' && localStorage.getItem('activities') === null) {
       return (
@@ -517,7 +525,7 @@ class Heatmap extends Component {
                 initialCenter={ { lat: 39.8283, lng: -98.5795 } }
                 center={this.state.map_center}
               >
-                {this.state.polylines[this.state.filter_type]["elements"][this.state.activity_type]["polylines"].map(polyline => {
+                {this.polylineElements(this.state.polylines[this.state.filter_type]["elements"][this.state.activity_type]["polylines"]).map(polyline => {
                   return (
                     <Polyline
                         path={polyline}
