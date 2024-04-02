@@ -19,7 +19,7 @@ const mapStyles = {
 };
 
 // url for production is https://workout-heatmap.herokuapp.com/, url for development is http://localhost:3000/
-const base_url = "https://workout-heatmap.herokuapp.com/"
+const base_url = "http://localhost:3000/"
 
 class Heatmap extends Component {
 
@@ -247,18 +247,18 @@ class Heatmap extends Component {
           }
         }
 
-        const cities = await this.getCitiesFromActivites(user_activities)
-        const city_counts = this.getCityActivityCounts(cities, user_activities)
+        // const cities = await this.getCitiesFromActivites(user_activities)
+        // const city_counts = this.getCityActivityCounts(cities, user_activities)
 
-        this.setState({ cities: city_counts })
-        localStorage.setItem('cities', JSON.stringify(city_counts))
+        // this.setState({ cities: city_counts })
+        // localStorage.setItem('cities', JSON.stringify(city_counts))
 
-        if (city_counts.length !== 0) {
-          this.recenterMap(0)
-        } else {
-          // Default location is geographic center of the U.S.
-          this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
-        }
+        // if (city_counts.length !== 0) {
+        //   this.recenterMap(0)
+        // } else {
+        //   // Default location is geographic center of the U.S.
+        //   this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
+        // }
 
         this.setState({ modal_open : false})
 
@@ -297,20 +297,21 @@ class Heatmap extends Component {
   getCitiesFromActivites = async(user_activities) => {
 
     var message_bodies = []
-    var curr_message_body = ''
+    var curr_message_body = []
     var activity_num = 1
 
-    // format activity coordinates into batches of 100 for the Reverse Geocoding API
+    // format activity coordinates into batches of 1000 for the Reverse Geocoding API
     for (let i = 0; i < user_activities.length; i++) {
       let activity_cords = user_activities[i].start_latlng
       if (activity_cords !== null) {
-        let curr_message = 'id=' + activity_num + '&prox=' + activity_cords[0] + ',' + activity_cords[1] + ',500\n'
-        curr_message_body += curr_message
+        // let curr_message = 'id=' + activity_num + '&at=' + activity_cords[0] + ',' + activity_cords[1] + '\n'
+        // curr_message_body += curr_message
+        curr_message_body.push([activity_cords[1], activity_cords[0]])
 
-        if (activity_num === 100) {
+        if (activity_num === 1000) {
           activity_num = 1
           message_bodies.push(curr_message_body)
-          curr_message_body = ''
+          curr_message_body = []
         } else {
           activity_num += 1
         }
@@ -322,7 +323,7 @@ class Heatmap extends Component {
       'Cache-Control': 'no-cache'
     }
 
-    const api_url = base_url + "proxy/6.2/multi-reversegeocode.json?mode=retrieveAreas&apiKey=" + keys.HERE_API_KEY
+    const api_url = base_url + "proxy/6.2/v1/batch/geocode/reverse?&apiKey=" + keys.GEOAPIFY_API_KEY
 
     var all_results = []
 
@@ -330,7 +331,9 @@ class Heatmap extends Component {
       let results = await axios
         .post(api_url, message_bodies[i], { headers: options })
 
-      Array.prototype.push.apply(all_results, results.data.Response.Item)
+      console.log(results)
+
+      // Array.prototype.push.apply(all_results, results.data.Response.Item)
     }
 
     return all_results
