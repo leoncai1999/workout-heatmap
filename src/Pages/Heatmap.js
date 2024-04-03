@@ -103,9 +103,6 @@ class Heatmap extends Component {
 
       const access_token = await this.updateAccessToken(String(window.location.href))
 
-      var activities_left = true
-      var page_num = 1;
-
       if (access_token === 'sample') {
         // sample user account information is read in from a Firebase real time database
         this.setState({ access_token })
@@ -172,80 +169,72 @@ class Heatmap extends Component {
         this.setState({ heart_rate_zones })
         localStorage.setItem('heart_rate_zones', JSON.stringify(heart_rate_zones))
 
-        while (activities_left) {
-          // Retrieve Strava Activites in batches of 200 until no activities are left
-          const activities = await this.getActivities(page_num, access_token)
-    
-          if (activities.length === 0) {
-            activities_left = false
-          } else {
-            const decodePolyline = require('decode-google-map-polyline')
-    
-            for (let i = 0; i < activities.length; i++) {
-              user_activities.push(activities[i])
-    
-              var polyline = activities[i]['map']['summary_polyline']
-              if (polyline != null) {
-                user_polylines[0]["elements"][0]["polylines"].push(decodePolyline(polyline))
+        const activities = await this.getActivities(access_token)
+  
+        const decodePolyline = require('decode-google-map-polyline')
 
-                // Store polylines grouped by Sport
-                var unique_activity_type = true
-                var type_num = 0
+        for (let i = 0; i < activities.length; i++) {
+          user_activities.push(activities[i])
 
-                // Sports other than the default 5 can also be added
-                while (unique_activity_type && type_num < user_polylines[1]["elements"].length) {
-                  if (user_polylines[1]["elements"][type_num]["type"] === activities[i].type) {
-                    user_polylines[1]["elements"][type_num]["polylines"].push(decodePolyline(polyline))
-                    unique_activity_type = false
-                  } else {
-                    type_num += 1
-                  }
-                }
+          var polyline = activities[i]['map']['summary_polyline']
+          if (polyline != null) {
+            user_polylines[0]["elements"][0]["polylines"].push(decodePolyline(polyline))
 
-                if (unique_activity_type) {
-                  user_polylines[1]["elements"].push({'id' : user_polylines[1]["elements"].length, 'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
-                }
+            // Store polylines grouped by Sport
+            var unique_activity_type = true
+            var type_num = 0
 
-                // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
-                if (activities[i]['workout_type'] === 1) {
-                  user_polylines[2]["elements"][1]["polylines"].push(decodePolyline(polyline))
-                } else {
-                  user_polylines[2]["elements"][0]["polylines"].push(decodePolyline(polyline))
-                }
-
-                // Store polylines grouped by Member Type
-                if (activities[i]["athlete_count"] === 2) {
-                  user_polylines[3]["elements"][1]["polylines"].push(decodePolyline(polyline))
-                } else if (activities[i]["athlete_count"] > 2) {
-                  user_polylines[3]["elements"][2]["polylines"].push(decodePolyline(polyline))
-                } else {
-                  user_polylines[3]["elements"][0]["polylines"].push(decodePolyline(polyline))
-                }
-
-                // Store polylines grouped by Time of Day
-                let start_hour = parseInt(activities[i]["start_date_local"].split(":")[0].slice(-2))
-
-                if (start_hour >= 4 && start_hour < 11) {
-                  user_polylines[4]["elements"][0]["polylines"].push(decodePolyline(polyline))
-                } else if (start_hour >= 11 && start_hour < 14) {
-                  user_polylines[4]["elements"][1]["polylines"].push(decodePolyline(polyline))
-                } else if (start_hour >= 14 && start_hour < 17) {
-                  user_polylines[4]["elements"][2]["polylines"].push(decodePolyline(polyline))
-                } else if (start_hour >= 17 && start_hour < 21) {
-                  user_polylines[4]["elements"][3]["polylines"].push(decodePolyline(polyline))
-                } else {
-                  user_polylines[4]["elements"][4]["polylines"].push(decodePolyline(polyline))
-                }
-
+            // Sports other than the default 5 can also be added
+            while (unique_activity_type && type_num < user_polylines[1]["elements"].length) {
+              if (user_polylines[1]["elements"][type_num]["type"] === activities[i].type) {
+                user_polylines[1]["elements"][type_num]["polylines"].push(decodePolyline(polyline))
+                unique_activity_type = false
+              } else {
+                type_num += 1
               }
             }
-    
-            this.setState({ activities : user_activities})
-            localStorage.setItem('activities', JSON.stringify(user_activities))
-            this.setState({ polylines : user_polylines})
-            page_num += 1
+
+            if (unique_activity_type) {
+              user_polylines[1]["elements"].push({'id' : user_polylines[1]["elements"].length, 'type' : activities[i].type, 'polylines' : [decodePolyline(polyline)]})
+            }
+
+            // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
+            if (activities[i]['workout_type'] === 1) {
+              user_polylines[2]["elements"][1]["polylines"].push(decodePolyline(polyline))
+            } else {
+              user_polylines[2]["elements"][0]["polylines"].push(decodePolyline(polyline))
+            }
+
+            // Store polylines grouped by Member Type
+            if (activities[i]["athlete_count"] === 2) {
+              user_polylines[3]["elements"][1]["polylines"].push(decodePolyline(polyline))
+            } else if (activities[i]["athlete_count"] > 2) {
+              user_polylines[3]["elements"][2]["polylines"].push(decodePolyline(polyline))
+            } else {
+              user_polylines[3]["elements"][0]["polylines"].push(decodePolyline(polyline))
+            }
+
+            // Store polylines grouped by Time of Day
+            let start_hour = parseInt(activities[i]["start_date_local"].split(":")[0].slice(-2))
+
+            if (start_hour >= 4 && start_hour < 11) {
+              user_polylines[4]["elements"][0]["polylines"].push(decodePolyline(polyline))
+            } else if (start_hour >= 11 && start_hour < 14) {
+              user_polylines[4]["elements"][1]["polylines"].push(decodePolyline(polyline))
+            } else if (start_hour >= 14 && start_hour < 17) {
+              user_polylines[4]["elements"][2]["polylines"].push(decodePolyline(polyline))
+            } else if (start_hour >= 17 && start_hour < 21) {
+              user_polylines[4]["elements"][3]["polylines"].push(decodePolyline(polyline))
+            } else {
+              user_polylines[4]["elements"][4]["polylines"].push(decodePolyline(polyline))
+            }
+
           }
         }
+
+        this.setState({ activities : user_activities})
+        localStorage.setItem('activities', JSON.stringify(user_activities))
+        this.setState({ polylines : user_polylines})
 
         // const cities = await this.getCitiesFromActivites(user_activities)
         // const city_counts = this.getCityActivityCounts(cities, user_activities)
@@ -410,11 +399,11 @@ class Heatmap extends Component {
     return city_counts
   }
 
-  getActivities = async(page_num, access_token) => {
+  getActivities = async(access_token) => {
     var invalid_token = false
 
     let results = await axios
-      .get(`activities/${page_num}/${access_token}`)
+      .get(`activities/${access_token}`)
       .catch(error => {
         invalid_token = true
       })
