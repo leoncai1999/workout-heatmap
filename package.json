@@ -2,6 +2,7 @@
   "homepage": "https://www.workoutheatmap.me/",
   "name": "workout-heatmap",
   "version": "0.1.0",
+  "proxy": "http://localhost:3001",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",

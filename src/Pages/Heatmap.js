@@ -414,13 +414,8 @@ class Heatmap extends Component {
     var invalid_token = false
 
     let results = await axios
-      .get("https://www.strava.com/api/v3/athlete/activities?", {
-        params: {
-          per_page: '200',
-          page: page_num,
-          access_token: access_token
-        }
-      }).catch(error => {
+      .get(`activities/${page_num}/${access_token}`)
+      .catch(error => {
         invalid_token = true
       })
 
