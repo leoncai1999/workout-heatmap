@@ -28,6 +28,7 @@ class Heatmap extends Component {
     polylines: [],
     filter_type: 0,
     activity_type: 0,
+    athlete_id: 0,
     access_token: '',
     map_center: {},
     heart_rate_zones: [],
@@ -158,6 +159,8 @@ class Heatmap extends Component {
       } else if (access_token !== '') {
         this.setState({ access_token })
 
+        axios.defaults.headers.common = {'Authorization': `Bearer ${access_token}`}
+
         // Revert the url of the site to the default url after authentication is finished
         if (is_map) {
           window.history.pushState({}, null, base_url + 'map')
@@ -169,7 +172,7 @@ class Heatmap extends Component {
         this.setState({ heart_rate_zones })
         localStorage.setItem('heart_rate_zones', JSON.stringify(heart_rate_zones))
 
-        const activities = await this.getActivities(access_token)
+        const activities = await this.getActivities(this.state.athlete_id)
   
         const decodePolyline = require('decode-google-map-polyline')
 
@@ -399,11 +402,11 @@ class Heatmap extends Component {
     return city_counts
   }
 
-  getActivities = async(access_token) => {
+  getActivities = async(athlete_id) => {
     var invalid_token = false
 
     let results = await axios
-      .get(`activities/${access_token}`)
+      .get(`activities/${athlete_id}`)
       .catch(error => {
         invalid_token = true
       })
@@ -418,7 +421,7 @@ class Heatmap extends Component {
     const tokenized_url = url.split('/')
     if (tokenized_url[3] !== null && tokenized_url[3].substring(0,10) === 'map-sample') {
       token = 'sample'
-    } else if (tokenized_url[3] !== null  && tokenized_url[3].substring(0,8) === 'callback') {
+    } else if (tokenized_url[3] !== null && tokenized_url[3].substring(0,8) === 'callback') {
       let code_and_scope = tokenized_url[3].substring(27);
       let code = code_and_scope.substring(0, code_and_scope.indexOf('&'))
 
@@ -429,6 +432,9 @@ class Heatmap extends Component {
               code: code,
               grant_type: 'authorization_code'
       })
+
+      this.setState({ athlete_id: results.data.athlete.id })
+      console.log("*****************Results", results)
 
       token = results.data.access_token
 
@@ -496,7 +502,6 @@ class Heatmap extends Component {
             <Modal.Body>
               <div className="loading-center">
                 <p className="loading-text">Fetching activities from Strava ...</p>
-                <p className="loading-subtext">Loading may take a while for a large number of activites</p>
                 <Spinner animation="border" className="loading-spinner" />
               </div>
             </Modal.Body>
