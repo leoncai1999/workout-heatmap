@@ -118,10 +118,10 @@ class Routes extends Component {
                         <Card.Body>       
                             <ListGroup>
                             <ListGroupItem>
-                                <p><span id="bold-text">Distance:</span> {(route[0]['distance'] / 1609.344).toFixed(2)} mi</p>
+                                <p><span id="bold-text">Distance:</span> {(route[0]['distance']).toFixed(2)} mi</p>
                             </ListGroupItem>
                             <ListGroupItem>
-                                <p><span id="bold-text">Elevation Gain:</span> {(route[0]['total_elevation_gain'] * 3.281).toFixed(2)} ft</p>
+                                <p><span id="bold-text">Elevation Gain:</span> {(route[0]['total_elevation_gain']).toFixed(2)} ft</p>
                             </ListGroupItem>
                             <ListGroupItem>
                                 <p><span id="bold-text">Occurances:</span> {route.length}</p>

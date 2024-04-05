@@ -38,8 +38,8 @@ class List extends Component {
                 user_activities[i]["pace"] = this.formatPace(user_activities[i]["moving_time"],  user_activities[i]["distance"])
                 user_activities[i]["moving_time"] = this.formatTime(user_activities[i]["moving_time"])
                 user_activities[i]["elapsed_time"] = this.formatTime(user_activities[i]["elapsed_time"])
-                user_activities[i]["distance"] = (user_activities[i]["distance"] / 1609.344).toFixed(2)
-                user_activities[i]["total_elevation_gain"] = (user_activities[i]["total_elevation_gain"] * 3.28084).toFixed(2)
+                user_activities[i]["distance"] = user_activities[i]["distance"].toFixed(2)
+                user_activities[i]["total_elevation_gain"] = (user_activities[i]["total_elevation_gain"]).toFixed(2)
             }
 
             if (user_activities[i]["max_heartrate"] === undefined) {
@@ -97,7 +97,7 @@ class List extends Component {
     }
 
     formatPace = (time, distance) => {
-        let decimal_pace = (time / 60) / (distance / 1609.344)
+        let decimal_pace = (time / 60) / distance
         let remainder = decimal_pace % 1
         let minutes = Math.floor(decimal_pace)
         let seconds = Math.floor(remainder * 60)

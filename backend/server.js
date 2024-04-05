@@ -6,6 +6,8 @@ const PORT = 3001
 
 app.get("/activities/:athlete_id", async (req, res) => {
   const ACTIVITY_BATCH_SIZE = 200
+  const FEET_IN_MILE = 1609.344
+  const FEET_IN_METER = 3.28084
 
   var num_core_activities = 0
   var min_activity_batches = 0
@@ -95,6 +97,14 @@ app.get("/activities/:athlete_id", async (req, res) => {
     upload_id, upload_id_str, external_id, from_accepted_tag, pr_count, average_watts, max_watts, 
     weighted_average_watts, device_watts, heartrate_opt_out, display_hide_heartrate_option,
     total_photo_count, has_kudoed, ...keepAttrrs}) => keepAttrrs)
+  
+  /*
+    Metric to imperial conversions
+  */
+  for (let i = 0; i < all_activities.length; i++) {
+    all_activities[i]["distance"] = all_activities[i]["distance"] / FEET_IN_MILE
+    all_activities[i]["total_elevation_gain"] = all_activities[i]["total_elevation_gain"] * FEET_IN_METER
+  }
 
   /*
     The location_city and location_state values in the activities endpoint are broken so we'll use a

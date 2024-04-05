@@ -200,9 +200,9 @@ class Stats extends Component {
         if (result[i] === 0) {
           result[i] = NaN
         } else if (attr === 'miles') {
-          result[i] = parseFloat((result[i] / 1609.344).toFixed(2))
+          result[i] = parseFloat((result[i]).toFixed(2))
         } else if (attr === 'elevation') {
-          result[i] = parseFloat((result[i] * 3.28084).toFixed(2))
+          result[i] = parseFloat((result[i]).toFixed(2))
         }
       }
       return result
@@ -211,7 +211,7 @@ class Stats extends Component {
     formatPaceData = (time, dist) => {
       let result = time
       for (let i = 0; i < result.length; i++) {
-        result[i] = parseFloat(((time[i] / 60) / (dist[i] / 1609.344)).toFixed(2))
+        result[i] = parseFloat(((time[i] / 60) / dist[i]).toFixed(2))
       }
       return result
     }
@@ -269,7 +269,7 @@ class Stats extends Component {
       for (let i = 0; i < day_counts.length; i++) {
         day_counts[i] = parseFloat(((day_counts[i] / week_counts[i]) * 100).toFixed(2))
         intensity_counts[i] = parseFloat((intensity_counts[i] / activity_counts[i]).toFixed(2))
-        day_mile_counts[i]["miles"] = (day_mile_counts[i]["miles"] / 1609).toFixed(2)
+        day_mile_counts[i]["miles"] = (day_mile_counts[i]["miles"]).toFixed(2)
         day_mile_counts[i]["pace"] = this.paceConversionFormat(pace_times[i], pace_distances[i])
       }
 
@@ -305,7 +305,7 @@ class Stats extends Component {
 
     // Converts Seconds/Meters to Minutes per 1 mile
     paceConversionFormat = (time, distance) => {
-      let decimal_pace = (time / 60) / (distance / 1609.344)
+      let decimal_pace = (time / 60) / distance
       let remainder = decimal_pace % 1
       let minutes = Math.floor(decimal_pace)
       let seconds = (remainder * 60)
@@ -334,7 +334,7 @@ class Stats extends Component {
       let dataBarState = this.state.dataBar
       dataBarState.datasets[0].data = hours
       this.setState({ dataBar : dataBarState })
-      this.setState({ total_distance : (total_miles / 1609.344).toFixed(2)})
+      this.setState({ total_distance : (total_miles).toFixed(2)})
       this.setState({ total_time : (total_seconds / 3600).toFixed(0)})
     }
 

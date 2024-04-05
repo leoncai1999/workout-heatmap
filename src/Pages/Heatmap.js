@@ -295,8 +295,8 @@ class Heatmap extends Component {
       if (activity["location_city"]) {
         let city_name = activity["location_city"] + ", " + activity["location_state"]
 
-        let activity_miles = activity["distance"] / 1609
-        let activity_elevation = activity["total_elevation_gain"] * 3.28084
+        let activity_miles = activity["distance"]
+        let activity_elevation = activity["total_elevation_gain"]
         let activity_time = activity["moving_time"]
 
         var unique_city = true
