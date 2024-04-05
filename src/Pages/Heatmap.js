@@ -315,7 +315,7 @@ class Heatmap extends Component {
       'Cache-Control': 'no-cache'
     }
 
-    const api_url = base_url + "proxy/6.2/v1/batch/geocode/reverse?&apiKey=" + keys.GEOAPIFY_API_KEY
+    const api_url = base_url + "proxy/6.2/v1/batch/geocode/reverse?&apiKey="
 
     var all_results = []
 
@@ -434,7 +434,6 @@ class Heatmap extends Component {
       })
 
       this.setState({ athlete_id: results.data.athlete.id })
-      console.log("*****************Results", results)
 
       token = results.data.access_token
 
