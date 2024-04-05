@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const axios = require('axios');
-const reverse_geocode = require('reverse-geocode');
+const utils = require('./utils');
 const PORT = 3001
 
 app.get("/activities/:athlete_id", async (req, res) => {
@@ -102,41 +102,35 @@ app.get("/activities/:athlete_id", async (req, res) => {
     Metric to imperial conversions
   */
   for (let i = 0; i < all_activities.length; i++) {
-    all_activities[i]["distance"] = all_activities[i]["distance"] / FEET_IN_MILE
-    all_activities[i]["total_elevation_gain"] = all_activities[i]["total_elevation_gain"] * FEET_IN_METER
-  }
-
-  /*
-    The location_city and location_state values in the activities endpoint are broken so we'll use a
-    reverse geocoder package to determine these values from the activity start coordinates. The package
-    only works for US, Canada and Australia. We use the name of the activity's time zone city to
-    to determine if it is in a supported country.
-  */
-  let supported_countries_to_timezone_cities = {
-    "us": ["New_York", "Chicago", "Denver", "Los_Angeles"],
-    "ca": ["St_Johns", "Toronto", "Winnipeg", "Regina", "Vancouver"],
-    "au": ["Sydney", "Adelaide", "Perth"]
-  }
-
-  for (let i = 0; i < all_activities.length; i++) {
     let activity = all_activities[i]
-    let activity_cords = activity["start_latlng"]
 
-    if (activity_cords.length > 0) {
-      let timezone_city = activity["timezone"].split("/").pop()
+    all_activities[i]["distance"] = activity["distance"] / FEET_IN_MILE
+    all_activities[i]["total_elevation_gain"] = activity["total_elevation_gain"] * FEET_IN_METER
 
-      for (const [country, timezone_cities] of Object.entries(supported_countries_to_timezone_cities)) {
-        if (timezone_cities.includes(timezone_city)) {
-          let activity_location = reverse_geocode.lookup(activity_cords[0], activity_cords[1], country)
+    let time_and_date = all_activities[i]["start_date_local"]
+    let date = time_and_date.substring(0, time_and_date.indexOf('T'))
+    let year = date.substring(0, 4)
+    let day_month = date.substring(5, date.length)
 
-          all_activities[i]["location_city"] = activity_location["city"]
-          all_activities[i]["location_state"] = activity_location["state_abbr"]
+    all_activities[i]["formatted_start_date"] = day_month + "-" + year
+    all_activities[i]["formatted_start_time"] = utils.formatMilitaryTime(time_and_date.substring(time_and_date.indexOf('T') + 1, time_and_date.indexOf('T') + 6))
 
-          break;
-        }
-      }
+    if (all_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
+      all_activities[i]["pace"] = utils.formatPace(activity["moving_time"], activity["distance"])
+      all_activities[i]["formatted_moving_time"] = utils.formatDuration(activity["moving_time"])
+      all_activities[i]["formatted_elapsed_time"] = utils.formatDuration(activity["elapsed_time"])
+    }
+
+    if (all_activities[i]["max_heartrate"] === undefined) {
+      all_activities[i]["max_heartrate"] = "N/A"
+    }
+
+    if (all_activities[i]["average_heartrate"] === undefined) {
+      all_activities[i]["average_heartrate"] = "N/A"
     }
   }
+
+  all_activities = utils.addCitiesToActivities(all_activities)
 
   res.json(all_activities)
 })

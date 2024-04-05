@@ -19,95 +19,7 @@ const paginationOptions = {
 class List extends Component {
 
     state = {
-        formatted_activities: [],
         dataCalled: false
-    }
-
-    formatData = () => {
-        var user_activities = this.props.data.activities
-        for (let i = 0; i < user_activities.length; i++) {
-
-            let time_and_date = user_activities[i]["start_date_local"]
-            let date = time_and_date.substring(0, time_and_date.indexOf('T'))
-            let year = date.substring(0, 4)
-            let day_month = date.substring(5, date.length)
-            user_activities[i]["date"] = day_month + "-" + year
-            user_activities[i]["time"] = this.convertMilitaryTime(time_and_date.substring(time_and_date.indexOf('T') + 1, time_and_date.indexOf('T') + 6))
-
-            if (user_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
-                user_activities[i]["pace"] = this.formatPace(user_activities[i]["moving_time"],  user_activities[i]["distance"])
-                user_activities[i]["moving_time"] = this.formatTime(user_activities[i]["moving_time"])
-                user_activities[i]["elapsed_time"] = this.formatTime(user_activities[i]["elapsed_time"])
-                user_activities[i]["distance"] = user_activities[i]["distance"].toFixed(2)
-                user_activities[i]["total_elevation_gain"] = (user_activities[i]["total_elevation_gain"]).toFixed(2)
-            }
-
-            if (user_activities[i]["max_heartrate"] === undefined) {
-                user_activities[i]["max_heartrate"] = "N/A"
-            }
-
-            if (user_activities[i]["average_heartrate"] === undefined) {
-                user_activities[i]["average_heartrate"] = "N/A"
-            }
-        }
-
-        this.setState({ formatted_activities : user_activities})
-    }
-
-    convertMilitaryTime = (time) => {
-        var parts = time.split(':')
-        var hour = parts[0]
-        var minutes = parts[1]
-
-        if (parseInt(hour) > 12) {
-            return (hour - 12) + ":" + minutes + " PM"
-        } else if (parseInt(hour) === 0) {
-            return "12:" + minutes + " AM"
-        } else if (parseInt(hour) === 12) {
-            return time + " PM"
-        } else if (parseInt(hour) < 10) {
-            return hour.substring(1) + ":" + minutes + " AM"
-        } else {
-            return time + " AM"
-        }
-    }
-
-    formatTime = (secs) => {
-        var hours = Math.floor(secs / 3600)
-        var minutes = Math.floor((secs - (hours * 3600)) / 60)
-        var seconds = secs - (hours * 3600) - (minutes * 60)
-        var time = ""
-
-        if (hours !== 0) {
-            time = hours + ":"
-        }
-
-        if (minutes !== 0 || time !== "") {
-            minutes = (minutes < 10 && time !== "") ? "0" + minutes : String(minutes)
-            time += minutes + ":"
-        }
-
-        if (time === "") {
-            time = seconds + "s"
-        } else {
-            time += (seconds < 10) ? "0" + seconds : String(seconds)
-        }
-
-        return time
-    }
-
-    formatPace = (time, distance) => {
-        let decimal_pace = (time / 60) / distance
-        let remainder = decimal_pace % 1
-        let minutes = Math.floor(decimal_pace)
-        let seconds = Math.floor(remainder * 60)
-        if (seconds < 10) {
-          seconds = "0" + seconds.toFixed(0)
-        } else {
-          seconds = seconds.toFixed(0)
-        }
-        let result = minutes + ":" + seconds + " /mi"
-        return result
     }
 
     getCSVName = () => {
@@ -209,7 +121,6 @@ class List extends Component {
     render () {
 
         if (this.props.data.activities.length > 0 && !this.state.dataCalled) {
-            this.formatData()
             this.setState({ dataCalled : true })
         }
 
@@ -227,7 +138,7 @@ class List extends Component {
                 }
             },
             {
-                dataField: "date",
+                dataField: "formatted_start_date",
                 text: "Date",
                 sort: true,
                 sortFunc: (a, b, order) => {
@@ -235,7 +146,7 @@ class List extends Component {
                 }
             },
             {
-                dataField: "time",
+                dataField: "formatted_start_time",
                 text: "Start Time",
                 sort: true,
                 sortFunc: (a, b, order) => {
@@ -251,7 +162,7 @@ class List extends Component {
                 }
             },
             {
-                dataField: "moving_time",
+                dataField: "formatted_moving_time",
                 text: "Moving Time",
                 sort: true,
                 sortFunc: (a, b, order) => {
@@ -259,7 +170,7 @@ class List extends Component {
                 }
             },
             {
-                dataField: "elapsed_time",
+                dataField: "formatted_elapsed_time",
                 text: "Elapsed Time",
                 sort: true,
                 sortFunc: (a, b, order) => {
@@ -316,7 +227,7 @@ class List extends Component {
         return (
             <div>
                 <Modal 
-                    show={this.state.formatted_activities.length === 0}
+                    show={this.props.data.activities.length === 0}
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
                 >
@@ -335,7 +246,7 @@ class List extends Component {
 
                 <ToolkitProvider
                     keyField='id' 
-                    data={ this.state.formatted_activities } 
+                    data={ this.props.data.activities } 
                     columns={ columns }
                     exportCSV={ {
                         fileName: this.getCSVName()
@@ -349,7 +260,7 @@ class List extends Component {
                                 </ExportCSVButton>
                                 <BootstrapTable 
                                     keyField='id' 
-                                    data={ this.state.formatted_activities } 
+                                    data={ this.props.data.activities } 
                                     columns={ columns } 
                                     bordercolors={ true }
                                     striped

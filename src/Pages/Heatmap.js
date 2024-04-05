@@ -434,6 +434,7 @@ class Heatmap extends Component {
             <Modal.Body>
               <div className="loading-center">
                 <p className="loading-text">Fetching activities from Strava ...</p>
+                <p className="loading-subtext">Loading may take a while for a large number of activites</p>
                 <Spinner animation="border" className="loading-spinner" />
               </div>
             </Modal.Body>
