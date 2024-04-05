@@ -1,136 +1,134 @@
 .linked-activity {
-    color: #FC4C02;
-    text-decoration: underline;
-    cursor: pointer;
+  color: #fc4c02;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .black-header {
-    text-align: center;
-    color: black;
-    font-size: 46px;
-    font-weight: 800;
-    margin-top: 10px;
-    margin-bottom: 10px;
+  text-align: center;
+  color: black;
+  font-size: 46px;
+  font-weight: 800;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .stats-description {
-    color: black;
-    font-size: 27px;
-    font-weight: 700;
-    margin-left: 15px;
-    margin-right: 15px;
-    margin-top: 40px;
-    margin-bottom: 40px;
-    text-align: center;
+  color: black;
+  font-size: 27px;
+  font-weight: 700;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .stats-header {
-    color: black;
-    font-size: 24px;
-    font-weight: 700;
-    margin-top: 15px;
-    margin-left: 20px;
+  color: black;
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 15px;
+  margin-left: 20px;
 }
 
 .button-position {
-    margin-left: 20px;
+  margin-left: 20px;
 }
 
 .img-stats {
-    display: block;
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 15px;
-    width: 15%;
+  display: block;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15px;
+  width: 15%;
 }
 
 .bootstrap-table {
-    margin-left: 20px;
-    margin-right: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .react-bootstrap-table th {
-    border: black solid 1.5px !important;
+  border: black solid 1.5px !important;
 }
 
 .react-bootstrap-table td {
-    border: black solid 1.5px !important;
+  border: black solid 1.5px !important;
 }
 
 table thead .caret {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    margin-left: 2px;
-    vertical-align: middle;
-    border-top: 4px dashed;
-    border-top: 4px solid \9;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px dashed;
+  border-top: 4px solid \9;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
 }
-   
+
 table thead .dropup .caret,
 table thead .navbar-fixed-bottom .dropdown .caret {
-    border-top: 0;
-    border-bottom: 4px dashed;
-    border-bottom: 4px solid \9;
-    content: "";
+  border-top: 0;
+  border-bottom: 4px dashed;
+  border-bottom: 4px solid \9;
+  content: "";
 }
 
-.react-bootstrap-table th
-.order>.dropdown>.caret {
-    color: black;
+.react-bootstrap-table th .order > .dropdown > .caret {
+  color: black;
 }
 
-.react-bootstrap-table th
-.order>.dropup>.caret {
-    color: black;
+.react-bootstrap-table th .order > .dropup > .caret {
+  color: black;
 }
 
-.pagination>li>a {
-    background-color: #e8e1eb;
-    color: black;
-    border-color: black;
+.pagination > li > a {
+  background-color: #e8e1eb;
+  color: black;
+  border-color: black;
 }
 
 .radar-chart {
-    width: 55%;
-    margin-bottom: 20px;
-    display: inline-block;
+  width: 55%;
+  margin-bottom: 20px;
+  display: inline-block;
 }
 
 .day-table {
-    display: inline-block;
-    width: 42%;
+  display: inline-block;
+  width: 42%;
 }
 
 .stats-chart {
-    margin: 20px;
+  margin: 20px;
 }
 
 .doughnut-chart {
-    width: 49%;
-    padding-top: 0px;
-    margin-bottom: 20px;
-    display: inline-block;
+  width: 49%;
+  padding-top: 0px;
+  margin-bottom: 20px;
+  display: inline-block;
 }
 
 .heart-rate-table {
-    display: inline-block;
-    width: 49%;
+  display: inline-block;
+  width: 49%;
 }
 
 .csv-btn {
-    background-color: #5dbcd2;
-    border-color: transparent;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    color: white;
-    font-weight: 600;
-    font-size: 19px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+  background-color: #5dbcd2;
+  border-color: transparent;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  color: white;
+  font-weight: 600;
+  font-size: 19px;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
