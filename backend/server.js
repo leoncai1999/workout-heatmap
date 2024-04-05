@@ -90,7 +90,7 @@ app.get("/activities/:athlete_id", async (req, res) => {
     The strava athletes endpoints provides various additional properties we don't need
   */
   all_activities = all_activities
-  .map(({resource_state, athlete, sport_type, start_date, timezone, utc_offset, achievement_count,
+  .map(({resource_state, athlete, sport_type, start_date, utc_offset, achievement_count, location_country,
     trainer, commute, manual, private, visibility, flagged, kudos_count, comment_count, photo_count, 
     upload_id, upload_id_str, external_id, from_accepted_tag, pr_count, average_watts, max_watts, 
     weighted_average_watts, device_watts, heartrate_opt_out, display_hide_heartrate_option,
@@ -99,23 +99,31 @@ app.get("/activities/:athlete_id", async (req, res) => {
   /*
     The location_city and location_state values in the activities endpoint are broken so we'll use a
     reverse geocoder package to determine these values from the activity start coordinates. The package
-    only works for US, Canada and Australia.
+    only works for US, Canada and Australia. We use the name of the activity's time zone city to
+    to determine if it is in a supported country.
   */
-  let supported_countries_to_abbr = {
-    "United States": "us",
-    "Canada": "ca",
-    "Australia": "au"
+  let supported_countries_to_timezone_cities = {
+    "us": ["New_York", "Chicago", "Denver", "Los_Angeles"],
+    "ca": ["St_Johns", "Toronto", "Winnipeg", "Regina", "Vancouver"],
+    "au": ["Sydney", "Adelaide", "Perth"]
   }
 
   for (let i = 0; i < all_activities.length; i++) {
     let activity = all_activities[i]
-    if (activity["start_latlng"].length > 0) {
-      if (Object.keys(supported_countries_to_abbr).includes(activity["location_country"])) {
-        let activity_cords = activity["start_latlng"]
-        let activity_location = reverse_geocode.lookup(activity_cords[0], activity_cords[1], supported_countries_to_abbr[activity["location_country"]])
+    let activity_cords = activity["start_latlng"]
 
-        all_activities[i]["location_city"] = activity_location["city"]
-        all_activities[i]["location_state"] = activity_location["state"]
+    if (activity_cords.length > 0) {
+      let timezone_city = activity["timezone"].split("/").pop()
+
+      for (const [country, timezone_cities] of Object.entries(supported_countries_to_timezone_cities)) {
+        if (timezone_cities.includes(timezone_city)) {
+          let activity_location = reverse_geocode.lookup(activity_cords[0], activity_cords[1], country)
+
+          all_activities[i]["location_city"] = activity_location["city"]
+          all_activities[i]["location_state"] = activity_location["state_abbr"]
+
+          break;
+        }
       }
     }
   }

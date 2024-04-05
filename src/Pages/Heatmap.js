@@ -239,18 +239,17 @@ class Heatmap extends Component {
         localStorage.setItem('activities', JSON.stringify(user_activities))
         this.setState({ polylines : user_polylines})
 
-        // const cities = await this.getCitiesFromActivites(user_activities)
-        // const city_counts = this.getCityActivityCounts(cities, user_activities)
+        const city_counts = this.getCityActivityCounts(user_activities)
 
-        // this.setState({ cities: city_counts })
-        // localStorage.setItem('cities', JSON.stringify(city_counts))
+        this.setState({ cities: city_counts })
+        localStorage.setItem('cities', JSON.stringify(city_counts))
 
-        // if (city_counts.length !== 0) {
-        //   this.recenterMap(0)
-        // } else {
-        //   // Default location is geographic center of the U.S.
-        //   this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
-        // }
+        if (city_counts.length !== 0) {
+          this.recenterMap(0)
+        } else {
+          // Default location is geographic center of the U.S.
+          this.setState( { map_center : { lat: 39.8283, lng: -98.5795 }} )
+        }
 
         this.setState({ modal_open : false})
 
@@ -286,80 +285,15 @@ class Heatmap extends Component {
     return results.data["heart_rate"]["zones"]
   }
 
-  getCitiesFromActivites = async(user_activities) => {
-
-    var message_bodies = []
-    var curr_message_body = []
-    var activity_num = 1
-
-    // format activity coordinates into batches of 1000 for the Reverse Geocoding API
-    for (let i = 0; i < user_activities.length; i++) {
-      let activity_cords = user_activities[i].start_latlng
-      if (activity_cords !== null) {
-        // let curr_message = 'id=' + activity_num + '&at=' + activity_cords[0] + ',' + activity_cords[1] + '\n'
-        // curr_message_body += curr_message
-        curr_message_body.push([activity_cords[1], activity_cords[0]])
-
-        if (activity_num === 1000) {
-          activity_num = 1
-          message_bodies.push(curr_message_body)
-          curr_message_body = []
-        } else {
-          activity_num += 1
-        }
-      }
-    }
-
-    const options = {
-      'Content-Type': '*',
-      'Cache-Control': 'no-cache'
-    }
-
-    const api_url = base_url + "proxy/6.2/v1/batch/geocode/reverse?&apiKey="
-
-    var all_results = []
-
-    for (let i = 0; i < message_bodies.length; i++) {
-      let results = await axios
-        .post(api_url, message_bodies[i], { headers: options })
-
-      console.log(results)
-
-      // Array.prototype.push.apply(all_results, results.data.Response.Item)
-    }
-
-    return all_results
-  }
-
-  getCityActivityCounts = (cities, user_activities) => {
+  getCityActivityCounts = (user_activities) => {
     var city_counts = []
-    var last_activity_with_location = 0
 
     // need to account for other countries where State may be null
-    for (let i = 0; i < cities.length; i++) {
-      let address = cities[i].Result[0].Location.Address
+    for (let i = 0; i < user_activities.length; i++) {
+      let activity = user_activities[i]
 
-      if (address.City !== undefined) {
-        let city_name = address.City + ", " + address.State
-
-        // Map the geocoding information of an activity to it's Strava details
-        let lat = cities[i].Result[0].Location.DisplayPosition.Latitude
-        let lng = cities[i].Result[0].Location.DisplayPosition.Longitude
-
-        var activity = {}
-        var activity_found = false
-        var x = last_activity_with_location
-
-        while (!activity_found) {
-          let curr_activity = user_activities[x]
-          if (curr_activity["start_latitude"] === lat && curr_activity["start_longitude"] === lng) {
-            activity_found = true
-            activity = curr_activity
-            last_activity_with_location = x + 1
-          } else {
-            x += 1
-          }
-        }
+      if (activity["location_city"]) {
+        let city_name = activity["location_city"] + ", " + activity["location_state"]
 
         let activity_miles = activity["distance"] / 1609
         let activity_elevation = activity["total_elevation_gain"] * 3.28084
@@ -384,7 +318,6 @@ class Heatmap extends Component {
           city_counts.push({'city' : city_name, 'activities' : 1, 'miles' : activity_miles, 'elevation' : activity_elevation, 'hours' : activity_time })
         } 
       }
-
     }
 
     // Sort cities by number of activites descending, breaking ties by total mileage
@@ -399,7 +332,7 @@ class Heatmap extends Component {
       city_counts[i]["hours"] = parseInt(city_counts[i]["hours"] / 3600)
     }
 
-    return city_counts
+    return city_counts  
   }
 
   getActivities = async(athlete_id) => {
