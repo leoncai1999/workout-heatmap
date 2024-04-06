@@ -52,5 +52,8 @@
   },
   "devDependencies": {
     "firebase": "^7.14.4"
+  },
+  "engines": {
+    "yarn": "YARN NO LONGER USED - use npm instead."
   }
 }
