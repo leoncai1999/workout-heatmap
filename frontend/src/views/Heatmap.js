@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Map, GoogleApiWrapper, Polyline } from "google-maps-react";
 import axios from "axios";
-import * as keys from "../Components/APIKeys";
 import {
   Button,
   ButtonGroup,
@@ -9,15 +8,15 @@ import {
   DropdownButton,
   Spinner,
 } from "react-bootstrap";
-import Welcome from "./Welcome";
-import List from "./List";
-import Stats from "./Stats";
-import Routes from "./Routes";
-import Navigation from "../Components/Navigation";
+import Welcome from "./Welcome.js";
+import List from "./List.js";
+import Stats from "./Stats.js";
+import Routes from "./Routes.js";
+import Navigation from "../components/Navigation.js";
 import Modal from "react-bootstrap/Modal";
-import Branding from "../Images/powered_by_strava.png";
-import "../Styles/Heatmap.css";
-import Firebase from "../Components/Firebase.js";
+import Branding from "../assets/powered_by_strava.png";
+import "../styles/Heatmap.css";
+import Firebase from "../components/Firebase.js";
 
 const mapStyles = {
   width: "100%",
@@ -94,31 +93,31 @@ class Heatmap extends Component {
       user_polylines[1]["elements"].push({
         id: 0,
         type: "Run",
-        img: require("../Icons/run.svg"),
+        img: require("../assets/run.svg"),
         polylines: [],
       });
       user_polylines[1]["elements"].push({
         id: 1,
         type: "Ride",
-        img: require("../Icons/ride.svg"),
+        img: require("../assets/ride.svg"),
         polylines: [],
       });
       user_polylines[1]["elements"].push({
         id: 2,
         type: "Swim",
-        img: require("../Icons/swim.svg"),
+        img: require("../assets/swim.svg"),
         polylines: [],
       });
       user_polylines[1]["elements"].push({
         id: 3,
         type: "Walk",
-        img: require("../Icons/walk.svg"),
+        img: require("../assets/walk.svg"),
         polylines: [],
       });
       user_polylines[1]["elements"].push({
         id: 4,
         type: "Hike",
-        img: require("../Icons/hike.svg"),
+        img: require("../assets/hike.svg"),
         polylines: [],
       });
 
@@ -154,27 +153,27 @@ class Heatmap extends Component {
       // Time of Day types
       user_polylines[4]["elements"].push({
         id: 0,
-        type: require("../Icons/morning.svg"),
+        type: require("../assets/morning.svg"),
         polylines: [],
       });
       user_polylines[4]["elements"].push({
         id: 1,
-        type: require("../Icons/lunch.svg"),
+        type: require("../assets/lunch.svg"),
         polylines: [],
       });
       user_polylines[4]["elements"].push({
         id: 2,
-        type: require("../Icons/afternoon.svg"),
+        type: require("../assets/afternoon.svg"),
         polylines: [],
       });
       user_polylines[4]["elements"].push({
         id: 3,
-        type: require("../Icons/evening.svg"),
+        type: require("../assets/evening.svg"),
         polylines: [],
       });
       user_polylines[4]["elements"].push({
         id: 4,
-        type: require("../Icons/night.svg"),
+        type: require("../assets/night.svg"),
         polylines: [],
       });
 
@@ -209,34 +208,34 @@ class Heatmap extends Component {
           user_polylines = snapshot.val();
 
           // redelcare images as they don't render properly from database
-          user_polylines[1]["elements"][0]["img"] = require("../Icons/run.svg");
+          user_polylines[1]["elements"][0]["img"] = require("../assets/run.svg");
           user_polylines[1]["elements"][1][
             "img"
-          ] = require("../Icons/ride.svg");
+          ] = require("../assets/ride.svg");
           user_polylines[1]["elements"][2][
             "img"
-          ] = require("../Icons/swim.svg");
+          ] = require("../assets/swim.svg");
           user_polylines[1]["elements"][3][
             "img"
-          ] = require("../Icons/walk.svg");
+          ] = require("../assets/walk.svg");
           user_polylines[1]["elements"][4][
             "img"
-          ] = require("../Icons/hike.svg");
+          ] = require("../assets/hike.svg");
           user_polylines[4]["elements"][0][
             "type"
-          ] = require("../Icons/morning.svg");
+          ] = require("../assets/morning.svg");
           user_polylines[4]["elements"][1][
             "type"
-          ] = require("../Icons/lunch.svg");
+          ] = require("../assets/lunch.svg");
           user_polylines[4]["elements"][2][
             "type"
-          ] = require("../Icons/afternoon.svg");
+          ] = require("../assets/afternoon.svg");
           user_polylines[4]["elements"][3][
             "type"
-          ] = require("../Icons/evening.svg");
+          ] = require("../assets/evening.svg");
           user_polylines[4]["elements"][4][
             "type"
-          ] = require("../Icons/night.svg");
+          ] = require("../assets/night.svg");
 
           this.setState({ polylines: user_polylines });
         });
@@ -523,7 +522,7 @@ class Heatmap extends Component {
         "https://www.strava.com/api/v3/oauth/token?",
         {
           client_id: "27965",
-          client_secret: keys.STRAVA_SECRET,
+          client_secret: process.env.REACT_APP_STRAVA_SECRET,
           code: code,
           grant_type: "authorization_code",
         }
@@ -548,7 +547,7 @@ class Heatmap extends Component {
         ".json?";
       let result = await axios.get(api_url, {
         params: {
-          access_token: keys.GEOCODING_API_KEY,
+          access_token: process.env.REACT_APP_GEOCODING_API_KEY,
         },
       });
 
@@ -771,5 +770,5 @@ class Heatmap extends Component {
 }
 
 export default GoogleApiWrapper({
-  apiKey: keys.GOOGLE_MAPS_API_KEY,
+  apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
 })(Heatmap);

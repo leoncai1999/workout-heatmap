@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Nav } from "react-bootstrap";
-import "../Styles/Welcome.css";
-import Logo from "../Icons/app-logo.svg";
-import StravaButton from "../Images/connect_with_strava.png";
-import Branding from "../Images/powered_by_strava.png";
+import "../styles/Welcome.css";
+import Logo from "../assets/app-logo.svg";
+import StravaButton from "../assets/connect_with_strava.png";
+import Branding from "../assets/powered_by_strava.png";
 
 // url for production is https://workout-heatmap.herokuapp.com/, url for development is http://localhost:3000/
 // change the authorized callback url in the Strava API settings accordingly
@@ -26,7 +26,7 @@ class Welcome extends Component {
   render() {
     return (
       <div>
-        <img class="img-center" src={Logo}></img>
+        <img className="img-center" src={Logo}></img>
         <h1> Workout Heatmap </h1>
         <h5>
           {" "}

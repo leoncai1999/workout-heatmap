@@ -1,9 +1,8 @@
 import React, { Component } from "react";
-import Navigation from "../Components/Navigation";
+import Navigation from "../components/Navigation";
 import Modal from "react-bootstrap/Modal";
-import RoutesIcon from "../Icons/routes.svg";
-import * as keys from "../Components/APIKeys";
-import Branding from "../Images/powered_by_strava.png";
+import RoutesIcon from "../assets/routes.svg";
+import Branding from "../assets/powered_by_strava.png";
 import {
   Card,
   CardDeck,
@@ -11,7 +10,7 @@ import {
   ListGroupItem,
   Spinner,
 } from "react-bootstrap";
-import "../Styles/Routes.css";
+import "../styles/Routes.css";
 
 class Routes extends Component {
   state = {
@@ -144,7 +143,7 @@ class Routes extends Component {
                 "https://maps.googleapis.com/maps/api/staticmap?size=300x300&path=weight:3%7Ccolor:blue%7Cenc:" +
                 escape(route[0]["map"]["summary_polyline"]) +
                 "&key=" +
-                keys.GOOGLE_MAPS_API_KEY
+                process.env.REACT_APP_GOOGLE_MAPS_API_KEY
               }
               style={{ height: "300px" }}
             />

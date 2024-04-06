@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import Navigation from "../Components/Navigation";
-import MapScreen from "../Images/map_screen.png";
-import GithubIcon from "../Icons/github.svg";
-import StravaIcon from "../Icons/strava.svg";
-import MailIcon from "../Icons/mail.svg";
-import Branding from "../Images/powered_by_strava.png";
-import "../Styles/About.css";
+import Navigation from "../components/Navigation";
+import MapScreen from "../assets/map_screen.png";
+import GithubIcon from "../assets/github.svg";
+import StravaIcon from "../assets/strava.svg";
+import MailIcon from "../assets/mail.svg";
+import Branding from "../assets/powered_by_strava.png";
+import "../styles/About.css";
 
 class About extends Component {
   componentDidMount() {

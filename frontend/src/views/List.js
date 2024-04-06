@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import Navigation from "../Components/Navigation";
-import ListIcon from "../Icons/list.svg";
+import Navigation from "../components/Navigation";
+import ListIcon from "../assets/list.svg";
 import Modal from "react-bootstrap/Modal";
 import { Spinner } from "react-bootstrap";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import ToolkitProvider, { CSVExport } from "react-bootstrap-table2-toolkit";
-import Branding from "../Images/powered_by_strava.png";
-import "../Styles/Stats.css";
+import Branding from "../assets/powered_by_strava.png";
+import "../styles/Stats.css";
 
 const { ExportCSVButton } = CSVExport;
 

@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import Navigation from "../Components/Navigation";
-import StatsIcon from "../Icons/stats.svg";
+import Navigation from "../components/Navigation";
+import StatsIcon from "../assets/stats.svg";
 import { Dropdown, DropdownButton, Spinner } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
-import Branding from "../Images/powered_by_strava.png";
-import "../Styles/Stats.css";
+import Branding from "../assets/powered_by_strava.png";
+import "../styles/Stats.css";
 
 const paginationOptions = {
   sizePerPage: 10,
