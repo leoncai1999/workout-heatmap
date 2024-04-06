@@ -8,7 +8,7 @@ import {
   DropdownButton,
   Spinner,
 } from "react-bootstrap";
-import Welcome from "./Welcome.js";
+import Landing from "./Landing.js";
 import List from "./List.js";
 import Stats from "./Stats.js";
 import Routes from "./Routes.js";
@@ -585,7 +585,7 @@ class Heatmap extends Component {
     ) {
       return (
         <div>
-          <Welcome />
+          <Landing />
         </div>
       );
     } else if (this.state.mode === "map" && this.state.access_token !== "") {
