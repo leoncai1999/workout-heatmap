@@ -748,7 +748,7 @@ class Heatmap extends Component {
     } else if (this.state.mode === "list") {
       return (
         <div>
-          <List data={this.state} />
+          <List activities={this.state.activities} />
         </div>
       );
     } else if (this.state.mode === "stats") {
