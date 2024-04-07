@@ -208,7 +208,9 @@ class Heatmap extends Component {
           user_polylines = snapshot.val();
 
           // redelcare images as they don't render properly from database
-          user_polylines[1]["elements"][0]["img"] = require("../assets/run.svg");
+          user_polylines[1]["elements"][0][
+            "img"
+          ] = require("../assets/run.svg");
           user_polylines[1]["elements"][1][
             "img"
           ] = require("../assets/ride.svg");
@@ -278,6 +280,10 @@ class Heatmap extends Component {
         localStorage.setItem("is_sample", false);
 
         var heart_rate_zones = await this.getHeartRateZones(access_token);
+        sessionStorage.setItem(
+          "heartRateZones",
+          JSON.stringify(heart_rate_zones)
+        );
         this.setState({ heart_rate_zones });
         localStorage.setItem(
           "heart_rate_zones",
@@ -382,12 +388,14 @@ class Heatmap extends Component {
           }
         }
 
+        sessionStorage.setItem("activities", JSON.stringify(user_activities));
         this.setState({ activities: user_activities });
         localStorage.setItem("activities", JSON.stringify(user_activities));
         this.setState({ polylines: user_polylines });
 
         const city_counts = this.getCityActivityCounts(user_activities);
 
+        sessionStorage.setItem("cities", JSON.stringify(city_counts));
         this.setState({ cities: city_counts });
         localStorage.setItem("cities", JSON.stringify(city_counts));
 
@@ -680,7 +688,11 @@ class Heatmap extends Component {
                       });
                     }}
                   >
-                    <img src={activity_type["img"]} style={{ width: 25 }} />
+                    <img
+                      src={activity_type["img"]}
+                      style={{ width: 25 }}
+                      alt="sport icon"
+                    />
                   </Button>
                 );
               })}
@@ -734,27 +746,31 @@ class Heatmap extends Component {
                       });
                     }}
                   >
-                    <img src={activity_type["type"]} style={{ width: 25 }} />
+                    <img
+                      src={activity_type["type"]}
+                      style={{ width: 25 }}
+                      alt="time of day icon"
+                    />
                   </Button>
                 );
               })}
             </ButtonGroup>
           </div>
           <div id="branding">
-            <img src={Branding} />
+            <img src={Branding} alt="powered by strava branding" />
           </div>
         </div>
       );
     } else if (this.state.mode === "list") {
       return (
         <div>
-          <List activities={this.state.activities} />
+          <List />
         </div>
       );
     } else if (this.state.mode === "stats") {
       return (
         <div>
-          <Stats data={this.state} />
+          <Stats />
         </div>
       );
     } else if (this.state.mode === "routes") {

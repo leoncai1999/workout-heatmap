@@ -15,7 +15,7 @@ import {
 } from "../utils/sort.js";
 import "../styles/Stats.css";
 
-function List({ activities }) {
+function List() {
   const { ExportCSVButton } = CSVExport;
 
   const paginationOptions = {
@@ -135,6 +135,8 @@ function List({ activities }) {
       return "Sample Strava Activity Data.csv";
     }
   }
+
+  const activities = JSON.parse(sessionStorage.activities)
 
   return (
     <div>
