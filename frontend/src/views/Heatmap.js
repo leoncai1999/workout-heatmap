@@ -1,5 +1,6 @@
-import React, { Component } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Map, GoogleApiWrapper, Polyline } from "google-maps-react";
+// import {APIProvider, Map, Polyline} from '@vis.gl/react-google-maps';
 import axios from "axios";
 import {
   Button,
@@ -16,7 +17,6 @@ import Navigation from "../components/Navigation.js";
 import Modal from "react-bootstrap/Modal";
 import Branding from "../assets/powered_by_strava.png";
 import "../styles/Heatmap.css";
-import Firebase from "../components/Firebase.js";
 
 const mapStyles = {
   width: "100%",
@@ -26,407 +26,295 @@ const mapStyles = {
 // url for production is https://workout-heatmap.herokuapp.com/, url for development is http://localhost:3000/
 const base_url = "http://localhost:3000/";
 
-class Heatmap extends Component {
-  state = {
-    activities: [],
-    polylines: [],
-    filter_type: 0,
-    activity_type: 0,
-    athlete_id: 0,
-    access_token: "",
-    map_center: {},
-    heart_rate_zones: [],
-    selected_city: "Select City",
-    cities: [],
-    zoom: 4,
-    modal_open: true,
-    mode: "map",
-    is_sample: false,
-  };
+function Heatmap() {
+  const [activities, setActivities] = useState([]);
+  const [polylines, setPolylines] = useState([]);
+  const [filterType, setFilterType] = useState(0);
+  const [activityType, setActivityType] = useState(0);
+  const [athleteId, setAthleteId] = useState(0);
+  const [accessToken, setAccessToken] = useState("");
+  const [mapCenter, setMapCenter] = useState({});
+  const [heartRateZones, setHeartRateZones] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("Select City");
+  const [cities, setCities] = useState([]);
+  const [zoom, setZoom] = useState(4);
+  const [modalOpen, setModalOpen] = useState(true);
+  const [mode, setMode] = useState("map");
+  const [isSample, setIsSample] = useState(false);
 
-  async componentDidMount() {
-    var data_can_persist = false;
+  const fetchData = useCallback(async() => {
     var is_map = false;
     let url_elements = String(window.location.href).split("/");
 
     if (url_elements.slice(-1)[0] === "stats") {
       document.body.style.background = "#e8e1eb";
-      this.setState({ mode: "stats" });
-      data_can_persist = true;
+      setMode("stats")
     } else if (url_elements.slice(-1)[0] === "routes") {
       document.body.style.background = "#e8e1eb";
-      this.setState({ mode: "routes" });
+      setMode("routes")
     } else if (url_elements.slice(-1)[0] === "list") {
       document.body.style.background = "#e8e1eb";
-      this.setState({ mode: "list" });
-      data_can_persist = true;
+      setMode("list")
     } else {
       document.body.style.background = "#5dbcd2";
-      this.setState({ mode: "map" });
+      setMode("map")
       is_map = true;
     }
 
-    if (localStorage.getItem("activities") !== null && data_can_persist) {
-      /* state is persisted locally but not stored externally. Avoids having to redo API
-         calls to obtain data we've already retrieved before. */
-      this.setState({ is_sample: localStorage.getItem("is_sample") });
-      this.setState({
-        activities: JSON.parse(localStorage.getItem("activities")),
-      });
-      this.setState({
-        heart_rate_zones: JSON.parse(localStorage.getItem("heart_rate_zones")),
-      });
-      this.setState({ cities: JSON.parse(localStorage.getItem("cities")) });
-    } else {
-      var user_activities = [];
-      var user_polylines = [
-        { id: 0, type: "All", elements: [] },
-        { id: 1, type: "Sport", elements: [] },
-        { id: 2, type: "Workout", elements: [] },
-        { id: 3, type: "Members", elements: [] },
-        { id: 4, type: "Time", elements: [] },
-      ];
+    var user_activities = [];
+    var user_polylines = [
+      { id: 0, type: "All", elements: [] },
+      { id: 1, type: "Sport", elements: [] },
+      { id: 2, type: "Workout", elements: [] },
+      { id: 3, type: "Members", elements: [] },
+      { id: 4, type: "Time", elements: [] },
+    ];
 
-      user_polylines[0]["elements"].push({ polylines: [] });
+    user_polylines[0]["elements"].push({ polylines: [] });
 
-      // Sport types
-      user_polylines[1]["elements"].push({
-        id: 0,
-        type: "Run",
-        img: require("../assets/run.svg"),
-        polylines: [],
-      });
-      user_polylines[1]["elements"].push({
-        id: 1,
-        type: "Ride",
-        img: require("../assets/ride.svg"),
-        polylines: [],
-      });
-      user_polylines[1]["elements"].push({
-        id: 2,
-        type: "Swim",
-        img: require("../assets/swim.svg"),
-        polylines: [],
-      });
-      user_polylines[1]["elements"].push({
-        id: 3,
-        type: "Walk",
-        img: require("../assets/walk.svg"),
-        polylines: [],
-      });
-      user_polylines[1]["elements"].push({
-        id: 4,
-        type: "Hike",
-        img: require("../assets/hike.svg"),
-        polylines: [],
-      });
+    // Sport types
+    user_polylines[1]["elements"].push({
+      id: 0,
+      type: "Run",
+      img: require("../assets/run.svg"),
+      polylines: [],
+    });
+    user_polylines[1]["elements"].push({
+      id: 1,
+      type: "Ride",
+      img: require("../assets/ride.svg"),
+      polylines: [],
+    });
+    user_polylines[1]["elements"].push({
+      id: 2,
+      type: "Swim",
+      img: require("../assets/swim.svg"),
+      polylines: [],
+    });
+    user_polylines[1]["elements"].push({
+      id: 3,
+      type: "Walk",
+      img: require("../assets/walk.svg"),
+      polylines: [],
+    });
+    user_polylines[1]["elements"].push({
+      id: 4,
+      type: "Hike",
+      img: require("../assets/hike.svg"),
+      polylines: [],
+    });
 
-      // Workout types
-      user_polylines[2]["elements"].push({
-        id: 0,
-        type: "Training",
-        polylines: [],
-      });
-      user_polylines[2]["elements"].push({
-        id: 1,
-        type: "Race",
-        polylines: [],
-      });
+    // Workout types
+    user_polylines[2]["elements"].push({
+      id: 0,
+      type: "Training",
+      polylines: [],
+    });
+    user_polylines[2]["elements"].push({
+      id: 1,
+      type: "Race",
+      polylines: [],
+    });
 
-      // Member types
-      user_polylines[3]["elements"].push({
-        id: 0,
-        type: "Solo",
-        polylines: [],
-      });
-      user_polylines[3]["elements"].push({
-        id: 1,
-        type: "Partner",
-        polylines: [],
-      });
-      user_polylines[3]["elements"].push({
-        id: 2,
-        type: "Group",
-        polylines: [],
-      });
+    // Member types
+    user_polylines[3]["elements"].push({
+      id: 0,
+      type: "Solo",
+      polylines: [],
+    });
+    user_polylines[3]["elements"].push({
+      id: 1,
+      type: "Partner",
+      polylines: [],
+    });
+    user_polylines[3]["elements"].push({
+      id: 2,
+      type: "Group",
+      polylines: [],
+    });
 
-      // Time of Day types
-      user_polylines[4]["elements"].push({
-        id: 0,
-        type: require("../assets/morning.svg"),
-        polylines: [],
-      });
-      user_polylines[4]["elements"].push({
-        id: 1,
-        type: require("../assets/lunch.svg"),
-        polylines: [],
-      });
-      user_polylines[4]["elements"].push({
-        id: 2,
-        type: require("../assets/afternoon.svg"),
-        polylines: [],
-      });
-      user_polylines[4]["elements"].push({
-        id: 3,
-        type: require("../assets/evening.svg"),
-        polylines: [],
-      });
-      user_polylines[4]["elements"].push({
-        id: 4,
-        type: require("../assets/night.svg"),
-        polylines: [],
-      });
+    // Time of Day types
+    user_polylines[4]["elements"].push({
+      id: 0,
+      type: require("../assets/morning.svg"),
+      polylines: [],
+    });
+    user_polylines[4]["elements"].push({
+      id: 1,
+      type: require("../assets/lunch.svg"),
+      polylines: [],
+    });
+    user_polylines[4]["elements"].push({
+      id: 2,
+      type: require("../assets/afternoon.svg"),
+      polylines: [],
+    });
+    user_polylines[4]["elements"].push({
+      id: 3,
+      type: require("../assets/evening.svg"),
+      polylines: [],
+    });
+    user_polylines[4]["elements"].push({
+      id: 4,
+      type: require("../assets/night.svg"),
+      polylines: [],
+    });
 
-      this.setState({ polylines: user_polylines });
+    setPolylines(user_polylines)
 
-      const access_token = await this.updateAccessToken(
-        String(window.location.href)
+    const access_token = await updateAccessToken(
+      String(window.location.href)
+    );
+
+    if (access_token !== "") {
+      console.log("*****My Token", access_token, athleteId)
+      setAccessToken(access_token)
+
+      axios.defaults.headers.common = {
+        Authorization: `Bearer ${access_token}`,
+      };
+
+      // Revert the url of the site to the default url after authentication is finished
+      if (is_map) {
+        window.history.pushState({}, null, base_url + "map");
+      }
+
+      var heart_rate_zones = await getHeartRateZones(access_token);
+      sessionStorage.setItem(
+        "heartRateZones",
+        JSON.stringify(heart_rate_zones)
       );
+      setHeartRateZones(heart_rate_zones)
 
-      if (access_token === "sample") {
-        // sample user account information is read in from a Firebase real time database
-        this.setState({ access_token });
-        this.setState({ is_sample: true });
-        localStorage.setItem("is_sample", true);
+      const activities = await getActivities("32573537", access_token);
 
-        if (is_map) {
-          window.history.pushState({}, null, "map");
-        }
+      const decodePolyline = require("decode-google-map-polyline");
 
-        const activitiesRef = Firebase.database().ref(
-          "activities/-M8E-22JV1rYTVc9ItVj"
-        );
-        activitiesRef.on("value", (snapshot) => {
-          this.setState({ activities: snapshot.val() });
-          localStorage.setItem("activities", JSON.stringify(snapshot.val()));
-        });
+      for (let i = 0; i < activities.length; i++) {
+        user_activities.push(activities[i]);
 
-        const polylinesRef = Firebase.database().ref(
-          "polylines/-M8E-287MG8ZC9Xw71ls"
-        );
-        polylinesRef.on("value", (snapshot) => {
-          user_polylines = snapshot.val();
-
-          // redelcare images as they don't render properly from database
-          user_polylines[1]["elements"][0][
-            "img"
-          ] = require("../assets/run.svg");
-          user_polylines[1]["elements"][1][
-            "img"
-          ] = require("../assets/ride.svg");
-          user_polylines[1]["elements"][2][
-            "img"
-          ] = require("../assets/swim.svg");
-          user_polylines[1]["elements"][3][
-            "img"
-          ] = require("../assets/walk.svg");
-          user_polylines[1]["elements"][4][
-            "img"
-          ] = require("../assets/hike.svg");
-          user_polylines[4]["elements"][0][
-            "type"
-          ] = require("../assets/morning.svg");
-          user_polylines[4]["elements"][1][
-            "type"
-          ] = require("../assets/lunch.svg");
-          user_polylines[4]["elements"][2][
-            "type"
-          ] = require("../assets/afternoon.svg");
-          user_polylines[4]["elements"][3][
-            "type"
-          ] = require("../assets/evening.svg");
-          user_polylines[4]["elements"][4][
-            "type"
-          ] = require("../assets/night.svg");
-
-          this.setState({ polylines: user_polylines });
-        });
-
-        const citiesRef = Firebase.database().ref(
-          "cities/-M8E-QYO2E65Yckec5Eh"
-        );
-        citiesRef.on("value", (snapshot) => {
-          this.setState({ cities: snapshot.val() });
-          localStorage.setItem("cities", JSON.stringify(snapshot.val()));
-        });
-
-        const heartRateRef = Firebase.database().ref(
-          "heartrate/-M8I0R4qpZGkFi9iPIss"
-        );
-        heartRateRef.on("value", (snapshot) => {
-          this.setState({ heart_rate_zones: snapshot.val() });
-          localStorage.setItem(
-            "heart_rate_zones",
-            JSON.stringify(snapshot.val())
+        var polyline = activities[i]["map"]["summary_polyline"];
+        if (polyline != null) {
+          user_polylines[0]["elements"][0]["polylines"].push(
+            decodePolyline(polyline)
           );
-        });
 
-        this.setState({ map_center: { lat: 30.2711, lng: -97.7437 } });
-        this.setState({ zoom: 13 });
-        this.setState({ modal_open: false });
-        localStorage.setItem("access_token", "sample");
-      } else if (access_token !== "") {
-        this.setState({ access_token });
+          // Store polylines grouped by Sport
+          var unique_activity_type = true;
+          var type_num = 0;
 
-        axios.defaults.headers.common = {
-          Authorization: `Bearer ${access_token}`,
-        };
-
-        // Revert the url of the site to the default url after authentication is finished
-        if (is_map) {
-          window.history.pushState({}, null, base_url + "map");
-        }
-
-        localStorage.setItem("is_sample", false);
-
-        var heart_rate_zones = await this.getHeartRateZones(access_token);
-        sessionStorage.setItem(
-          "heartRateZones",
-          JSON.stringify(heart_rate_zones)
-        );
-        this.setState({ heart_rate_zones });
-        localStorage.setItem(
-          "heart_rate_zones",
-          JSON.stringify(heart_rate_zones)
-        );
-
-        const activities = await this.getActivities(this.state.athlete_id);
-
-        const decodePolyline = require("decode-google-map-polyline");
-
-        for (let i = 0; i < activities.length; i++) {
-          user_activities.push(activities[i]);
-
-          var polyline = activities[i]["map"]["summary_polyline"];
-          if (polyline != null) {
-            user_polylines[0]["elements"][0]["polylines"].push(
-              decodePolyline(polyline)
-            );
-
-            // Store polylines grouped by Sport
-            var unique_activity_type = true;
-            var type_num = 0;
-
-            // Sports other than the default 5 can also be added
-            while (
-              unique_activity_type &&
-              type_num < user_polylines[1]["elements"].length
+          // Sports other than the default 5 can also be added
+          while (
+            unique_activity_type &&
+            type_num < user_polylines[1]["elements"].length
+          ) {
+            if (
+              user_polylines[1]["elements"][type_num]["type"] ===
+              activities[i].type
             ) {
-              if (
-                user_polylines[1]["elements"][type_num]["type"] ===
-                activities[i].type
-              ) {
-                user_polylines[1]["elements"][type_num]["polylines"].push(
-                  decodePolyline(polyline)
-                );
-                unique_activity_type = false;
-              } else {
-                type_num += 1;
-              }
-            }
-
-            if (unique_activity_type) {
-              user_polylines[1]["elements"].push({
-                id: user_polylines[1]["elements"].length,
-                type: activities[i].type,
-                polylines: [decodePolyline(polyline)],
-              });
-            }
-
-            // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
-            if (activities[i]["workout_type"] === 1) {
-              user_polylines[2]["elements"][1]["polylines"].push(
+              user_polylines[1]["elements"][type_num]["polylines"].push(
                 decodePolyline(polyline)
               );
+              unique_activity_type = false;
             } else {
-              user_polylines[2]["elements"][0]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            }
-
-            // Store polylines grouped by Member Type
-            if (activities[i]["athlete_count"] === 2) {
-              user_polylines[3]["elements"][1]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            } else if (activities[i]["athlete_count"] > 2) {
-              user_polylines[3]["elements"][2]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            } else {
-              user_polylines[3]["elements"][0]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            }
-
-            // Store polylines grouped by Time of Day
-            let start_hour = parseInt(
-              activities[i]["start_date_local"].split(":")[0].slice(-2)
-            );
-
-            if (start_hour >= 4 && start_hour < 11) {
-              user_polylines[4]["elements"][0]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            } else if (start_hour >= 11 && start_hour < 14) {
-              user_polylines[4]["elements"][1]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            } else if (start_hour >= 14 && start_hour < 17) {
-              user_polylines[4]["elements"][2]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            } else if (start_hour >= 17 && start_hour < 21) {
-              user_polylines[4]["elements"][3]["polylines"].push(
-                decodePolyline(polyline)
-              );
-            } else {
-              user_polylines[4]["elements"][4]["polylines"].push(
-                decodePolyline(polyline)
-              );
+              type_num += 1;
             }
           }
+
+          if (unique_activity_type) {
+            user_polylines[1]["elements"].push({
+              id: user_polylines[1]["elements"].length,
+              type: activities[i].type,
+              polylines: [decodePolyline(polyline)],
+            });
+          }
+
+          // Store polylines grouped by Workout Type (Could result in error if certain activity doesn't have type)
+          if (activities[i]["workout_type"] === 1) {
+            user_polylines[2]["elements"][1]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else {
+            user_polylines[2]["elements"][0]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          }
+
+          // Store polylines grouped by Member Type
+          if (activities[i]["athlete_count"] === 2) {
+            user_polylines[3]["elements"][1]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else if (activities[i]["athlete_count"] > 2) {
+            user_polylines[3]["elements"][2]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else {
+            user_polylines[3]["elements"][0]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          }
+
+          // Store polylines grouped by Time of Day
+          let start_hour = parseInt(
+            activities[i]["start_date_local"].split(":")[0].slice(-2)
+          );
+
+          if (start_hour >= 4 && start_hour < 11) {
+            user_polylines[4]["elements"][0]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else if (start_hour >= 11 && start_hour < 14) {
+            user_polylines[4]["elements"][1]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else if (start_hour >= 14 && start_hour < 17) {
+            user_polylines[4]["elements"][2]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else if (start_hour >= 17 && start_hour < 21) {
+            user_polylines[4]["elements"][3]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          } else {
+            user_polylines[4]["elements"][4]["polylines"].push(
+              decodePolyline(polyline)
+            );
+          }
         }
-
-        sessionStorage.setItem("activities", JSON.stringify(user_activities));
-        this.setState({ activities: user_activities });
-        localStorage.setItem("activities", JSON.stringify(user_activities));
-        this.setState({ polylines: user_polylines });
-
-        const city_counts = this.getCityActivityCounts(user_activities);
-
-        sessionStorage.setItem("cities", JSON.stringify(city_counts));
-        this.setState({ cities: city_counts });
-        localStorage.setItem("cities", JSON.stringify(city_counts));
-
-        if (city_counts.length !== 0) {
-          this.recenterMap(0);
-        } else {
-          // Default location is geographic center of the U.S.
-          this.setState({ map_center: { lat: 39.8283, lng: -98.5795 } });
-        }
-
-        this.setState({ modal_open: false });
-
-        localStorage.setItem("access_token", access_token);
-
-        // uncomment if sample account in firebase needs to be updated
-        /* const activitiesRef = Firebase.database().ref('activities')
-        activitiesRef.push(user_activities)
-
-        const polylinesRef = Firebase.database().ref('polylines')
-        polylinesRef.remove()
-        polylinesRef.push(user_polylines)
-
-        const heartRateRef = Firebase.database().ref('heartrate')
-        heartRateRef.push(heart_rate_zones) */
-      } else {
-        window.history.pushState({}, null, base_url);
       }
-    }
-  }
 
-  getHeartRateZones = async (access_token) => {
+      sessionStorage.setItem("activities", JSON.stringify(user_activities));
+      setActivities(user_activities)
+      setPolylines(user_polylines)
+
+      const city_counts = getCityActivityCounts(user_activities);
+
+      sessionStorage.setItem("cities", JSON.stringify(city_counts));
+      setCities(city_counts)
+
+      if (city_counts.length !== 0) {
+        setZoom(13)
+        setMapCenter(city_counts[0]["cords"])
+      } else {
+        // Default location is geographic center of the U.S.
+        setMapCenter({ lat: 39.8283, lng: -98.5795 })
+      }
+
+      setModalOpen(false)
+
+      sessionStorage.setItem("access_token", access_token);
+    } else {
+      window.history.pushState({}, null, base_url);
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log("window", window.google)
+    fetchData()
+  }, [fetchData]);
+
+  async function getHeartRateZones(access_token) {
     let results = await axios
       .get("https://www.strava.com/api/v3/athlete/zones?", {
         params: {
@@ -440,7 +328,7 @@ class Heatmap extends Component {
     return results.data["heart_rate"]["zones"];
   };
 
-  getCityActivityCounts = (user_activities) => {
+  function getCityActivityCounts(user_activities) {
     var city_counts = [];
 
     // need to account for other countries where State may be null
@@ -454,6 +342,7 @@ class Heatmap extends Component {
         let activity_miles = activity["distance"];
         let activity_elevation = activity["total_elevation_gain"];
         let activity_time = activity["moving_time"];
+        let activity_cords = { lat: activity["start_latlng"][0], lng: activity["start_latlng"][1] }
 
         var unique_city = true;
         var city_num = 0;
@@ -477,6 +366,7 @@ class Heatmap extends Component {
             miles: activity_miles,
             elevation: activity_elevation,
             hours: activity_time,
+            cords: activity_cords
           });
         }
       }
@@ -499,17 +389,17 @@ class Heatmap extends Component {
     return city_counts;
   };
 
-  getActivities = async (athlete_id) => {
+  async function getActivities(athlete_id, access_token) {
     var invalid_token = false;
 
-    let results = await axios.get(`activities/${athlete_id}`).catch((error) => {
+    let results = await axios.get(`activities/${athlete_id}/${access_token}`).catch((error) => {
       invalid_token = true;
     });
 
     return invalid_token ? [] : results.data;
   };
 
-  updateAccessToken = async (url) => {
+  async function updateAccessToken(url) {
     var token = "";
 
     // Retrieve the code from the authenication process, then exchange the code for a token to access the Strava API
@@ -536,49 +426,17 @@ class Heatmap extends Component {
         }
       );
 
-      this.setState({ athlete_id: results.data.athlete.id });
+      setAthleteId(results.data.athlete.id)
 
       token = results.data.access_token;
-    } else if (localStorage.getItem("access_token") !== null) {
-      token = localStorage.getItem("access_token");
+    } else if (sessionStorage.access_token !== null) {
+      token = sessionStorage.access_token
     }
 
     return token;
   };
 
-  recenterMap = async (city_id) => {
-    // Store coordinates of cities at first request to avoid excess API calls
-    if (!("cords" in this.state.cities[city_id])) {
-      let api_url =
-        "https://api.mapbox.com/geocoding/v5/mapbox.places/" +
-        this.state.cities[city_id]["city"] +
-        ".json?";
-      let result = await axios.get(api_url, {
-        params: {
-          access_token: process.env.REACT_APP_GEOCODING_API_KEY,
-        },
-      });
-
-      let cords = result.data.features[0];
-      let center_cords = { lat: cords.center[1], lng: cords.center[0] };
-
-      let city_counts = this.state.cities;
-      city_counts[city_id]["cords"] = center_cords;
-
-      this.setState({ cities: city_counts });
-
-      // uncomment if sample account in firebase needs to be updated
-      /* const citiesRef = Firebase.database().ref('cities')
-      if (city_id === 17) {
-        citiesRef.push(city_counts)
-      } */
-    }
-
-    this.setState({ zoom: 13 });
-    this.setState({ map_center: this.state.cities[city_id]["cords"] });
-  };
-
-  polylineElements = (polyline_elements) => {
+  function polylineElements(polyline_elements) {
     if (polyline_elements !== undefined) {
       return polyline_elements;
     } else {
@@ -586,205 +444,189 @@ class Heatmap extends Component {
     }
   };
 
-  render() {
-    if (
-      this.state.access_token === "" &&
-      localStorage.getItem("activities") === null
-    ) {
-      return (
-        <div>
-          <Landing />
-        </div>
-      );
-    } else if (this.state.mode === "map" && this.state.access_token !== "") {
-      return (
-        <div id="container">
-          <Modal
-            show={this.state.modal_open}
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
+  if (
+    accessToken === "" &&
+    JSON.parse(sessionStorage.activities) === null
+  ) {
+    return (
+      <div>
+        <Landing />
+      </div>
+    );
+  } else if (mode === "map" && accessToken !== "") {
+    return (
+      <div id="container">
+        <Modal
+          show={modalOpen}
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+        >
+          <Modal.Body>
+            <div className="loading-center">
+              <p className="loading-text">
+                Fetching activities from Strava ...
+              </p>
+              <p className="loading-subtext">
+                Loading may take a while for a large number of activites
+              </p>
+              <Spinner animation="border" className="loading-spinner" />
+            </div>
+          </Modal.Body>
+        </Modal>
+
+        <Navigation />
+
+        <div id="map">
+          <Map
+            google={window.google}
+            zoom={zoom}
+            style={mapStyles}
+            initialCenter={{ lat: 39.8283, lng: -98.5795 }}
+            center={mapCenter}
           >
-            <Modal.Body>
-              <div className="loading-center">
-                <p className="loading-text">
-                  Fetching activities from Strava ...
-                </p>
-                <p className="loading-subtext">
-                  Loading may take a while for a large number of activites
-                </p>
-                <Spinner animation="border" className="loading-spinner" />
-              </div>
-            </Modal.Body>
-          </Modal>
+            {polylineElements(
+              polylines[filterType]["elements"][activityType]["polylines"]
+            ).map((polyline) => {
+              return (
+                <Polyline
+                  path={polyline}
+                  strokeColor="#6F1BC6"
+                  strokeWeight="2"
+                />
+              );
+            })}
+          </Map>
+        </div>
 
-          <Navigation />
+        <div id="cities-search">
+          <DropdownButton
+            alignRight
+            title={selectedCity}
+            id="dropdown-menu-align-right"
+          >
+            {cities.map((city) => {
+              return (
+                <Dropdown.Item
+                  onClick={() => {
+                    setZoom(13);
+                    setMapCenter(city["cords"]);
+                    setSelectedCity(city["city"]);
+                  }}
+                >
+                  {city["city"]}
+                </Dropdown.Item>
+              );
+            })}
+          </DropdownButton>
+        </div>
 
-          <div id="map">
-            <Map
-              google={this.props.google}
-              zoom={this.state.zoom}
-              style={mapStyles}
-              initialCenter={{ lat: 39.8283, lng: -98.5795 }}
-              center={this.state.map_center}
-            >
-              {this.polylineElements(
-                this.state.polylines[this.state.filter_type]["elements"][
-                  this.state.activity_type
-                ]["polylines"]
-              ).map((polyline) => {
-                return (
-                  <Polyline
-                    path={polyline}
-                    strokeColor="#6F1BC6"
-                    strokeWeight="2"
+        <div id="map-menu">
+          <h3>Options</h3>
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            onClick={(e) => {
+              setFilterType(0)
+              setActivityType(0)
+            }}
+          >
+            All Activities
+          </Button>
+          <h4>Sport</h4>
+          <ButtonGroup size="sm">
+            {polylines[1]["elements"].map((activity_type) => {
+              return (
+                <Button
+                  variant="outline-secondary"
+                  onClick={(e) => {
+                    setFilterType(1)
+                    setActivityType(activity_type["id"])
+                  }}
+                >
+                  <img
+                    src={activity_type["img"]}
+                    style={{ width: 25 }}
+                    alt="sport icon"
                   />
-                );
-              })}
-            </Map>
-          </div>
-
-          <div id="cities-search">
-            <DropdownButton
-              alignRight
-              title={this.state.selected_city}
-              id="dropdown-menu-align-right"
-            >
-              {this.state.cities.map((city) => {
-                return (
-                  <Dropdown.Item
-                    onClick={() => {
-                      this.recenterMap(city["id"]);
-                      this.setState({ selected_city: city["city"] });
-                    }}
-                  >
-                    {city["city"]}
-                  </Dropdown.Item>
-                );
-              })}
-            </DropdownButton>
-          </div>
-
-          <div id="map-menu">
-            <h3>Options</h3>
-            <Button
-              variant="outline-secondary"
-              size="sm"
-              onClick={(e) => {
-                this.setState({ filter_type: 0, activity_type: 0 });
-              }}
-            >
-              All Activities
-            </Button>
-            <h4>Sport</h4>
-            <ButtonGroup size="sm">
-              {this.state.polylines[1]["elements"].map((activity_type) => {
-                return (
-                  <Button
-                    variant="outline-secondary"
-                    onClick={(e) => {
-                      this.setState({
-                        filter_type: 1,
-                        activity_type: activity_type["id"],
-                      });
-                    }}
-                  >
-                    <img
-                      src={activity_type["img"]}
-                      style={{ width: 25 }}
-                      alt="sport icon"
-                    />
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
-            <h4>Workout</h4>
-            <ButtonGroup size="sm" className="btn-group">
-              {this.state.polylines[2]["elements"].map((activity_type) => {
-                return (
-                  <Button
-                    variant="outline-secondary"
-                    onClick={(e) => {
-                      this.setState({
-                        filter_type: 2,
-                        activity_type: activity_type["id"],
-                      });
-                    }}
-                  >
-                    {activity_type["type"]}
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
-            <h4>Members</h4>
-            <ButtonGroup size="sm" className="btn-group">
-              {this.state.polylines[3]["elements"].map((activity_type) => {
-                return (
-                  <Button
-                    variant="outline-secondary"
-                    onClick={(e) => {
-                      this.setState({
-                        filter_type: 3,
-                        activity_type: activity_type["id"],
-                      });
-                    }}
-                  >
-                    {activity_type["type"]}
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
-            <h4>Time of Day</h4>
-            <ButtonGroup size="sm">
-              {this.state.polylines[4]["elements"].map((activity_type) => {
-                return (
-                  <Button
-                    variant="outline-secondary"
-                    onClick={(e) => {
-                      this.setState({
-                        filter_type: 4,
-                        activity_type: activity_type["id"],
-                      });
-                    }}
-                  >
-                    <img
-                      src={activity_type["type"]}
-                      style={{ width: 25 }}
-                      alt="time of day icon"
-                    />
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
-          </div>
-          <div id="branding">
-            <img src={Branding} alt="powered by strava branding" />
-          </div>
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+          <h4>Workout</h4>
+          <ButtonGroup size="sm" className="btn-group">
+            {polylines[2]["elements"].map((activity_type) => {
+              return (
+                <Button
+                  variant="outline-secondary"
+                  onClick={(e) => {
+                    setFilterType(2)
+                    setActivityType(activity_type["id"])
+                  }}
+                >
+                  {activity_type["type"]}
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+          <h4>Members</h4>
+          <ButtonGroup size="sm" className="btn-group">
+            {polylines[3]["elements"].map((activity_type) => {
+              return (
+                <Button
+                  variant="outline-secondary"
+                  onClick={(e) => {
+                    setFilterType(3)
+                    setActivityType(activity_type["id"])
+                  }}
+                >
+                  {activity_type["type"]}
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+          <h4>Time of Day</h4>
+          <ButtonGroup size="sm">
+            {polylines[4]["elements"].map((activity_type) => {
+              return (
+                <Button
+                  variant="outline-secondary"
+                  onClick={(e) => {
+                    setFilterType(4)
+                    setActivityType(activity_type["id"])
+                  }}
+                >
+                  <img
+                    src={activity_type["type"]}
+                    style={{ width: 25 }}
+                    alt="time of day icon"
+                  />
+                </Button>
+              );
+            })}
+          </ButtonGroup>
         </div>
-      );
-    } else if (this.state.mode === "list") {
-      return (
-        <div>
-          <List />
+        <div id="branding">
+          <img src={Branding} alt="powered by strava branding" />
         </div>
-      );
-    } else if (this.state.mode === "stats") {
-      return (
-        <div>
-          <Stats />
-        </div>
-      );
-    } else if (this.state.mode === "routes") {
-      return (
-        <div>
-          <Routes data={this.state} />
-        </div>
-      );
-    } else {
-      return <div></div>;
-    }
+      </div>
+    );
+  } else if (mode === "list") {
+    return (
+      <div>
+        <List />
+      </div>
+    );
+  } else if (mode === "stats") {
+    return (
+      <div>
+        <Stats />
+      </div>
+    );
+  } else {
+    return <div></div>;
   }
 }
 
 export default GoogleApiWrapper({
-  apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+  apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY
 })(Heatmap);

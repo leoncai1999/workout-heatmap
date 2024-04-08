@@ -4,7 +4,7 @@ const axios = require("axios");
 const utils = require("./utils");
 const PORT = 3001;
 
-app.get("/activities/:athlete_id", async (req, res) => {
+app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   const ACTIVITY_BATCH_SIZE = 200;
   const FEET_IN_MILE = 1609.344;
   const FEET_IN_METER = 3.28084;
@@ -12,15 +12,6 @@ app.get("/activities/:athlete_id", async (req, res) => {
   var num_core_activities = 0;
   var min_activity_batches = 0;
   var all_activities = [];
-
-  let token =
-    req.headers.authorization &&
-    req.headers.authorization.match(/^Bearer (.*)$/);
-  if (token && token[1]) {
-    token = token[1];
-  } else if (!token) {
-    // TODO: error handling
-  }
 
   /*
     We can't directly deterimine the total number of Strava activities an athlete has. But
@@ -32,7 +23,7 @@ app.get("/activities/:athlete_id", async (req, res) => {
     `https://www.strava.com/api/v3/athletes/${req.params.athlete_id}/stats`,
     {
       params: {
-        access_token: token,
+        access_token: req.params.access_token,
       },
     }
   );
@@ -61,7 +52,7 @@ app.get("/activities/:athlete_id", async (req, res) => {
         params: {
           per_page: ACTIVITY_BATCH_SIZE,
           page: i,
-          access_token: token,
+          access_token: req.params.access_token,
         },
       })
     );
@@ -86,7 +77,7 @@ app.get("/activities/:athlete_id", async (req, res) => {
         params: {
           per_page: ACTIVITY_BATCH_SIZE,
           page: min_activity_batches,
-          access_token: token,
+          access_token: req.params.access_token,
         },
       }
     );
