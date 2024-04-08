@@ -1,18 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Map, GoogleApiWrapper, Polyline } from "google-maps-react";
 import axios from "axios";
-import {
-  Button,
-  ButtonGroup,
-  Dropdown,
-  DropdownButton,
-  Spinner,
-} from "react-bootstrap";
+import { Dropdown, DropdownButton, Spinner } from "react-bootstrap";
 import Landing from "./Landing.js";
 import List from "./List.js";
 import Stats from "./Stats.js";
 import Routes from "./Routes.js";
 import Navigation from "../components/Navigation.js";
+import MapMenu from "../components/MapMenu.js";
 import Modal from "react-bootstrap/Modal";
 import Branding from "../assets/powered_by_strava.png";
 import "../styles/Heatmap.css";
@@ -29,11 +24,8 @@ const decodePolyline = require("decode-google-map-polyline");
 const base_url = "http://localhost:3000/";
 
 function Heatmap() {
-  const [polylines, setPolylines] = useState([]);
   const [filterValue, setFilterValue] = useState("");
   const [filterType, setFilterType] = useState("");
-  const [activityType, setActivityType] = useState(0);
-  const [accessToken, setAccessToken] = useState("");
   const [mapCenter, setMapCenter] = useState({});
   const [selectedCity, setSelectedCity] = useState("Select City");
   const [cities, setCities] = useState([]);
@@ -42,35 +34,34 @@ function Heatmap() {
   const [mode, setMode] = useState("map");
   const [isSample, setIsSample] = useState(false);
 
-  const fetchData = useCallback(async() => {
+  const fetchData = useCallback(async () => {
     var is_map = false;
     let url_elements = String(window.location.href).split("/");
 
     document.body.style.background = "#e8e1eb";
-    const url_end = url_elements.slice(-1)[0]
-    const non_map_modes = ["stats", "routes", "list"]
+    const url_end = url_elements.slice(-1)[0];
+    const non_map_modes = ["stats", "routes", "list"];
 
     if (non_map_modes.includes(url_end)) {
-      setMode(url_end)
+      setMode(url_end);
     } else {
-      setMode("map")
-      is_map = true
+      document.body.style.backgroundColor = "#5dbcd2";
+      setMode("map");
+      is_map = true;
     }
 
     const authenticatedUser = await getAuthenticatedUser(
       String(window.location.href)
-    )
+    );
     sessionStorage.setItem(
       "autenticatedUser",
       JSON.stringify(authenticatedUser)
-    )
+    );
 
-    const access_token = authenticatedUser["access_token"]
-    const athlete_id = authenticatedUser["athlete"]["id"]
+    const access_token = authenticatedUser["access_token"];
+    const athlete_id = authenticatedUser["athlete"]["id"];
 
     if (access_token !== "") {
-      setAccessToken(access_token)
-
       axios.defaults.headers.common = {
         Authorization: `Bearer ${access_token}`,
       };
@@ -80,20 +71,24 @@ function Heatmap() {
         window.history.pushState({}, null, base_url + "map");
       }
 
-      var heart_rate_zones = await axios
-      .get("https://www.strava.com/api/v3/athlete/zones?", {
-        params: {
-          access_token: access_token,
-        },
-      })
-      heart_rate_zones = heart_rate_zones.data["heart_rate"]["zones"]
-      
+      var heart_rate_zones = await axios.get(
+        "https://www.strava.com/api/v3/athlete/zones?",
+        {
+          params: {
+            access_token: access_token,
+          },
+        }
+      );
+      heart_rate_zones = heart_rate_zones.data["heart_rate"]["zones"];
+
       sessionStorage.setItem(
         "heartRateZones",
         JSON.stringify(heart_rate_zones)
       );
 
-      var activities = await axios.get(`activities/${athlete_id}/${access_token}`)
+      var activities = await axios.get(
+        `activities/${athlete_id}/${access_token}`
+      );
       activities = activities.data;
 
       sessionStorage.setItem("activities", JSON.stringify(activities));
@@ -101,26 +96,26 @@ function Heatmap() {
       const city_counts = getCityActivityCounts(activities);
 
       sessionStorage.setItem("cities", JSON.stringify(city_counts));
-      setCities(city_counts)
+      setCities(city_counts);
 
       if (city_counts.length !== 0) {
-        setZoom(13)
-        setMapCenter(city_counts[0]["cords"])
+        setZoom(13);
+        setMapCenter(city_counts[0]["cords"]);
       } else {
         // Default location is geographic center of the U.S.
-        setMapCenter({ lat: 39.8283, lng: -98.5795 })
+        setMapCenter({ lat: 39.8283, lng: -98.5795 });
       }
 
-      setModalOpen(false)
+      setModalOpen(false);
 
       sessionStorage.setItem("access_token", access_token);
     } else {
       window.history.pushState({}, null, base_url);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, [fetchData]);
 
   function getCityActivityCounts(activities) {
@@ -137,7 +132,10 @@ function Heatmap() {
         let activity_miles = activity["distance"];
         let activity_elevation = activity["total_elevation_gain"];
         let activity_time = activity["moving_time"];
-        let activity_cords = { lat: activity["start_latlng"][0], lng: activity["start_latlng"][1] }
+        let activity_cords = {
+          lat: activity["start_latlng"][0],
+          lng: activity["start_latlng"][1],
+        };
 
         var unique_city = true;
         var city_num = 0;
@@ -161,7 +159,7 @@ function Heatmap() {
             miles: activity_miles,
             elevation: activity_elevation,
             hours: activity_time,
-            cords: activity_cords
+            cords: activity_cords,
           });
         }
       }
@@ -182,69 +180,72 @@ function Heatmap() {
     }
 
     return city_counts;
-  };
+  }
 
   function getActivityTimeOfDay(timeOfDay) {
-    let start_hour = parseInt(
-      timeOfDay.split(":")[0].slice(-2)
-    );
+    let start_hour = parseInt(timeOfDay.split(":")[0].slice(-2));
 
     if (start_hour >= 4 && start_hour < 11) {
-      return "morning"
+      return "morning";
     } else if (start_hour >= 11 && start_hour < 14) {
-      return "lunch"
+      return "lunch";
     } else if (start_hour >= 14 && start_hour < 17) {
-      return "afternoon"
+      return "afternoon";
     } else if (start_hour >= 17 && start_hour < 21) {
-      return "evening"
+      return "evening";
     } else {
-      return "night"
+      return "night";
     }
   }
 
   function getActivityMemberType(athlete_count) {
     if (athlete_count === 2) {
-      return "Partner"
+      return "Partner";
     } else if (athlete_count > 2) {
-      return "Group"
+      return "Group";
     } else {
-      return "Solo"
+      return "Solo";
     }
   }
 
   function getPolylines(filterType, filterValue) {
-    var activities = JSON.parse(sessionStorage.activities)
+    var activities = JSON.parse(sessionStorage.activities);
 
     if (filterType === "sport") {
-      activities = activities.filter((activity) =>
-        activity["type"] && activity["type"] === filterValue
-      )
+      activities = activities.filter(
+        (activity) => activity["type"] && activity["type"] === filterValue
+      );
     } else if (filterType === "workout") {
-      activities = activities.filter((activity) =>
-        (activity["workout_type"] === 1 ? "Race" : "Training") === filterValue
-      )
+      activities = activities.filter(
+        (activity) =>
+          (activity["workout_type"] === 1 ? "Race" : "Training") === filterValue
+      );
     } else if (filterType === "members") {
-      activities = activities.filter((activity) =>
-        activity["athlete_count"] && getActivityMemberType(activity["athlete_count"]) === filterValue
-      )
+      activities = activities.filter(
+        (activity) =>
+          activity["athlete_count"] &&
+          getActivityMemberType(activity["athlete_count"]) === filterValue
+      );
     } else if (filterType === "time") {
-      activities = activities.filter((activity) =>
-        activity["start_date_local"] && getActivityTimeOfDay(activity["start_date_local"]) === filterValue
-      )
+      activities = activities.filter(
+        (activity) =>
+          activity["start_date_local"] &&
+          getActivityTimeOfDay(activity["start_date_local"]) === filterValue
+      );
     }
 
-    var polylines = []
+    var polylines = [];
 
     for (let i = 0; i < activities.length; i++) {
-      const polyline = activities[i]["map"]["summary_polyline"]
-      polylines.push(decodePolyline(polyline))
+      const polyline = activities[i]["map"]["summary_polyline"];
+      polylines.push(decodePolyline(polyline));
     }
 
-    return polylines
+    return polylines;
   }
 
   if (
-    accessToken === "" &&
+    sessionStorage.authenticatedUser === undefined &&
     JSON.parse(sessionStorage.activities) === null
   ) {
     return (
@@ -252,7 +253,7 @@ function Heatmap() {
         <Landing />
       </div>
     );
-  } else if (mode === "map" && accessToken !== "") {
+  } else if (mode === "map") {
     return (
       <div id="container">
         <Modal
@@ -317,90 +318,11 @@ function Heatmap() {
           </DropdownButton>
         </div>
 
-        <div id="map-menu">
-          <h3>Options</h3>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={(e) => {
-              setFilterType("")
-            }}
-          >
-            All Activities
-          </Button>
-          <h4>Sport</h4>
-          <ButtonGroup size="sm">
-            {["Run", "Ride", "Swim", "Walk", "Hike"].map((sport) => {
-              return(
-                <Button
-                  variant="outline-secondary"
-                  onClick={(e) => {
-                    setFilterType("sport")
-                    setFilterValue(sport)
-                  }}
-                >
-                  <img
-                    src={require(`../assets/${sport.toLowerCase()}.svg`)}
-                    style={{ width: 25 }}
-                    alt="sport icon"
-                  />
-                </Button>
-              )
-            })}
-          </ButtonGroup>
-          <h4>Workout</h4>
-          <ButtonGroup size="sm" className="btn-group">
-            {["Training", "Race"].map((workoutType) => {
-              return (
-                <Button
-                  variant="outline-secondary"
-                  onClick={(e) => {
-                    setFilterType("workout")
-                    setFilterValue(workoutType)
-                  }}
-                >
-                  {workoutType}
-                </Button>
-              );
-            })}
-          </ButtonGroup>
-          <h4>Members</h4>
-          <ButtonGroup size="sm" className="btn-group">
-            {["Solo", "Partner", "Group"].map((memberType) => {
-              return (
-                <Button
-                  variant="outline-secondary"
-                  onClick={(e) => {
-                    setFilterType("members")
-                    setFilterValue(memberType)
-                  }}
-                >
-                  {memberType}
-                </Button>
-              );
-            })}
-          </ButtonGroup>
-          <h4>Time of Day</h4>
-          <ButtonGroup size="sm">
-            {["morning", "lunch", "afternoon", "evening", "night"].map((timeOfDay) => {
-              return (
-                <Button
-                  variant="outline-secondary"
-                  onClick={(e) => {
-                    setFilterType("time")
-                    setFilterValue(timeOfDay)
-                  }}
-                >
-                  <img
-                    src={require(`../assets/${timeOfDay}.svg`)}
-                    style={{ width: 25 }}
-                    alt="time of day icon"
-                  />
-                </Button>
-              );
-            })}
-          </ButtonGroup>
-        </div>
+        <MapMenu
+          setFilterType={setFilterType}
+          setFilterValue={setFilterValue}
+        />
+
         <div id="branding">
           <img src={Branding} alt="powered by strava branding" />
         </div>
@@ -424,5 +346,5 @@ function Heatmap() {
 }
 
 export default GoogleApiWrapper({
-  apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY
+  apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
 })(Heatmap);
