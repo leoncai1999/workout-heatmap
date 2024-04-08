@@ -2,9 +2,9 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
-import Heatmap from "./views/Heatmap";
-import Landing from "./views/Landing";
-import About from "./views/About";
+import Heatmap from "./pages/Heatmap";
+import Landing from "./pages/Landing";
+import About from "./pages/About";
 
 function App() {
   return (

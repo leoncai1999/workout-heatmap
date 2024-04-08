@@ -1,5 +1,5 @@
 import React from "react";
-import Navigation from "../components/Navigation";
+import Navigation from "../components/Navigation.js";
 import ListIcon from "../assets/list.svg";
 import Modal from "react-bootstrap/Modal";
 import { Spinner } from "react-bootstrap";
