@@ -2,8 +2,6 @@ import React, { useEffect } from "react";
 import Navigation from "../components/Navigation.js";
 import Branding from "../components/Branding.js";
 import ListIcon from "../assets/list.svg";
-import Modal from "react-bootstrap/Modal";
-import { Spinner } from "react-bootstrap";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import ToolkitProvider, { CSVExport } from "react-bootstrap-table2-toolkit";
@@ -130,7 +128,7 @@ function List() {
   }, []);
 
   function getCSVName() {
-    if (localStorage.getItem("is_sample")) {
+    if (sessionStorage.getItem("is_sample")) {
       let date = new Date();
       let date_string =
         date.getMonth() + 1 + "-" + date.getDate() + "-" + date.getFullYear();
@@ -140,23 +138,8 @@ function List() {
     }
   }
 
-  const activities = JSON.parse(sessionStorage.activities)
-
   return (
     <div>
-      <Modal
-        show={activities.length === 0}
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Body>
-          <div className="loading-center">
-            <p className="loading-text">Loading List of Activities ...</p>
-            <Spinner animation="border" className="loading-spinner" />
-          </div>
-        </Modal.Body>
-      </Modal>
-
       <Navigation />
 
       <img class="img-stats" src={ListIcon} alt="spreadsheet icon"></img>
@@ -164,7 +147,7 @@ function List() {
 
       <ToolkitProvider
         keyField="id"
-        data={activities}
+        data={JSON.parse(sessionStorage["activities"])}
         columns={columns}
         exportCSV={{
           fileName: getCSVName(),
@@ -177,7 +160,7 @@ function List() {
             </ExportCSVButton>
             <BootstrapTable
               keyField="id"
-              data={activities}
+              data={JSON.parse(sessionStorage["activities"])}
               columns={columns}
               bordercolors={true}
               striped

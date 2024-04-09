@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navigation from "../components/Navigation";
 import Branding from "../components/Branding.js";
 import StatsIcon from "../assets/stats.svg";
-import { Dropdown, DropdownButton, Spinner } from "react-bootstrap";
-import Modal from "react-bootstrap/Modal";
+import { Dropdown, DropdownButton } from "react-bootstrap";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
@@ -739,19 +738,6 @@ function Stats() {
 
   return (
     <div>
-      <Modal
-        show={getCityStats(activities).length === 0}
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Body>
-          <div className="loading-center">
-            <p className="loading-text">Loading Statistics ...</p>
-            <Spinner animation="border" className="loading-spinner" />
-          </div>
-        </Modal.Body>
-      </Modal>
-
       <Navigation />
 
       <img className="img-stats" src={StatsIcon} alt="Icon of data graph"></img>
