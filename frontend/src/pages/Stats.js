@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Navigation from "../components/Navigation";
+import Branding from "../components/Branding.js";
 import StatsIcon from "../assets/stats.svg";
 import { Dropdown, DropdownButton, Spinner } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import { Line, Radar, Bar, Doughnut } from "react-chartjs-2";
-import Branding from "../assets/powered_by_strava.png";
 import "../styles/Stats.css";
 
 const paginationOptions = {
@@ -210,6 +210,10 @@ function Stats() {
   const [totalDistance, setTotalDistance] = useState("");
   const [totalTime, setTotalTime] = useState("");
 
+  useEffect(() => {
+    document.body.style.background = "#e8e1eb";
+  }, []);
+
   const city_columns = [
     {
       dataField: "id",
@@ -283,8 +287,10 @@ function Stats() {
     },
   ];
 
+  const activities = JSON.parse(sessionStorage.activities)
+
   function getWorkoutStatsByMonth(attr) {
-    let user_activities = JSON.parse(sessionStorage.activities).reverse();
+    let user_activities = activities.reverse();
     let current_year = user_activities[0]["start_date_local"].split("-")[0];
     let year_data = new Array(12).fill(0);
     let distance_per_month = new Array(12).fill(0);
@@ -417,7 +423,7 @@ function Stats() {
   }
 
   function getWorkoutStatsByDay() {
-    let user_activities = JSON.parse(sessionStorage.activities).reverse();
+    let user_activities = activities.reverse();
 
     let first_day = new Date(
       user_activities[0]["start_date_local"].split("T")[0]
@@ -562,7 +568,7 @@ function Stats() {
 
   // Get number of workout activities started at each hour
   function getWorkoutStatsByTimeOfDay() {
-    let user_activities = JSON.parse(sessionStorage.activities);
+    let user_activities = activities;
     let hours = new Array(24).fill(0);
     let total_miles = 0;
     let total_seconds = 0;
@@ -655,9 +661,73 @@ function Stats() {
     setDataDoughnut(dataDoughnutState);
   }
 
+  function getCityStats(activities) {
+    var city_stats = [];
+
+    // need to account for other countries where State may be null
+    for (let i = 0; i < activities.length; i++) {
+      let activity = activities[i];
+
+      if (activity["location_city"]) {
+        let city_name =
+          activity["location_city"] + ", " + activity["location_state"];
+
+        let activity_miles = activity["distance"];
+        let activity_elevation = activity["total_elevation_gain"];
+        let activity_time = activity["moving_time"];
+        let activity_cords = {
+          lat: activity["start_latlng"][0],
+          lng: activity["start_latlng"][1],
+        };
+
+        var unique_city = true;
+        var city_num = 0;
+
+        while (unique_city && city_num < city_stats.length) {
+          if (city_stats[city_num]["city"] === city_name) {
+            city_stats[city_num]["activities"] += 1;
+            city_stats[city_num]["miles"] += activity_miles;
+            city_stats[city_num]["elevation"] += activity_elevation;
+            city_stats[city_num]["hours"] += activity_time;
+            unique_city = false;
+          } else {
+            city_num += 1;
+          }
+        }
+
+        if (unique_city) {
+          city_stats.push({
+            city: city_name,
+            activities: 1,
+            miles: activity_miles,
+            elevation: activity_elevation,
+            hours: activity_time,
+            cords: activity_cords,
+          });
+        }
+      }
+    }
+
+    // Sort cities by number of activites descending, breaking ties by total mileage
+    city_stats.sort(function (a, b) {
+      return b.activities - a.activities || b.miles - a.miles;
+    });
+
+    for (let i = 0; i < city_stats.length; i++) {
+      city_stats[i]["id"] = i;
+      city_stats[i]["miles"] = parseFloat(city_stats[i]["miles"].toFixed(2));
+      city_stats[i]["elevation"] = parseFloat(
+        city_stats[i]["elevation"].toFixed(2)
+      );
+      city_stats[i]["hours"] = parseInt(city_stats[i]["hours"] / 3600);
+    }
+
+    return city_stats;
+  }
+
   useEffect(() => {
     if (
-      JSON.parse(sessionStorage.activities).length > 0 &&
+      activities.length > 0 &&
       JSON.parse(sessionStorage.heartRateZones).length > 0
     ) {
       getWorkoutStatsByMonth("miles");
@@ -670,7 +740,7 @@ function Stats() {
   return (
     <div>
       <Modal
-        show={JSON.parse(sessionStorage.cities).length === 0}
+        show={getCityStats(activities).length === 0}
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
@@ -688,7 +758,7 @@ function Stats() {
       <h1 className="black-header"> Workout Statistics </h1>
 
       <h2 className="stats-description">
-        You've worked out {JSON.parse(sessionStorage.activities).length} times
+        You've worked out {activities.length} times
         for a total of {totalTime} hours, and traveled {totalDistance} miles
       </h2>
 
@@ -696,7 +766,7 @@ function Stats() {
       <div className="bootstrap-table">
         <BootstrapTable
           keyField="id"
-          data={JSON.parse(sessionStorage.cities)}
+          data={getCityStats(activities)}
           columns={city_columns}
           bordercolors={true}
           striped
@@ -803,9 +873,7 @@ function Stats() {
           condensed
         />
       </div>
-      <div id="branding">
-        <img src={Branding} alt="powered by strava branding" />
-      </div>
+      <Branding />
     </div>
   );
 }

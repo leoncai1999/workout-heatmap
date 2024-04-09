@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { Nav } from "react-bootstrap";
 import Logo from "../assets/app-logo.svg";
 import StravaButton from "../assets/connect_with_strava.png";
-import Branding from "../assets/powered_by_strava.png";
-import { requestStravaPermissions } from "../utils/api";
+import Branding from "../components/Branding.js";
+import { requestStravaPermissions } from "../utils/authenticate";
 import "../styles/Welcome.css";
 
 function Landing() {
@@ -35,9 +35,7 @@ function Landing() {
       <Nav.Link href="/map-sample">
         <h6 className="demo-text"> Not a Strava user? See a demo account </h6>
       </Nav.Link>
-      <div id="branding">
-        <img src={Branding} alt="powered by strava branding"/>
-      </div>
+      <Branding />
     </div>
   )
 }

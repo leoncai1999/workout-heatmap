@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import Navigation from "../components/Navigation";
 import IconContainer from "../components/IconContainer";
+import Branding from "../components/Branding.js";
 import MapScreen from "../assets/map_screen.png";
-import Branding from "../assets/powered_by_strava.png";
 import "../styles/About.css";
 
 function About() {
@@ -40,9 +40,7 @@ function About() {
         feel free to reach out to me via email!
       </p>
       <IconContainer />
-      <div id="branding">
-        <img src={Branding} alt="powered by strava branding"/>
-      </div>
+      <Branding />
     </div>
   );
 }

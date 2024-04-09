@@ -32,11 +32,6 @@ In order to see Stats regarding activity intensity and estimated workout effort 
 the user must enable access to their Strava profile information. Allowing this gives the web app
 access to the user's heart rate zones which can then be used to bring these insights.
 
-## Routes
-[![RoutesScreen](https://i.postimg.cc/x14DMJpy/Routes-Screen.png)](https://postimg.cc/87M0V5Sj)
-The app's algorithm scans all of the user's map plottable activites to determine which activities have similar
-routes to each other based on path, distance and elevation gain. Commonly repeated routes are then displayed.
-
 ## App Components
 **Built With:** React, HTML/CSS and JavaScript
 

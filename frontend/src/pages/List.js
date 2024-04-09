@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navigation from "../components/Navigation.js";
+import Branding from "../components/Branding.js";
 import ListIcon from "../assets/list.svg";
 import Modal from "react-bootstrap/Modal";
 import { Spinner } from "react-bootstrap";
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import ToolkitProvider, { CSVExport } from "react-bootstrap-table2-toolkit";
-import Branding from "../assets/powered_by_strava.png";
 import {
   sortDates,
   sortTimesOfDay,
@@ -125,6 +125,10 @@ function List() {
     },
   ];
 
+  useEffect(() => {
+    document.body.style.background = "#e8e1eb";
+  }, []);
+
   function getCSVName() {
     if (localStorage.getItem("is_sample")) {
       let date = new Date();
@@ -185,9 +189,7 @@ function List() {
           </div>
         )}
       </ToolkitProvider>
-      <div id="branding">
-        <img src={Branding} alt="powered by strava branding" />
-      </div>
+      <Branding />
     </div>
   );
 }
