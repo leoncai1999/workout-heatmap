@@ -121,6 +121,9 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
       )
     );
 
+    all_activities[i]["start_hour"] = parseInt(time_and_date.split(":")[0].slice(-2));
+    all_activities[i]["day_of_week"] = new Date(time_and_date).getDay();
+
     if (all_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
       all_activities[i]["pace"] = utils.formatPace(
         activity["moving_time"],

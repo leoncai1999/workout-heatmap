@@ -22,6 +22,8 @@ function Landing({ isCallback }) {
     const access_token = authenticatedUser["access_token"];
     const athlete_id = authenticatedUser["athlete"]["id"];
 
+    console.log("**********Token is: ", access_token)
+
     var heartRateZones = await axios.get(
       "https://www.strava.com/api/v3/athlete/zones?",
       {
