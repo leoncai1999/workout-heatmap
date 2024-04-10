@@ -8,7 +8,7 @@ import StravaButton from "../assets/connect_with_strava.png";
 import Branding from "../components/Branding.js";
 import { getCities } from "../utils/get.js";
 import { requestStravaPermissions, getAuthenticatedUser } from "../utils/authenticate.js";
-import "../styles/Welcome.css";
+import "../styles/Landing.css";
 
 
 function Landing({ isCallback }) {
