@@ -161,7 +161,7 @@ export const removeUnwantedFields = (activities) => {
       trainer,
       commute,
       manual,
-      private,
+      // private,
       visibility,
       flagged,
       kudos_count,
