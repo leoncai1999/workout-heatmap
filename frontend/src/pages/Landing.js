@@ -18,7 +18,7 @@ const isLocalhost =
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname === "";
 
-const baseApiUrl = isLocalhost ? "http://localhost:3000" : "https://workout-heatmap-backend.onrender.com/"
+const baseApiUrl = isLocalhost ? "http://localhost:3000" : "https://workout-heatmap-backend.onrender.com"
 
 function Landing({ isCallback }) {
   const [fetchComplete, setFetchComplete] = useState(!isCallback);
