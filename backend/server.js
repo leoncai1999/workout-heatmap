@@ -2,7 +2,11 @@ const express = require("express");
 const app = express();
 const axios = require("axios");
 const utils = require("./utils");
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+
+app.get("/", (req, res) => {
+  res.json("Welcome to the Workout Heatmap API")
+})
 
 app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   const ACTIVITY_BATCH_SIZE = 200;
@@ -151,6 +155,6 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   res.json(all_activities);
 });
 
-app.listen(PORT, () => {
-  console.log("Server started on port 3001");
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server started at PORT ${PORT}`);
 });
