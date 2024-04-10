@@ -102,21 +102,39 @@ module.exports.formatPace = (time, distance) => {
     only works for US. We use the name of the activity's time zone city to determin if it's in the US.
 */
 module.exports.addCitiesToActivities = (activities) => {
-  let us_timezones = ["New_York", "Chicago", "Denver", "Los_Angeles"]
+  let us_timezones = ["New_York", "Chicago", "Denver", "Los_Angeles"];
 
-  activities.filter((activity) => activity["start_latlng"]).forEach((activity) => {
-    let timezone_city = activity["timezone"].split("/").pop();
+  var cities_requests = [];
 
-    if (us_timezones.includes(timezone_city)) {
-      let activity_location = cities.gps_lookup(
-        activity["start_latlng"][0],
-        activity["start_latlng"][1]
-      );
+  activities
+    .filter((activity) => activity["start_latlng"])
+    .forEach((activity) => {
+      let timezone_city = activity["timezone"].split("/").pop();
 
-      activity["location_city"] = activity_location["city"];
-      activity["location_state"] = activity_location["state_abbr"];
-    }
-  })
+      if (us_timezones.includes(timezone_city)) {
+        cities_requests.push(
+          new Promise((resolve, reject) => {
+            let activity_location = cities.gps_lookup(
+              activity["start_latlng"][0],
+              activity["start_latlng"][1]
+            );
+
+            activity["location_city"] = activity_location["city"];
+            activity["location_state"] = activity_location["state_abbr"];
+            resolve = "OK";
+          })
+        );
+        // let activity_location = cities.gps_lookup(
+        //   activity["start_latlng"][0],
+        //   activity["start_latlng"][1]
+        // );
+
+        // activity["location_city"] = activity_location["city"];
+        // activity["location_state"] = activity_location["state_abbr"];
+      }
+    });
+
+  Promise.all(cities_requests);
 
   return activities;
 };
