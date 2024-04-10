@@ -1,11 +1,10 @@
 import axios from "axios";
 
-export const requestStravaPermissions = (mode) => {
+export const requestStravaPermissions = (isLocalhost) => {
   // Be sure to change the authorized callback url in the Strava API settings accordingly
-  const base_url =
-    mode === "local"
-      ? "http://localhost:3000/"
-      : "https://workout-heatmap.herokuapp.com/";
+  const base_url = isLocalhost
+    ? "http://localhost:3000/"
+    : "https://workout-heatmap-frontend.onrender.com/";
 
   // User is redirected to Strava's website to login and give site permission to access acount information
   window.location.assign(
