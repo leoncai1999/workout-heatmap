@@ -1,4 +1,5 @@
 const reverse_geocode = require("reverse-geocode");
+const cities = require("cities");
 
 module.exports.removeUnwantedFields = (activities) => {
   activities = activities.map(
@@ -98,41 +99,24 @@ module.exports.formatPace = (time, distance) => {
 /*
     The location_city and location_state values in the activities endpoint are broken so we'll use a
     reverse geocoder package to determine these values from the activity start coordinates. The package
-    only works for US, Canada and Australia. We use the name of the activity's time zone city to
-    to determine if it is in a supported country.
+    only works for US. We use the name of the activity's time zone city to determin if it's in the US.
 */
 module.exports.addCitiesToActivities = (activities) => {
-  let supported_countries_to_timezone_cities = {
-    us: ["New_York", "Chicago", "Denver", "Los_Angeles"],
-    ca: ["St_Johns", "Toronto", "Winnipeg", "Regina", "Vancouver"],
-    au: ["Sydney", "Adelaide", "Perth"],
-  };
+  let us_timezones = ["New_York", "Chicago", "Denver", "Los_Angeles"]
 
-  for (let i = 0; i < activities.length; i++) {
-    let activity = activities[i];
-    let activity_cords = activity["start_latlng"];
+  activities.filter((activity) => activity["start_latlng"]).forEach((activity) => {
+    let timezone_city = activity["timezone"].split("/").pop();
 
-    if (activity_cords.length > 0) {
-      let timezone_city = activity["timezone"].split("/").pop();
+    if (us_timezones.includes(timezone_city)) {
+      let activity_location = cities.gps_lookup(
+        activity["start_latlng"][0],
+        activity["start_latlng"][1]
+      );
 
-      for (const [country, timezone_cities] of Object.entries(
-        supported_countries_to_timezone_cities
-      )) {
-        if (timezone_cities.includes(timezone_city)) {
-          let activity_location = reverse_geocode.lookup(
-            activity_cords[0],
-            activity_cords[1],
-            country
-          );
-
-          activities[i]["location_city"] = activity_location["city"];
-          activities[i]["location_state"] = activity_location["state_abbr"];
-
-          break;
-        }
-      }
+      activity["location_city"] = activity_location["city"];
+      activity["location_state"] = activity_location["state_abbr"];
     }
-  }
+  })
 
   return activities;
 };
