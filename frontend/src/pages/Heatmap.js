@@ -30,14 +30,15 @@ function Heatmap({ mode }) {
       }
     }
 
-    const cities = JSON.parse(sessionStorage["cities"])
-    if (cities.length !== 0) {
-      setZoom(13);
-      setMapCenter(cities[0]["latlng"]);
-    } else {
-      // Default location is geographic center of the U.S.
-      setMapCenter({ lat: 39.8283, lng: -98.5795 });
-    }
+    // const cities = JSON.parse(sessionStorage["cities"])
+    // if (cities.length !== 0) {
+    //   setZoom(13);
+    //   setMapCenter(cities[0]["latlng"]);
+    // } else {
+    //   // Default location is geographic center of the U.S.
+    //   setMapCenter({ lat: 39.8283, lng: -98.5795 });
+    // }
+    setMapCenter({ lat: 39.8283, lng: -98.5795 });
   }, []);
 
   return (
@@ -65,7 +66,7 @@ function Heatmap({ mode }) {
       </div>
 
       <MapDropdown
-        cities={JSON.parse(sessionStorage["cities"])}
+        cities={[]}
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         setMapCenter={setMapCenter}

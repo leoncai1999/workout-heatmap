@@ -153,7 +153,7 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
     }
   }
 
-  all_activities = utils.addCitiesToActivities(all_activities);
+  // all_activities = utils.addCitiesToActivities(all_activities);
 
   res.json(all_activities);
 });

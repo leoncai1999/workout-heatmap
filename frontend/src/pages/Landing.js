@@ -47,8 +47,8 @@ function Landing({ isCallback }) {
     activities = activities["data"];
     sessionStorage.setItem("activities", JSON.stringify(activities));
 
-    const cities = getCities(activities);
-    sessionStorage.setItem("cities", JSON.stringify(cities));
+    // const cities = getCities(activities);
+    // sessionStorage.setItem("cities", JSON.stringify(cities));
 
     setFetchComplete(true);
   }, []);
