@@ -1,8 +1,11 @@
 const express = require("express");
 const app = express();
 const axios = require("axios");
+const cors = require('cors');  
 const utils = require("./utils");
 const PORT = process.env.PORT || 3001;
+
+app.use(cors())
 
 app.get("/", (req, res) => {
   res.json("Welcome to the Workout Heatmap API")
