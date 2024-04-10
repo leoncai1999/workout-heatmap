@@ -6,7 +6,6 @@ import Logo from "../assets/app-logo.svg";
 import { Spinner } from "react-bootstrap";
 import StravaButton from "../assets/connect_with_strava.png";
 import Branding from "../components/Branding.js";
-import { getActivities } from "../utils/api.js";
 import { getCities } from "../utils/get.js";
 import {
   requestStravaPermissions,
@@ -42,10 +41,9 @@ function Landing({ isCallback }) {
     heartRateZones = heartRateZones["data"]["heart_rate"]["zones"];
     sessionStorage.setItem("heartRateZones", JSON.stringify(heartRateZones));
 
-    // var activities = await axios.get(
-    //   `${baseApiUrl}/activities/${athlete_id}/${access_token}`
-    // );
-    var activities = await getActivities(athlete_id, access_token);
+    var activities = await axios.get(
+      `${baseApiUrl}/activities/${athlete_id}/${access_token}`
+    );
     activities = activities["data"];
     sessionStorage.setItem("activities", JSON.stringify(activities));
 
