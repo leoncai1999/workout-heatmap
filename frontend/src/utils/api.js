@@ -93,7 +93,7 @@ export const getActivities = async(athlete_id, access_token) => {
   /*
     The strava athletes endpoints provides various additional properties we don't need
   */
-  all_activities = utils.removeUnwantedFields(all_activities);
+  all_activities = removeUnwantedFields(all_activities);
 
   /*
     Metric to imperial conversions
@@ -111,7 +111,7 @@ export const getActivities = async(athlete_id, access_token) => {
     let day_month = date.substring(5, date.length);
 
     all_activities[i]["formatted_start_date"] = day_month + "-" + year;
-    all_activities[i]["formatted_start_time"] = utils.formatMilitaryTime(
+    all_activities[i]["formatted_start_time"] = formatMilitaryTime(
       time_and_date.substring(
         time_and_date.indexOf("T") + 1,
         time_and_date.indexOf("T") + 6
@@ -122,14 +122,14 @@ export const getActivities = async(athlete_id, access_token) => {
     all_activities[i]["day_of_week"] = new Date(time_and_date).getDay();
 
     if (all_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
-      all_activities[i]["pace"] = utils.formatPace(
+      all_activities[i]["pace"] = formatPace(
         activity["moving_time"],
         activity["distance"]
       );
-      all_activities[i]["formatted_moving_time"] = utils.formatDuration(
+      all_activities[i]["formatted_moving_time"] = formatDuration(
         activity["moving_time"]
       );
-      all_activities[i]["formatted_elapsed_time"] = utils.formatDuration(
+      all_activities[i]["formatted_elapsed_time"] = formatDuration(
         activity["elapsed_time"]
       );
     }
@@ -143,7 +143,7 @@ export const getActivities = async(athlete_id, access_token) => {
     }
   }
 
-  all_activities = utils.addCitiesToActivities(all_activities);
+  all_activities = addCitiesToActivities(all_activities);
 
   return all_activities;
 }
