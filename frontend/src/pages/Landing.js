@@ -45,7 +45,7 @@ function Landing({ isCallback }) {
     // var activities = await axios.get(
     //   `${baseApiUrl}/activities/${athlete_id}/${access_token}`
     // );
-    var activities = getActivities(athlete_id, access_token)
+    var activities = await getActivities(athlete_id, access_token);
     activities = activities["data"];
     sessionStorage.setItem("activities", JSON.stringify(activities));
 
