@@ -104,37 +104,21 @@ module.exports.formatPace = (time, distance) => {
 module.exports.addCitiesToActivities = (activities) => {
   let us_timezones = ["New_York", "Chicago", "Denver", "Los_Angeles"];
 
-  var cities_requests = [];
-
   activities
     .filter((activity) => activity["start_latlng"])
     .forEach((activity) => {
       let timezone_city = activity["timezone"].split("/").pop();
 
       if (us_timezones.includes(timezone_city)) {
-        cities_requests.push(
-          new Promise((resolve, reject) => {
-            let activity_location = cities.gps_lookup(
-              activity["start_latlng"][0],
-              activity["start_latlng"][1]
-            );
-
-            activity["location_city"] = activity_location["city"];
-            activity["location_state"] = activity_location["state_abbr"];
-            resolve = "OK";
-          })
+        let activity_location = cities.gps_lookup(
+          activity["start_latlng"][0],
+          activity["start_latlng"][1]
         );
-        // let activity_location = cities.gps_lookup(
-        //   activity["start_latlng"][0],
-        //   activity["start_latlng"][1]
-        // );
 
-        // activity["location_city"] = activity_location["city"];
-        // activity["location_state"] = activity_location["state_abbr"];
+        activity["location_city"] = activity_location["city"];
+        activity["location_state"] = activity_location["state_abbr"];
       }
     });
-
-  Promise.all(cities_requests);
 
   return activities;
 };
