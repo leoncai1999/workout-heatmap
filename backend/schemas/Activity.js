@@ -1,0 +1,43 @@
+const mongoose = require("mongoose");
+
+const activitySchema = new mongoose.Schema({
+  name: String,
+  distance: Number,
+  moving_time: Number,
+  elapsed_time: Number,
+  total_elevation_gain: Number,
+  type: String,
+  workout_type: Number,
+  id: Number,
+  start_date_local: Date,
+  timezone: String,
+  location_city: String,
+  location_state: String,
+  athlete_count: Number,
+  map: {
+    id: String,
+    summary_polyline: String,
+    resource_state: Number,
+  },
+  gear_id: String,
+  start_latlng: Array,
+  end_latlng: Array,
+  average_speed: Number,
+  max_speed: Number,
+  average_cadence: Number,
+  kilojoules: Number,
+  has_heartrate: Boolean,
+  average_heartrate: Number,
+  max_heartrate: Number,
+  elev_high: Number,
+  elev_low: Number,
+  formatted_start_date: Date,
+  formatted_start_time: String,
+  start_hour: Number,
+  day_of_week: Number,
+  pace: String,
+  formatted_moving_time: String,
+  formatted_elapsed_time: String,
+});
+
+module.exports = mongoose.model("Activity", activitySchema, "activities");

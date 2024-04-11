@@ -1,15 +1,75 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const app = express();
 const axios = require("axios");
-const cors = require('cors');  
+const cors = require("cors");
 const utils = require("./utils");
 const PORT = process.env.PORT || 3001;
 
-app.use(cors())
+const Activity = require("./schemas/Activity");
+const HeartRateZone = require("./schemas/HeartRateZone");
+
+require('dotenv').config()
+const uri = process.env.MONGO_DB_URI
+
+async function connect() {
+  try {
+    await mongoose.connect(uri);
+    console.log("Connnected to MongoDB");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+connect();
+
+app.use(cors());
 
 app.get("/", (req, res) => {
-  res.json("Welcome to the Workout Heatmap API")
+  res.json("Welcome to the Workout Heatmap API");
+});
+
+app.get("/sampleactivities", async (req, res) => {
+  const sample_activites = await Activity.find({})
+  res.json(sample_activites)
 })
+
+app.get("/sampleheartratezones", async (req, res) => {
+  const sample_heartratezones = await HeartRateZone.find({})
+  res.json(sample_heartratezones)
+})
+
+app.get("/addHeartRateZones", async (req, res) => {
+  const sample_heart_rate_zones = [
+    {
+      min: 0,
+      max: 123,
+    },
+    {
+      min: 123,
+      max: 153,
+    },
+    {
+      min: 153,
+      max: 169,
+    },
+    {
+      min: 169,
+      max: 184,
+    },
+    {
+      min: 184,
+      max: -1,
+    },
+  ];
+
+  sample_heart_rate_zones.forEach(async (heartRateZone) => {
+    const db_heartRateZone = new HeartRateZone(heartRateZone);
+    await db_heartRateZone.save();
+  });
+
+  res.send("Added Heart Rate Zones to sample user");
+});
 
 app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   const ACTIVITY_BATCH_SIZE = 200;
@@ -128,7 +188,9 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
       )
     );
 
-    all_activities[i]["start_hour"] = parseInt(time_and_date.split(":")[0].slice(-2));
+    all_activities[i]["start_hour"] = parseInt(
+      time_and_date.split(":")[0].slice(-2)
+    );
     all_activities[i]["day_of_week"] = new Date(time_and_date).getDay();
 
     if (all_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
@@ -143,17 +205,15 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
         activity["elapsed_time"]
       );
     }
-
-    if (all_activities[i]["max_heartrate"] === undefined) {
-      all_activities[i]["max_heartrate"] = "N/A";
-    }
-
-    if (all_activities[i]["average_heartrate"] === undefined) {
-      all_activities[i]["average_heartrate"] = "N/A";
-    }
   }
 
   all_activities = utils.addCitiesToActivities(all_activities);
+
+  // Comment this in if you would like to add the activities in to the test user
+  // all_activities.forEach(async (activity) => {
+  //   const db_activity = new Activity(activity)
+  //   await db_activity.save()
+  // })
 
   res.json(all_activities);
 });

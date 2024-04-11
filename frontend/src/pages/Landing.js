@@ -18,37 +18,50 @@ const isLocalhost =
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname === "";
 
-const baseApiUrl = isLocalhost ? "http://localhost:3000" : "https://workout-heatmap-backend.onrender.com"
+const baseApiUrl = isLocalhost
+  ? "http://localhost:3001"
+  : "https://workout-heatmap-backend.onrender.com";
 
-function Landing({ isCallback }) {
-  const [fetchComplete, setFetchComplete] = useState(!isCallback);
+function Landing({ mode }) {
+  const [fetchComplete, setFetchComplete] = useState(mode === "normal");
 
-  const fetchData = useCallback(async () => {
-    const authenticatedUser = await getAuthenticatedUser(
-      String(window.location.href)
-    );
-    const access_token = authenticatedUser["access_token"];
-    const athlete_id = authenticatedUser["athlete"]["id"];
+  const fetchData = useCallback(async (mode) => {
+    var activities = [];
+    var heartRateZones = [];
 
-    var heartRateZones = await axios.get(
-      "https://www.strava.com/api/v3/athlete/zones?",
-      {
-        params: {
-          access_token: access_token,
-        },
-      }
-    );
-    heartRateZones = heartRateZones["data"]["heart_rate"]["zones"];
-    sessionStorage.setItem("heartRateZones", JSON.stringify(heartRateZones));
+    if (mode === "callback") {
+      const authenticatedUser = await getAuthenticatedUser(
+        String(window.location.href)
+      );
+      const access_token = authenticatedUser["access_token"];
+      const athlete_id = authenticatedUser["athlete"]["id"];
 
-    var activities = await axios.get(
-      `${baseApiUrl}/activities/${athlete_id}/${access_token}`
-    );
-    activities = activities["data"];
-    sessionStorage.setItem("activities", JSON.stringify(activities));
+      heartRateZones = await axios.get(
+        "https://www.strava.com/api/v3/athlete/zones?",
+        {
+          params: {
+            access_token: access_token,
+          },
+        }
+      );
+      heartRateZones = heartRateZones["data"]["heart_rate"]["zones"];
+
+      activities = await axios.get(
+        `${baseApiUrl}/activities/${athlete_id}/${access_token}`
+      );
+      activities = activities["data"];
+    } else {
+      heartRateZones = await axios.get(`${baseApiUrl}/sampleheartratezones`);
+      heartRateZones = heartRateZones["data"];
+
+      activities = await axios.get(`${baseApiUrl}/sampleactivities`);
+      activities = activities["data"];
+    }
 
     const cities = getCities(activities);
     sessionStorage.setItem("cities", JSON.stringify(cities));
+    sessionStorage.setItem("activities", JSON.stringify(activities));
+    sessionStorage.setItem("heartRateZones", JSON.stringify(heartRateZones));
 
     setFetchComplete(true);
   }, []);
@@ -56,13 +69,13 @@ function Landing({ isCallback }) {
   useEffect(() => {
     document.body.style.backgroundColor = "#5dbcd2";
     if (!fetchComplete) {
-      fetchData();
+      fetchData(mode);
     }
   }, [fetchData]);
 
   return (
     <div>
-      {isCallback && fetchComplete && <Navigate to="/map" />}
+      {mode !== "normal" && fetchComplete && <Navigate to="/map" />}
       <Modal
         show={!fetchComplete}
         aria-labelledby="contained-modal-title-vcenter"
@@ -70,10 +83,19 @@ function Landing({ isCallback }) {
       >
         <Modal.Body>
           <div className="loading-center">
-            <p className="loading-text">Fetching activities from Strava ...</p>
-            <p className="loading-subtext">
-              Loading may take a while for a large number of activites
-            </p>
+            {mode === "callback" ? (
+              <>
+                <p className="loading-text">
+                  Fetching activities from Strava ...
+                </p>
+                <p className="loading-subtext">
+                  Loading can take two or more minutes for a large number of
+                  activities
+                </p>
+              </>
+            ) : (
+              <p className="loading-text">Fetching sample athlete data ...</p>
+            )}
             <Spinner animation="border" className="loading-spinner" />
           </div>
         </Modal.Body>
@@ -97,7 +119,7 @@ function Landing({ isCallback }) {
           alt="connect with strava button"
         ></img>
       </div>
-      <Nav.Link href="/map-sample">
+      <Nav.Link href="/sample">
         <h6 className="demo-text"> Not a Strava user? See a demo account </h6>
       </Nav.Link>
       <Branding />

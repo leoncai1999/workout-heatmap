@@ -123,6 +123,8 @@ function List() {
     },
   ];
 
+  const activities = JSON.parse(sessionStorage["activities"]);
+
   useEffect(() => {
     document.body.style.background = "#e8e1eb";
   }, []);
@@ -138,6 +140,20 @@ function List() {
     }
   }
 
+  function replaceNullWithNA(activities) {
+    var formatted_activities = activities.forEach((activity) => {
+      if (activity["max_heartrate"] === undefined) {
+        activity["max_heartrate"] = "N/A"
+      }
+
+      if (activity["average_heartrate"] === undefined) {
+        activity["average_heartrate"] = "N/A"
+      }
+    })
+
+    return formatted_activities
+  }
+
   return (
     <div>
       <Navigation />
@@ -147,7 +163,7 @@ function List() {
 
       <ToolkitProvider
         keyField="id"
-        data={JSON.parse(sessionStorage["activities"])}
+        data={activities}
         columns={columns}
         exportCSV={{
           fileName: getCSVName(),
@@ -160,7 +176,7 @@ function List() {
             </ExportCSVButton>
             <BootstrapTable
               keyField="id"
-              data={JSON.parse(sessionStorage["activities"])}
+              data={replaceNullWithNA(activities)}
               columns={columns}
               bordercolors={true}
               striped

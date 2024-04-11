@@ -12,10 +12,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route exact path={"/"} element={<Landing isCallback={false}/>} />
-        <Route path={"/callback"} element={<Landing isCallback={true}/>} />
-        <Route path={"/map"} element={<Heatmap mode="normal"/>} />
-        <Route path={"/map-sample"} element={<Heatmap mode="sample"/>} />
+        <Route exact path={"/"} element={<Landing mode="normal"/>} />
+        <Route path={"/callback"} element={<Landing mode="callback"/>} />
+        <Route path={"/sample"} element={<Landing mode="sample"/>} />
+        <Route path={"/map"} element={<Heatmap />} />
         <Route path={"/list"} element={<List />} />
         <Route path={"/stats"} element={<Stats />} />
         <Route path={"/about"} element={<About />} />

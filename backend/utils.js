@@ -1,4 +1,3 @@
-const reverse_geocode = require("reverse-geocode");
 const cities = require("cities");
 
 module.exports.removeUnwantedFields = (activities) => {

@@ -12,31 +12,20 @@ const mapStyles = {
   height: "100%",
 };
 
-function Heatmap({ mode }) {
+function Heatmap() {
   const [filterValue, setFilterValue] = useState("");
   const [filterType, setFilterType] = useState("");
-  const [mapCenter, setMapCenter] = useState({});
+  const [mapCenter, setMapCenter] = useState({ lat: 39.8283, lng: -98.5795 });
   const [selectedCity, setSelectedCity] = useState("Select City");
   const [zoom, setZoom] = useState(4);
 
+  const activities = JSON.parse(sessionStorage["activities"]);
+  const cities = JSON.parse(sessionStorage["cities"]);
+
   useEffect(() => {
-    document.body.style.backgroundColor = "#5dbcd2";
-
-    if (!sessionStorage["activities"]) {
-      if (mode === "sample") {
-        // TODO: fetch activities from MongoDB and set session storage
-      } else {
-        // TODO: Redirect back to main and have pop-up saying user must connect with strava first
-      }
-    }
-
-    const cities = JSON.parse(sessionStorage["cities"])
     if (cities.length !== 0) {
       setZoom(13);
       setMapCenter(cities[0]["latlng"]);
-    } else {
-      // Default location is geographic center of the U.S.
-      setMapCenter({ lat: 39.8283, lng: -98.5795 });
     }
   }, []);
 
@@ -52,7 +41,7 @@ function Heatmap({ mode }) {
           initialCenter={{ lat: 39.8283, lng: -98.5795 }}
           center={mapCenter}
         >
-          {getPolylines(filterType, filterValue, JSON.parse(sessionStorage["activities"])).map((polyline) => {
+          {getPolylines(filterType, filterValue, activities).map((polyline) => {
             return (
               <Polyline
                 path={polyline}
@@ -65,7 +54,7 @@ function Heatmap({ mode }) {
       </div>
 
       <MapDropdown
-        cities={JSON.parse(sessionStorage["cities"])}
+        cities={cities}
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         setMapCenter={setMapCenter}
