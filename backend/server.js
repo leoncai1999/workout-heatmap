@@ -30,12 +30,12 @@ app.get("/", (req, res) => {
 });
 
 app.get("/sampleactivities", async (req, res) => {
-  const sample_activites = await Activity.find({})
+  const sample_activites = await Activity.find({}).sort({ 'idx': 1})
   res.json(sample_activites)
 })
 
 app.get("/sampleheartratezones", async (req, res) => {
-  const sample_heartratezones = await HeartRateZone.find({})
+  const sample_heartratezones = await HeartRateZone.find({}).sort({ 'idx': 1})
   res.json(sample_heartratezones)
 })
 
@@ -44,24 +44,31 @@ app.get("/addHeartRateZones", async (req, res) => {
     {
       min: 0,
       max: 123,
+      idx: 0
     },
     {
       min: 123,
       max: 153,
+      idx: 1
     },
     {
       min: 153,
       max: 169,
+      idx: 2
     },
     {
       min: 169,
       max: 184,
+      idx: 3
     },
     {
       min: 184,
       max: -1,
+      idx: 4
     },
   ];
+
+  await HeartRateZone.deleteMany({})
 
   sample_heart_rate_zones.forEach(async (heartRateZone) => {
     const db_heartRateZone = new HeartRateZone(heartRateZone);
@@ -209,8 +216,11 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
 
   all_activities = utils.addCitiesToActivities(all_activities);
 
-  // Comment this in if you would like to add the activities in to the test user
-  // all_activities.forEach(async (activity) => {
+  // Comment this in if you would like to update the activities for the test user
+  // await Activity.deleteMany({})
+
+  // all_activities.forEach(async (activity, idx) => {
+  //   activity["idx"] = idx
   //   const db_activity = new Activity(activity)
   //   await db_activity.save()
   // })

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const activitySchema = new mongoose.Schema({
+  idx: Number,
   name: String,
   distance: Number,
   moving_time: Number,
@@ -9,7 +10,7 @@ const activitySchema = new mongoose.Schema({
   type: String,
   workout_type: Number,
   id: Number,
-  start_date_local: Date,
+  start_date_local: String,
   timezone: String,
   location_city: String,
   location_state: String,
@@ -31,7 +32,7 @@ const activitySchema = new mongoose.Schema({
   max_heartrate: Number,
   elev_high: Number,
   elev_low: Number,
-  formatted_start_date: Date,
+  formatted_start_date: String,
   formatted_start_time: String,
   start_hour: Number,
   day_of_week: Number,
