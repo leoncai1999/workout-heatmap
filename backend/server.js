@@ -23,10 +23,7 @@ async function connect() {
 
 connect();
 
-app.use(cors({
-  origin: "https://www.workoutheatmap.me/",
-  optionsSuccessStatus: 200
-}));
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.json("Welcome to the Workout Heatmap API");
