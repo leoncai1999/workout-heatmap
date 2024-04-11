@@ -140,8 +140,11 @@ function List() {
     }
   }
 
-  function replaceNullWithNA(activities) {
+  function formatData(activities) {
     var formatted_activities = activities.forEach((activity) => {
+      activity["distance"] = parseFloat(activity["distance"].toFixed(2))
+      activity["total_elevation_gain"] = parseFloat(activity["total_elevation_gain"].toFixed(2))
+
       if (activity["max_heartrate"] === undefined) {
         activity["max_heartrate"] = "N/A"
       }
@@ -176,7 +179,7 @@ function List() {
             </ExportCSVButton>
             <BootstrapTable
               keyField="id"
-              data={replaceNullWithNA(activities)}
+              data={formatData(activities)}
               columns={columns}
               bordercolors={true}
               striped
