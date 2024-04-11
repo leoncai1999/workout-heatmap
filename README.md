@@ -1,15 +1,15 @@
 # Workout Heatmap
 [![WelcomeScreen](https://i.postimg.cc/NF4wZNsR/Welcome-Screen.png)](https://postimg.cc/T5pSDJWP)
 
-Workout Heatmap is a React Web App that connects with a user's Strava account to deliver an interactive
-heatmap and additional analytics based on their workout activites. The user has discretion over what degree
-of access is granted to their Strava information, and none of the user's information is stored externally.
-The user's information is temporarily stored locally to avoid having to refetch the user's data between
-page refreshes. This site is free to use and anyone can access it at workoutheatmap.me, pending API Call limits. 
-Below are the features of the app.
+WorkoutHeatmap.me is a Web App that connects with a user's Strava account to create a personalized and
+interactive heatmap of their activities. Additionally, it delivers statistics on their workout habits
+and allows them to download their data. Your information is retrieved from the Strava API and none of it
+is stored externally. You may revoke your Strava access at any time. If you do not have a Stava account,
+there is a sample account if you would still like to explore the app. This site is free for anyone to use
+pending Strava API call limits. Below are the features of the app.
 
 ## Heatmap
-[![MapScreen](https://i.postimg.cc/QCphpsLn/Map-Screen.png)](https://postimg.cc/zHXsrsGn)
+[![MapScreen](https://i.postimg.cc/9MVNjQxk/map-screen-13f795f3.png)](https://postimg.cc/8FKbRNgd)
 The interactive Heatmap allows the user to filter activites by sport, workout type, number of members and
 time of day in the left panel. The right dropdown consists of all the cities the user has outdoor activites
 logged in and selecting a particular city will reposition the map as appropriate.
@@ -33,34 +33,34 @@ the user must enable access to their Strava profile information. Allowing this g
 access to the user's heart rate zones which can then be used to bring these insights.
 
 ## App Components
-**Built With:** React, HTML/CSS and JavaScript
+**Built With:** MongoDB (for storing sample account data), Express, React, and NodeJS
 
-**APIs:** [Strava API](http://developers.strava.com/docs/reference/) (user authentication and accessing workout data), [Google Maps API](https://developers.google.com/maps/documentation/javascript/overview) (heatmap and individual route cards), [Here API](https://developer.here.com/develop/rest-apis) (retrieving the cities of activites), [Mapbox API](https://docs.mapbox.com/api/) (geocoding the cities of activities)
+**APIs:** [Strava API](http://developers.strava.com/docs/reference/) (user authentication and accessing workout data), [Google Maps API](https://developers.google.com/maps/documentation/javascript/overview) (map overlay)
 
-**Dependencies:** React Bootstrap, React Bootstrap Table 2, React ChartJs 2, Geolib, React Router, Axios, Decode Google Map Polyline Js, Express, Express HTTP Proxy, Firebase Js SDK
+**Hosting** Both the frontend and backend are deployed to Render with autotmatic GitHub deployment. DNS and SSL Certification
+are managed by Cloudflare and a custom domain name was bought from NameCheap
 
-**Hosting:** Heroku with automatic GitHub deployment
-
-**Domain:** GoDaddy
-
-**SSL Certification and DNS Management:** Cloudflare
-
-**Database:** Firebase Realtime Database (for storing and retrieving Demo account data)
+**Key Dependencies:** React Bootstrap, React Bootstrap Table 2, React ChartJs 2, Mongoose, Decode Google Map Polyline Js,
+Google Mpas React
 
 ## Recreating the Project
 
-To recreate and run this project on your own machine, start by cloning down this repository. Next, create a .env file
-in the root directory of the project, obtain the necessary API keys as specified in the APIKeys and Firebase file,
-and store those keys in the .env file.
+To recreate and run this project on your own machine, start by cloning down this repository. Create a .env file
+in the frontend directory with the following variables:
 
-If running the project locally, type **yarn start** in the root directory of the project and the project will run on
-localhost:3000. In the Strava API application settings, set the authorized callback domain to localhost:3000.
-Set the base_url in the code to localhost:3000.
+REACT_APP_GOOGLE_MAPS_API_KEY = {Your Google Maps API key}\
+REACT_APP_STRAVA_CLIENT_ID = {Your Strava Client ID}\
+REACT_APP_STRAVA_SECRET = {Your Strava Secret}
 
-To run the project in production, create a project in Heroku and link it to the GitHub repository of your project.
-Specifiy the Heroku domain as the base_url in the code and the authorized callback domain in the Strava API
-application. In the Heroku project settings, define config vars identical to the API keys in the .env file.
-Every subsequent Git commit will trigger a deployment of the site.
+To run this program locally, type **npm start** in the frontend directory of the project and the project will
+run on localhost:3000. In the Strava API application settings, set the authorized callback domain to localhost:3000.
+
+To run set up the backend, create a MongoDB project and a .env variable in the backend directory with the following
+variable:
+
+MONGO_DB_URI = {Your MongoDB URI}
+
+You can then type **npm run dev** to run your backend locally on localhost:3001.
 
 If you have questions, suggestions, or would like to report any issues, please feel free to reach out to me
 via email!
