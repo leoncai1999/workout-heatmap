@@ -48,8 +48,8 @@ Google Mpas React
 To recreate and run this project on your own machine, start by cloning down this repository. Create a .env file
 in the frontend directory with the following variables:
 
-REACT_APP_GOOGLE_MAPS_API_KEY = {Your Google Maps API key}
-REACT_APP_STRAVA_CLIENT_ID = {Your Strava Client ID}
+REACT_APP_GOOGLE_MAPS_API_KEY = {Your Google Maps API key}\
+REACT_APP_STRAVA_CLIENT_ID = {Your Strava Client ID}\
 REACT_APP_STRAVA_SECRET = {Your Strava Secret}
 
 To run this program locally, type **npm start** in the frontend directory of the project and the project will
