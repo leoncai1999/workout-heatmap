@@ -41,26 +41,36 @@ access to the user's heart rate zones which can then be used to bring these insi
 are managed by Cloudflare and a custom domain name was bought from NameCheap
 
 **Key Dependencies:** React Bootstrap, React Bootstrap Table 2, React ChartJs 2, Mongoose, Decode Google Map Polyline Js,
-Google Mpas React
+Google Maps React
 
 ## Recreating the Project
 
 To recreate and run this project on your own machine, start by cloning down this repository. Create a .env file
 in the frontend directory with the following variables:
 
-REACT_APP_GOOGLE_MAPS_API_KEY = {Your Google Maps API key}\
-REACT_APP_STRAVA_CLIENT_ID = {Your Strava Client ID}\
-REACT_APP_STRAVA_SECRET = {Your Strava Secret}
+`REACT_APP_GOOGLE_MAPS_API_KEY = {Your Google Maps API key}`\
+`REACT_APP_STRAVA_CLIENT_ID = {Your Strava Client ID}`\
+`REACT_APP_STRAVA_SECRET = {Your Strava Secret}`
 
-To run this program locally, type **npm start** in the frontend directory of the project and the project will
-run on localhost:3000. In the Strava API application settings, set the authorized callback domain to localhost:3000.
-
-To run set up the backend, create a MongoDB project and a .env variable in the backend directory with the following
+Then for the backend, create a MongoDB project and a .env variable in the backend directory with the following
 variable:
 
-MONGO_DB_URI = {Your MongoDB URI}
+`MONGO_DB_URI = {Your MongoDB URI}`
 
-You can then type **npm run dev** to run your backend locally on localhost:3001.
+After this setup, a docker compose file is provided for your convenience to run the project while handling
+potential dependency conflicts. Install the docker app and docker CLI. Then run the following commands to build
+the front end & backend docker files, and then run:
+
+`cd frontend && docker build . -f Dockerfile -t workoutheatmap-fe:1`
+`cd ..backend && docker build . -f Dockerfile -t workoutheatmap-be:1`
+`cd .. & docker compose up`
+
+Afterwards, your frontend and backend will be running on `localhost:3000` and `localhost:3001`
+respectively. 
+In the Strava API application settings, set the authorized callback domain to `localhost:3000`.
+
+You can also run the project without docker by running `npm start` in the frontend and `npm run dev` in the
+backend.
 
 If you have questions, suggestions, or would like to report any issues, please feel free to reach out to me
 via email!
