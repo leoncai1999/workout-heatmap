@@ -61,8 +61,8 @@ After this setup, a docker compose file is provided for your convenience to run 
 potential dependency conflicts. Install the docker app and docker CLI. Then run the following commands to build
 the front end & backend docker files, and then run:
 
-`cd frontend && docker build . -f Dockerfile -t workoutheatmap-fe:1`
-`cd ..backend && docker build . -f Dockerfile -t workoutheatmap-be:1`
+`cd frontend && docker build . -f Dockerfile -t workoutheatmap-fe:1`\
+`cd ..backend && docker build . -f Dockerfile -t workoutheatmap-be:1`\
 `cd .. & docker compose up`
 
 Afterwards, your frontend and backend will be running on `localhost:3000` and `localhost:3001`
