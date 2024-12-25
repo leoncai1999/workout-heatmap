@@ -14,6 +14,7 @@ const activitySchema = new mongoose.Schema({
   timezone: String,
   location_city: String,
   location_state: String,
+  location: String,
   athlete_count: Number,
   map: {
     id: String,

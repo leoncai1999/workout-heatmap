@@ -116,6 +116,14 @@ module.exports.addCitiesToActivities = (activities) => {
 
         activity["location_city"] = activity_location["city"];
         activity["location_state"] = activity_location["state_abbr"];
+        
+        if (activity["location_city"]) {
+          activity["location"] = activity["location_city"] + ", " + activity["location_state"]
+        } else if (activity["location_state"]) {
+          activity["location"] = activity["location_state"]
+        } else {
+          activity["location"] = "NA"
+        }
       }
     });
 

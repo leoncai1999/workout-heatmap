@@ -121,6 +121,14 @@ function List() {
         return order === "asc" ? b - a : a - b;
       },
     },
+    {
+      dataField: "location",
+      text: "Location",
+      sort: true,
+      sortFunc: (a, b, order) => {
+        return order === "asc" ? b - a : a - b;
+      },
+    }
   ];
 
   const activities = JSON.parse(sessionStorage["activities"]);

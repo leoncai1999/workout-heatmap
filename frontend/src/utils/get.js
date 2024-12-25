@@ -65,11 +65,11 @@ export const getCities = (activities) => {
 
   for (let i = 0; i < activities.length; i++) {
     let activity = activities[i];
-    if (activity["location_city"]) {
-      let city_name =
-        activity["location_city"] + ", " + activity["location_state"];
+    let city_name = activity["location"]
 
+    if (activity["location_city"]) {
       let city_obj = cities.find((city) => city.name === city_name);
+
       if (city_obj) {
         city_obj["activities"] += 1;
         city_obj["miles"] += activity["distance"];
