@@ -6,6 +6,7 @@ const cors = require("cors");
 const utils = require("./utils");
 const PORT = process.env.PORT || 3001;
 
+const User = require("./schemas/User");
 const Activity = require("./schemas/Activity");
 const HeartRateZone = require("./schemas/HeartRateZone");
 
@@ -14,7 +15,9 @@ const uri = process.env.MONGO_DB_URI
 
 async function connect() {
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, {
+      dbName: "user-data"
+    });
     console.log("Connnected to MongoDB");
   } catch (error) {
     console.log(error);
@@ -85,7 +88,44 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
 
   var num_core_activities = 0;
   var min_activity_batches = 0;
-  var all_activities = [];
+  var saved_activities = [];
+  var new_activities = [];
+
+  var last_saved_activity_epoch = 0;
+
+  /*
+    Check if the user has already logged in before and chose to save their activities.
+    If not, add that user to the database for future reference.
+  */
+  let user = await User.findOne({ athlete_id: req.params.athlete_id })
+
+  if (!user) {
+    var athlete_info = await axios.get("https://www.strava.com/api/v3/athlete", {
+      params: {
+        access_token: req.params.access_token,
+      },
+    });
+
+    athlete_info = athlete_info.data;
+
+    user = new User({
+      athlete_id: req.params.athlete_id,
+      username: athlete_info["username"],
+      profile: athlete_info["profile"],
+      heartRateZones: [],
+    })
+
+    await user.save();
+  } else {
+    saved_activities = await Activity.find({ user_id: user._id }).sort({ 'idx': 1 })
+
+    if (saved_activities.length === 0) {
+      last_saved_activity_epoch = 0
+    } else {
+      last_saved_activity = saved_activities[saved_activities.length - 1]
+      last_saved_activity_epoch = utils.getEpochTime(last_saved_activity["start_date_local"], last_saved_activity["timezone"])
+    }
+  }
 
   /*
     We can't directly deterimine the total number of Strava activities an athlete has. But
@@ -105,13 +145,15 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
 
   /*
     The activities endpoint only lets us retrieve 200 activities per call. So at minimum.
-    we need to call it (num_core_activities/200) times. And we round up as the last batch
-    is likely not full but still has necessary info
+    we need to call it ((num_core_activities - already saved activities)/200) times. 
+    And we round up as the last batch is likely not full but still has necessary info.
   */
   num_core_activities =
     athlete_stats["all_run_totals"]["count"] +
     athlete_stats["all_ride_totals"]["count"] +
     athlete_stats["all_swim_totals"]["count"];
+  num_core_activities -= saved_activities.length;
+  num_core_activities = (num_core_activities < 1) ? 1 : num_core_activities;
   min_activity_batches = Math.ceil(num_core_activities / ACTIVITY_BATCH_SIZE);
 
   /*
@@ -124,6 +166,7 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
     activity_requests.push(
       axios.get("https://www.strava.com/api/v3/athlete/activities?", {
         params: {
+          after: last_saved_activity_epoch,
           per_page: ACTIVITY_BATCH_SIZE,
           page: i,
           access_token: req.params.access_token,
@@ -164,68 +207,73 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   }
 
   activity_results.forEach((resp) => {
-    all_activities.push(...resp.data);
+    new_activities.push(...resp.data);
   });
 
   /*
     The strava athletes endpoints provides various additional properties we don't need
   */
-  all_activities = utils.removeUnwantedFields(all_activities);
+  new_activities = utils.removeUnwantedFields(new_activities);
 
   /*
     Metric to imperial conversions
   */
-  for (let i = 0; i < all_activities.length; i++) {
-    let activity = all_activities[i];
+  for (let i = 0; i < new_activities.length; i++) {
+    let activity = new_activities[i];
 
-    all_activities[i]["distance"] = activity["distance"] / FEET_IN_MILE;
-    all_activities[i]["total_elevation_gain"] =
+    new_activities[i]["distance"] = activity["distance"] / FEET_IN_MILE;
+    new_activities[i]["total_elevation_gain"] =
       activity["total_elevation_gain"] * FEET_IN_METER;
 
-    let time_and_date = all_activities[i]["start_date_local"];
+    let time_and_date = new_activities[i]["start_date_local"];
     let date = time_and_date.substring(0, time_and_date.indexOf("T"));
     let year = date.substring(0, 4);
     let day_month = date.substring(5, date.length);
 
-    all_activities[i]["formatted_start_date"] = day_month + "-" + year;
-    all_activities[i]["formatted_start_time"] = utils.formatMilitaryTime(
+    new_activities[i]["formatted_start_date"] = day_month + "-" + year;
+    new_activities[i]["formatted_start_time"] = utils.formatMilitaryTime(
       time_and_date.substring(
         time_and_date.indexOf("T") + 1,
         time_and_date.indexOf("T") + 6
       )
     );
 
-    all_activities[i]["start_hour"] = parseInt(
+    new_activities[i]["start_hour"] = parseInt(
       time_and_date.split(":")[0].slice(-2)
     );
-    all_activities[i]["day_of_week"] = new Date(time_and_date).getDay();
+    new_activities[i]["day_of_week"] = new Date(time_and_date).getDay();
 
-    if (all_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
-      all_activities[i]["pace"] = utils.formatPace(
+    if (new_activities[i]["moving_time"].toString().match(/^[0-9]+$/) != null) {
+      new_activities[i]["pace"] = utils.formatPace(
         activity["moving_time"],
         activity["distance"]
       );
-      all_activities[i]["formatted_moving_time"] = utils.formatDuration(
+      new_activities[i]["formatted_moving_time"] = utils.formatDuration(
         activity["moving_time"]
       );
-      all_activities[i]["formatted_elapsed_time"] = utils.formatDuration(
+      new_activities[i]["formatted_elapsed_time"] = utils.formatDuration(
         activity["elapsed_time"]
       );
     }
   }
 
-  all_activities = utils.addCitiesToActivities(all_activities);
+  new_activities = utils.addCitiesToActivities(new_activities);
 
-  // Comment this in if you would like to update the activities for the test user
-  // await Activity.deleteMany({})
+  new_activities.forEach(async (activity, idx) => {
+    activity["user_id"] = user._id
+    activity["idx"] = idx + saved_activities.length
+  })
 
-  // all_activities.forEach(async (activity, idx) => {
-  //   activity["idx"] = idx
-  //   const db_activity = new Activity(activity)
-  //   await db_activity.save()
-  // })
+  await Activity.insertMany(new_activities)
 
-  res.json(all_activities);
+  activities = [...saved_activities, ...new_activities];
+
+  /*
+    Once the old and new activities are combined into one array, reverse
+    the full result so we return a complete list of activities from
+    newest to oldest
+  */
+  res.json(activities.reverse());
 });
 
 app.listen(PORT, "0.0.0.0", () => {

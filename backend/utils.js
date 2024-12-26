@@ -1,5 +1,28 @@
 const cities = require("cities");
 
+module.exports.getEpochTime = (start_date, timezone) => {
+  // Parse the start_date into a JavaScript Date object
+  const date = new Date(start_date);
+
+  // Extract the timezone offset in hours from the timezone string
+  const timezoneMatch = timezone.match(/\(GMT([+-]\d{2}):(\d{2})\)/);
+  if (!timezoneMatch) {
+    throw new Error('Invalid timezone format');
+  }
+
+  const offsetHours = parseInt(timezoneMatch[1], 10);
+  const offsetMinutes = parseInt(timezoneMatch[2], 10);
+
+  // Calculate total offset in milliseconds
+  const totalOffsetMilliseconds = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
+
+  // Adjust the date for the timezone offset
+  const adjustedDate = new Date(date.getTime() - totalOffsetMilliseconds);
+
+  // Return the epoch time (in seconds)
+  return Math.floor(adjustedDate.getTime() / 1000);
+};
+
 module.exports.removeUnwantedFields = (activities) => {
   activities = activities.map(
     ({

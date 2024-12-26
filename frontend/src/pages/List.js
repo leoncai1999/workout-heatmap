@@ -183,7 +183,7 @@ function List() {
         {(props) => (
           <div class="bootstrap-table">
             <ExportCSVButton {...props.csvProps} class="csv-btn">
-              Export to CSV
+              Download as CSV
             </ExportCSVButton>
             <BootstrapTable
               keyField="id"
