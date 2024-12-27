@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3001;
 
 const User = require("./schemas/User");
 const Activity = require("./schemas/Activity");
-const HeartRateZone = require("./schemas/HeartRateZone");
 
 require('dotenv').config()
 const uri = process.env.MONGO_DB_URI
@@ -33,52 +32,46 @@ app.get("/", (req, res) => {
 });
 
 app.get("/sampleactivities", async (req, res) => {
-  const sample_activites = await Activity.find({}).sort({ 'idx': 1})
-  res.json(sample_activites)
+  let user = await User.findOne({ athlete_id: 0 })
+  let activities = await Activity.find({ user_id: user._id }).sort({ 'idx': -1 })
+
+  res.json(activities)
 })
 
 app.get("/sampleheartratezones", async (req, res) => {
-  const sample_heartratezones = await HeartRateZone.find({}).sort({ 'idx': 1})
-  res.json(sample_heartratezones)
+  let user = await User.findOne({ athlete_id: 0 })
+
+  res.json(user.heartRateZones)
 })
 
-app.get("/addHeartRateZones", async (req, res) => {
-  const sample_heart_rate_zones = [
+app.get("/heartratezones/:athlete_id/:access_token", async (req, res) => {
+  let user = await User.findOne({ athlete_id: req.params.athlete_id })
+  
+  var heart_rate_zones = await axios.get(
+    "https://www.strava.com/api/v3/athlete/zones?",
     {
-      min: 0,
-      max: 123,
-      idx: 0
-    },
-    {
-      min: 123,
-      max: 153,
-      idx: 1
-    },
-    {
-      min: 153,
-      max: 169,
-      idx: 2
-    },
-    {
-      min: 169,
-      max: 184,
-      idx: 3
-    },
-    {
-      min: 184,
-      max: -1,
-      idx: 4
-    },
-  ];
+      params: {
+        access_token: req.params.access_token,
+      },
+    }
+  );
 
-  await HeartRateZone.deleteMany({})
+  if (heart_rate_zones === undefined || heart_rate_zones.length === 0) {
+    res.json([])
+  } else {
+    heart_rate_zones = heart_rate_zones["data"]["heart_rate"]["zones"]
+    /*
+      Keep track of the order of the heart rate zones for MongoDB
+    */
+    heart_rate_zones.forEach((heart_rate_zone, idx) => {
+      heart_rate_zone["idx"] = idx
+    })
 
-  sample_heart_rate_zones.forEach(async (heartRateZone) => {
-    const db_heartRateZone = new HeartRateZone(heartRateZone);
-    await db_heartRateZone.save();
-  });
+    user.heartRateZones = heart_rate_zones
+    await user.save();
 
-  res.send("Added Heart Rate Zones to sample user");
+    res.json(heart_rate_zones)
+  }
 });
 
 app.get("/activities/:athlete_id/:access_token", async (req, res) => {
@@ -259,7 +252,7 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
 
   new_activities = utils.addCitiesToActivities(new_activities);
 
-  new_activities.forEach(async (activity, idx) => {
+  new_activities.forEach((activity, idx) => {
     activity["user_id"] = user._id
     activity["idx"] = idx + saved_activities.length
   })

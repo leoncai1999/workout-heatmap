@@ -36,26 +36,21 @@ function Landing({ mode }) {
       const access_token = authenticatedUser["access_token"];
       const athlete_id = authenticatedUser["athlete"]["id"];
 
-      heartRateZones = await axios.get(
-        "https://www.strava.com/api/v3/athlete/zones?",
-        {
-          params: {
-            access_token: access_token,
-          },
-        }
-      );
-      heartRateZones = heartRateZones["data"]["heart_rate"]["zones"];
-
       activities = await axios.get(
         `${baseApiUrl}/activities/${athlete_id}/${access_token}`
       );
       activities = activities["data"];
-    } else {
-      // heartRateZones = await axios.get(`${baseApiUrl}/sampleheartratezones`);
-      // heartRateZones = heartRateZones["data"];
 
+      heartRateZones = await axios.get(
+        `${baseApiUrl}/heartratezones/${athlete_id}/${access_token}`
+      );
+      heartRateZones = heartRateZones["data"];
+    } else {
       activities = await axios.get(`${baseApiUrl}/sampleactivities`);
       activities = activities["data"];
+
+      heartRateZones = await axios.get(`${baseApiUrl}/sampleheartratezones`);
+      heartRateZones = heartRateZones["data"];
     }
 
     const cities = getCities(activities);
