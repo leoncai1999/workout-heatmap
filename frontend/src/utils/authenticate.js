@@ -13,28 +13,30 @@ export const requestStravaPermissions = (isLocalhost) => {
 };
 
 export const getAuthenticatedUser = async (url) => {
-  var authenticatedUser = {};
+  let authenticatedUser = {};
 
-  // Retrieve the code from the authenication process, then exchange the code for a token to access the Strava API
-  const tokenized_url = url.split("/");
-  if (
-    tokenized_url[3] !== null &&
-    tokenized_url[3].substring(0, 8) === "callback"
-  ) {
-    let code_and_scope = tokenized_url[3].substring(27);
-    let code = code_and_scope.substring(0, code_and_scope.indexOf("&"));
+  // Parse the callback URL for the authorization code
+  const queryParams = new URLSearchParams(new URL(url).search);
+  const code = queryParams.get("code");
 
-    let results = await axios.post(
-      "https://www.strava.com/api/v3/oauth/token?",
-      {
-        client_id: process.env.REACT_APP_STRAVA_CLIENT_ID,
-        client_secret: process.env.REACT_APP_STRAVA_SECRET,
-        code: code,
-        grant_type: "authorization_code",
-      }
-    );
-
-    authenticatedUser = results.data;
+  if (code) {
+    try {
+      // Exchange the authorization code for an access token
+      const results = await axios.post(
+        "https://www.strava.com/api/v3/oauth/token",
+        {
+          client_id: process.env.REACT_APP_STRAVA_CLIENT_ID,
+          client_secret: process.env.REACT_APP_STRAVA_SECRET,
+          code: code,
+          grant_type: "authorization_code",
+        }
+      );
+      authenticatedUser = results.data;
+    } catch (error) {
+      console.error("Error exchanging code for token:", error);
+    }
+  } else {
+    console.error("Authorization code not found in the callback URL.");
   }
 
   return authenticatedUser;

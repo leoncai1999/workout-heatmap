@@ -31,6 +31,16 @@ app.get("/", (req, res) => {
   res.json("Welcome to the Workout Heatmap API");
 });
 
+app.get("/userexists/:athlete_id", async (req, res) => {
+  let user = await User.findOne({ athlete_id: req.params.athlete_id })
+
+  if (user) {
+    return res.json({ exists: true })
+  } else {
+    return res.json({ exists: false })
+  }
+})
+
 app.get("/sampleactivities", async (req, res) => {
   let user = await User.findOne({ athlete_id: 0 })
   let activities = await Activity.find({ user_id: user._id }).sort({ 'idx': -1 })
@@ -71,6 +81,23 @@ app.get("/heartratezones/:athlete_id/:access_token", async (req, res) => {
     await user.save();
 
     res.json(heart_rate_zones)
+  }
+});
+
+app.get("/deleteathlete/:athlete_id", async (req, res) => {
+  // Find and delete the user
+  const user = await User.findOneAndDelete({ athlete_id: req.params.athlete_id})
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found." });
+  }
+
+  const activities = await Activity.deleteMany({ user_id: user._id })
+
+  if (activities.deletedCount > 0) {
+    res.status(200).json("User and associated activities deleted successfully.")
+  } else {
+    res.status(404).json("No activities found for given user.")
   }
 });
 

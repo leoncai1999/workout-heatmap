@@ -102,9 +102,6 @@ function Landing({ mode }) {
         Build an interactive heatmap of your outdoor activites from your Strava
         account!
       </h5>
-      {/* <h6>
-        WorkoutHeatmap.me does not collect or externally store any of your data
-      </h6> */}
       <div className="button-center">
         <img
           src={StravaButton}
