@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Navigation from "../components/Navigation.js";
 import Branding from "../components/Branding.js";
 import ListIcon from "../assets/list.svg";
@@ -131,10 +131,19 @@ function List() {
     }
   ];
 
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 1258);
+
   const activities = JSON.parse(sessionStorage["activities"]);
 
   useEffect(() => {
     document.body.style.background = "#e8e1eb";
+
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth > 1258);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   function getCSVName() {
@@ -185,17 +194,27 @@ function List() {
             <ExportCSVButton {...props.csvProps} class="csv-btn">
               Download as CSV
             </ExportCSVButton>
-            <BootstrapTable
-              keyField="id"
-              data={formatData(activities)}
-              columns={columns}
-              bordercolors={true}
-              striped
-              hover
-              condensed
-              pagination={paginationFactory(paginationOptions)}
-              {...props.baseProps}
-            />
+            {isLargeScreen ? (
+              <>
+                <BootstrapTable
+                  keyField="id"
+                  data={formatData(activities)}
+                  columns={columns}
+                  bordercolors={true}
+                  striped
+                  hover
+                  condensed
+                  pagination={paginationFactory(paginationOptions)}
+                  {...props.baseProps}
+                />
+              </>
+            ) : (
+              <>
+                <h2 className="stats-description">
+                  Please use a desktop or larger screen to see the list of activities.
+                </h2>
+              </>
+            )}
           </div>
         )}
       </ToolkitProvider>

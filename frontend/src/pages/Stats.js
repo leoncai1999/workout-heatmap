@@ -25,6 +25,7 @@ const paginationOptions = {
 function Stats() {
   const [lineAttr, setLineAttr] = useState("Distance (Miles)");
   const [doughnutAttr, setDoughnutAttr] = useState("Number of Activities");
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 1258);
 
   const city_columns = [
     {
@@ -105,6 +106,13 @@ function Stats() {
 
   useEffect(() => {
     document.body.style.background = "#e8e1eb";
+
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth > 1258);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -137,24 +145,28 @@ function Stats() {
       <h3 className="stats-header">Activities by Year and Month</h3>
       <YearlyLineChart lineAttr={lineAttr} setLineAttr={setLineAttr} activities={activities} />
 
-      <h3 className="stats-header">Activities by Day of Week</h3>
-      <div className="radar-chart">
-        <Radar
-          data={getActivitiesByDayOfWeekRadar(activities)}
-          options={{ responsive: true, maintainAspectRatio: true }}
-        />
-      </div>
-      <div className="day-table">
-        <BootstrapTable
-          keyField="id"
-          data={getActivitiesByDayOfWeekTable(activities)}
-          columns={day_columns}
-          bordecolors={true}
-          striped
-          hover
-          condensed
-        />
-      </div>
+      {isLargeScreen && (
+        <>
+          <h3 className="stats-header">Activities by Day of Week</h3>
+          <div className="radar-chart">
+            <Radar
+              data={getActivitiesByDayOfWeekRadar(activities)}
+              options={{ responsive: true, maintainAspectRatio: true }}
+            />
+          </div>
+          <div className="day-table">
+            <BootstrapTable
+              keyField="id"
+              data={getActivitiesByDayOfWeekTable(activities)}
+              columns={day_columns}
+              bordecolors={true}
+              striped
+              hover
+              condensed
+            />
+          </div>
+        </>
+      )}
 
       <h3 className="stats-header">Activities by Time of Day</h3>
       <div className="stats-chart">
@@ -165,41 +177,45 @@ function Stats() {
         />
       </div>
 
-      <h3 className="stats-header">Activities by Intensity</h3>
-      <DropdownButton className="button-position" title={doughnutAttr}>
-        {["Number of Activities", "Total Time (Hours)"].map((attr) => {
-          return (
-            <Dropdown.Item
-              onClick={(e) => {
-                setDoughnutAttr(attr);
-              }}
-            >
-              {attr}
-            </Dropdown.Item>
-          );
-        })}
-      </DropdownButton>
-      <div className="doughnut-chart">
-        <Doughnut
-          data={getActivitiesByIntensityDoughnut(
-            activities,
-            heartRateZones,
-            doughnutAttr
-          )}
-          options={{ responsive: true, maintainAspectRatio: true }}
-        />
-      </div>
-      <div className="heart-rate-table">
-        <BootstrapTable
-          keyField="id"
-          data={getActivitiesByIntensityTable(activities, heartRateZones)}
-          columns={heart_rate_columns}
-          bordecolors={true}
-          striped
-          hover
-          condensed
-        />
-      </div>
+      {isLargeScreen && (
+        <>
+          <h3 className="stats-header">Activities by Intensity</h3>
+          <DropdownButton className="button-position" title={doughnutAttr}>
+            {["Number of Activities", "Total Time (Hours)"].map((attr) => {
+              return (
+                <Dropdown.Item
+                  onClick={(e) => {
+                    setDoughnutAttr(attr);
+                  }}
+                >
+                  {attr}
+                </Dropdown.Item>
+              );
+            })}
+          </DropdownButton>
+          <div className="doughnut-chart">
+            <Doughnut
+              data={getActivitiesByIntensityDoughnut(
+                activities,
+                heartRateZones,
+                doughnutAttr
+              )}
+              options={{ responsive: true, maintainAspectRatio: true }}
+            />
+          </div>
+          <div className="heart-rate-table">
+            <BootstrapTable
+              keyField="id"
+              data={getActivitiesByIntensityTable(activities, heartRateZones)}
+              columns={heart_rate_columns}
+              bordecolors={true}
+              striped
+              hover
+              condensed
+            />
+          </div>
+        </>
+      )}
       <Branding />
     </div>
   );

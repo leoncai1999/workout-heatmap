@@ -3,10 +3,10 @@ import { Nav, Navbar } from "react-bootstrap";
 import Logo from "../assets/app-logo.svg";
 import "../styles/Navigation.css";
 
-function Navigation() {
+function Navigation({ toggleNavbar }) {
   return (
     <>
-      <Navbar collapseOnSelect expand="lg" className="color-nav" variant="dark">
+      <Navbar collapseOnSelect expand="lg" className="color-nav" variant="dark" onToggle={toggleNavbar}>
         <Navbar.Brand className="nav-brand" href="/">
           <img src={Logo} className="logo-button" style={{ width: 27 }} alt = "app logo"/>
           Workout Heatmap
