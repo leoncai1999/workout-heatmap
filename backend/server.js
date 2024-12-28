@@ -27,6 +27,10 @@ connect();
 
 app.use(cors());
 
+// Use the built-in body-parser middleware
+app.use(express.json({ limit: "10mb" })); // For parsing application/json
+app.use(express.urlencoded({ extended: true, limit: "10mb" })); // For parsing application/x-www-form-urlencoded
+
 app.get("/", (req, res) => {
   res.json("Welcome to the Workout Heatmap API");
 });
@@ -39,6 +43,25 @@ app.get("/userexists/:athlete_id", async (req, res) => {
   } else {
     return res.json({ exists: false })
   }
+})
+
+app.post("/adduser", async (req, res) => {
+  const { athleteInfo, activities, heartRateZones } = req.body;
+
+  const user = new User({
+    athlete_id: athleteInfo["id"],
+    username: athleteInfo["username"],
+    profile: athleteInfo["profile"],
+    heartRateZones: heartRateZones
+  })
+  await user.save();
+
+  activities.forEach((activity) => {
+    activity["user_id"] = user._id
+  })
+  await Activity.insertMany(activities)
+
+  res.json("User and activities saved successfully")
 })
 
 app.get("/sampleactivities", async (req, res) => {
@@ -55,8 +78,6 @@ app.get("/sampleheartratezones", async (req, res) => {
 })
 
 app.get("/heartratezones/:athlete_id/:access_token", async (req, res) => {
-  let user = await User.findOne({ athlete_id: req.params.athlete_id })
-  
   var heart_rate_zones = await axios.get(
     "https://www.strava.com/api/v3/athlete/zones?",
     {
@@ -77,8 +98,12 @@ app.get("/heartratezones/:athlete_id/:access_token", async (req, res) => {
       heart_rate_zone["idx"] = idx
     })
 
-    user.heartRateZones = heart_rate_zones
-    await user.save();
+    let user = await User.findOne({ athlete_id: req.params.athlete_id })
+
+    if (user) {
+      user.heartRateZones = heart_rate_zones
+      await user.save();
+    }
 
     res.json(heart_rate_zones)
   }
@@ -119,24 +144,7 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   */
   let user = await User.findOne({ athlete_id: req.params.athlete_id })
 
-  if (!user) {
-    var athlete_info = await axios.get("https://www.strava.com/api/v3/athlete", {
-      params: {
-        access_token: req.params.access_token,
-      },
-    });
-
-    athlete_info = athlete_info.data;
-
-    user = new User({
-      athlete_id: req.params.athlete_id,
-      username: athlete_info["username"],
-      profile: athlete_info["profile"],
-      heartRateZones: [],
-    })
-
-    await user.save();
-  } else {
+  if (user) {
     saved_activities = await Activity.find({ user_id: user._id }).sort({ 'idx': 1 })
 
     if (saved_activities.length === 0) {
@@ -280,11 +288,16 @@ app.get("/activities/:athlete_id/:access_token", async (req, res) => {
   new_activities = utils.addCitiesToActivities(new_activities);
 
   new_activities.forEach((activity, idx) => {
-    activity["user_id"] = user._id
     activity["idx"] = idx + saved_activities.length
   })
 
-  await Activity.insertMany(new_activities)
+  if (user) {
+    new_activities.forEach((activity) => {
+      activity["user_id"] = user._id
+    })
+
+    await Activity.insertMany(new_activities)
+  }
 
   activities = [...saved_activities, ...new_activities];
 

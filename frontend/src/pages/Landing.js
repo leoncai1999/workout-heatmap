@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
-import { Nav, Modal } from "react-bootstrap";
+import { Nav, Modal, Button } from "react-bootstrap";
 import Logo from "../assets/app-logo.svg";
 import { Spinner } from "react-bootstrap";
 import StravaButton from "../assets/connect_with_strava.png";
@@ -24,17 +24,25 @@ const baseApiUrl = isLocalhost
 
 function Landing({ mode }) {
   const [fetchComplete, setFetchComplete] = useState(mode === "normal");
+  const [askToStoreData, setAskToStoreData] = useState(false);
+
+  const [savedAthleteInfo, setSavedAthleteInfo] = useState([]);
+  const [savedActivities, setSavedActivities] = useState([]);
+  const [savedHeartRateZones, setSavedHeartRateZones] = useState([]);
 
   const fetchData = useCallback(async (mode) => {
     var activities = [];
     var heartRateZones = [];
 
+    var access_token = "";
+    var athlete_id = 0;
+
     if (mode === "callback") {
       const authenticatedUser = await getAuthenticatedUser(
         String(window.location.href)
       );
-      const access_token = authenticatedUser["access_token"];
-      const athlete_id = authenticatedUser["athlete"]["id"];
+      access_token = authenticatedUser["access_token"];
+      athlete_id = authenticatedUser["athlete"]["id"];
 
       activities = await axios.get(
         `${baseApiUrl}/activities/${athlete_id}/${access_token}`
@@ -58,7 +66,24 @@ function Landing({ mode }) {
     sessionStorage.setItem("activities", JSON.stringify(activities));
     sessionStorage.setItem("heartRateZones", JSON.stringify(heartRateZones));
 
-    setFetchComplete(true);
+    const userExistsResponse = await axios.get(`${baseApiUrl}/userexists/${athlete_id}`);
+    const userExists = userExistsResponse.data.exists;
+
+    if (userExists) {
+      setFetchComplete(true);
+    } else {
+      var athlete_info = await axios.get("https://www.strava.com/api/v3/athlete", {
+        params: {
+          access_token: access_token,
+        },
+      });
+
+      setSavedAthleteInfo(athlete_info["data"]);
+      setSavedActivities(activities);
+      setSavedHeartRateZones(heartRateZones);
+
+      setAskToStoreData(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -68,11 +93,36 @@ function Landing({ mode }) {
     }
   }, [fetchData]);
 
+  const handleStoreData = async (store) => {
+    setAskToStoreData(false);
+    setFetchComplete(true); // Redirect to the next page
+
+    if (store) {
+      try {
+        /* 
+        Since we're saving the user data for access at their next login,
+        we can let the user proceed to the next page while this api
+        call proceeds. Since this call only takes a few seconds, the data
+        will be ready next time the user logs in.
+        */
+        console.log("hello")
+        console.log(savedAthleteInfo)
+        await axios.post(`${baseApiUrl}/adduser`, {
+          athleteInfo: savedAthleteInfo,
+          activities: savedActivities,
+          heartRateZones: savedHeartRateZones,
+        });
+      } catch (error) {
+        console.error("Error saving user data:", error);
+      }
+    }
+  }
+
   return (
     <div>
       {mode !== "normal" && fetchComplete && <Navigate to="/map" />}
       <Modal
-        show={!fetchComplete}
+        show={!fetchComplete && !askToStoreData}
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
@@ -92,6 +142,28 @@ function Landing({ mode }) {
               <p className="loading-text">Fetching sample athlete data ...</p>
             )}
             <Spinner animation="border" className="loading-spinner" />
+          </div>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        show={askToStoreData}
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Body>
+          <div className="loading-center">
+            <p className="loading-text">
+              Would you like to store your data for faster access next time?
+            </p>
+            <div className="button-group">
+              <Button variant="primary" onClick={() => handleStoreData(true)}>
+                Yes
+              </Button>
+              <Button variant="secondary" onClick={() => handleStoreData(false)}>
+                No
+              </Button>
+            </div>
           </div>
         </Modal.Body>
       </Modal>
