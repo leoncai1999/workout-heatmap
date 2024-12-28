@@ -23,6 +23,9 @@ function Navigation() {
             <Nav.Link className="nav-item" href="/stats">
               Stats
             </Nav.Link>
+            <Nav.Link className="nav-item" href="/settings">
+              Settings
+            </Nav.Link>
             <Nav.Link className="nav-item" href="/about">
               About
             </Nav.Link>

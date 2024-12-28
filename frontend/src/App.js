@@ -7,6 +7,7 @@ import List from "./pages/List";
 import Stats from "./pages/Stats";
 import Landing from "./pages/Landing";
 import About from "./pages/About";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path={"/map"} element={<Heatmap />} />
         <Route path={"/list"} element={<List />} />
         <Route path={"/stats"} element={<Stats />} />
+        <Route path={"/settings"} element={<Settings />} />
         <Route path={"/about"} element={<About />} />
       </Routes>
     </BrowserRouter>

@@ -70,6 +70,7 @@ function Landing({ mode }) {
     const userExists = userExistsResponse.data.exists;
 
     if (userExists) {
+      sessionStorage.setItem("savedAthleteId", athlete_id);
       setFetchComplete(true);
     } else {
       var athlete_info = await axios.get("https://www.strava.com/api/v3/athlete", {
@@ -105,16 +106,18 @@ function Landing({ mode }) {
         call proceeds. Since this call only takes a few seconds, the data
         will be ready next time the user logs in.
         */
-        console.log("hello")
-        console.log(savedAthleteInfo)
         await axios.post(`${baseApiUrl}/adduser`, {
           athleteInfo: savedAthleteInfo,
           activities: savedActivities,
           heartRateZones: savedHeartRateZones,
         });
+
+        sessionStorage.setItem("savedAthleteId", savedAthleteInfo["id"]);
       } catch (error) {
         console.error("Error saving user data:", error);
       }
+    } else {
+      sessionStorage.setItem("savedAthleteId", 0);
     }
   }
 
@@ -156,7 +159,7 @@ function Landing({ mode }) {
             <p className="loading-text">
               Would you like to store your data for faster access next time?
             </p>
-            <div className="button-group">
+            <div className="store-data-button-group">
               <Button variant="primary" onClick={() => handleStoreData(true)}>
                 Yes
               </Button>

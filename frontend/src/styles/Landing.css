@@ -52,3 +52,10 @@ h6 {
   margin-top: 30px;
   cursor: pointer;
 }
+
+.store-data-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Adjust the spacing between buttons */
+  margin-top: 15px; /* Add some top margin to separate buttons from the text */
+}
