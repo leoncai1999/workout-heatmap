@@ -27,10 +27,10 @@ function YearlyLineChart({ lineAttr, setLineAttr, activities }) {
       </DropdownButton>
       <Line
         data={getActivitiesByYearAndMonth(activities, lineAttr)}
-        height={450}
+        height={150}
         options={{
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
           scales: {
             yAxes: [
               {
