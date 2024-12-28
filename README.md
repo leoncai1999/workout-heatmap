@@ -1,12 +1,14 @@
 # Workout Heatmap
-[![WelcomeScreen](https://i.postimg.cc/NF4wZNsR/Welcome-Screen.png)](https://postimg.cc/T5pSDJWP)
+[![WelcomeScreen](https://i.postimg.cc/cJxCTkJf/Welcome-Screen.png)](https://postimg.cc/G4fbmQGp)
 
 WorkoutHeatmap.me is a Web App that connects with a user's Strava account to create a personalized and
 interactive heatmap of their activities. Additionally, it delivers statistics on their workout habits
-and allows them to download their data. Your information is retrieved from the Strava API and none of it
-is stored externally. You may revoke your Strava access at any time. If you do not have a Stava account,
-there is a sample account if you would still like to explore the app. This site is free for anyone to use
-pending Strava API call limits. Below are the features of the app.
+and allows them to download their data. Your information is retrieved from the Strava API and you can
+optionally decide to store your information in our database for fast access next time you connect your
+account. If you later decide to you would like to remove your information, you can delete your account
+in the settings. If you do not have a Stava account, there is a sample account if you would still like
+to explore the app. This site is free for anyone to use pending Strava API call limits. Below are the 
+features of the app.
 
 ## Heatmap
 [![MapScreen](https://i.postimg.cc/9MVNjQxk/map-screen-13f795f3.png)](https://postimg.cc/8FKbRNgd)
@@ -33,7 +35,7 @@ the user must enable access to their Strava profile information. Allowing this g
 access to the user's heart rate zones which can then be used to bring these insights.
 
 ## App Components
-**Built With:** MongoDB (for storing sample account data), Express, React, and NodeJS
+**Built With:** MongoDB, Express, React, and NodeJS
 
 **APIs:** [Strava API](http://developers.strava.com/docs/reference/) (user authentication and accessing workout data), [Google Maps API](https://developers.google.com/maps/documentation/javascript/overview) (map overlay)
 
