@@ -4,19 +4,21 @@ import "../styles/Heatmap.css";
 
 function MapDropdown({cities, selectedCity, setSelectedCity, setMapCenter}) {
   return (
-    <div id="cities-search">
+    <div id="cities-search" data-testid="cities-dropdown">
       <DropdownButton
         alignRight
         title={selectedCity}
         id="dropdown-menu-align-right"
       >
-        {cities.map((city) => {
+        {cities.map((city, i) => {
           return (
             <Dropdown.Item
               onClick={() => {
                 setSelectedCity(city["name"]);
                 setMapCenter(city["latlng"]);
               }}
+              key={i}
+              data-testid={`city-dropdown-${i}`}
             >
               {city["name"]}
             </Dropdown.Item>

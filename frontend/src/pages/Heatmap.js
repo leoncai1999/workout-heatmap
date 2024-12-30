@@ -46,7 +46,7 @@ function Heatmap() {
     <div id="container">
       <Navigation toggleNavbar={toggleNavbar} />
 
-      <div id="map">
+      <div id="map" data-testid="google-map">
         <Map
           google={window.google}
           zoom={zoom}
@@ -54,12 +54,14 @@ function Heatmap() {
           initialCenter={{ lat: 39.8283, lng: -98.5795 }}
           center={mapCenter}
         >
-          {getPolylines(filterType, filterValue, activities).map((polyline) => {
+          {getPolylines(filterType, filterValue, activities).map((polyline, i) => {
             return (
               <Polyline
                 path={polyline}
                 strokeColor="#6F1BC6"
                 strokeWeight="2"
+                key={i}
+                customId={`activity-polyline-${i}`}
               />
             );
           })}

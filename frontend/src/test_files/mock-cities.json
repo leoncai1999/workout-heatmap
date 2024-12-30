@@ -1,0 +1,37 @@
+[{
+    "name": "Portland, OR",
+    "activities": 11,
+    "miles": 71.02,
+    "elevation": 8828.74,
+    "hours": 10,
+    "latlng": { "lat": 45.534766, "lng": -122.699515 },
+    "id": 0
+  },
+  {
+    "name": "Austin, TX",
+    "activities": 4,
+    "miles": 25.73,
+    "elevation": 1184.38,
+    "hours": 4,
+    "latlng": { "lat": 30.2692261151969, "lng": -97.7534967195243 },
+    "id": 1
+  },
+  {
+    "name": "Packwood, WA",
+    "activities": 1,
+    "miles": 14.71,
+    "elevation": 3966.54,
+    "hours": 5,
+    "latlng": { "lat": 46.4668977633119, "lng": -121.528159473091 },
+    "id": 2
+  },
+  {
+    "name": "Beaverton, OR",
+    "activities": 1,
+    "miles": 3.93,
+    "elevation": 173.88,
+    "hours": 0,
+    "latlng": { "lat": 45.5092580337077, "lng": -122.833102019504 },
+    "id": 3
+  }
+]

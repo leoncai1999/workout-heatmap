@@ -11,7 +11,7 @@ function Navigation({ toggleNavbar }) {
           <img src={Logo} className="logo-button" style={{ width: 27 }} alt = "app logo"/>
           Workout Heatmap
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" data-testid="navbar-hamburger"/>
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ml-auto">
             <Nav.Link className="nav-item" href="/map">
