@@ -16,7 +16,7 @@ beforeEach(() => {
 jest.mock("google-maps-react", () => ({
   Map: ({ children, center }) => <div data-testid="map" data-center={JSON.stringify(center)}>{children}</div>,
   Polyline: ({ customId, path }) => <div data-testid={customId} data-path={JSON.stringify(path)}></div>,
-  GoogleApiWrapper: (config) => (Component) => (props) => <Component {...props} />,
+  GoogleApiWrapper: () => (Component) => (props) => <Component {...props} />,
 }));
 
 afterEach(() => {
@@ -147,4 +147,41 @@ test("polylines update based on option selected", async () => {
 
   const polylines = screen.queryAllByTestId(/^activity-polyline-/);
   expect(polylines).toHaveLength(mockActivities.length);
+});
+
+test("cities dropdown disappears on a small screen if the navbar hamburger is clicked", async () => {
+  // Render the Heatmap component
+  render(<Heatmap />);
+
+  // Simulate resizing the screen to make the hamburger appear
+  act(() => {
+    global.innerWidth = 500;
+    global.dispatchEvent(new Event("resize"));
+  });
+
+  // Check that the hamburger menu is visible
+  const hamburger = screen.getByTestId("navbar-hamburger");
+  expect(hamburger).toBeInTheDocument();
+
+  // Click the hamburger to collapse the navbar
+  await act(async () => {
+    fireEvent.click(hamburger);
+
+    // Wait for the dropdown to disappear
+    await waitFor(() => {
+      const dropdown = screen.queryByTestId("cities-dropdown");
+      expect(dropdown).not.toBeInTheDocument();
+    });
+  });
+
+  // Click the hamburger again to expand the navbar
+  await act(async () => {
+    fireEvent.click(hamburger);
+
+    // Wait for the dropdown to reappear
+    await waitFor(() => {
+      const dropdown = screen.getByTestId("cities-dropdown");
+      expect(dropdown).toBeInTheDocument();
+    });
+  });
 });

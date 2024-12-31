@@ -178,7 +178,7 @@ function List() {
     <div>
       <Navigation />
 
-      <img class="img-stats" src={ListIcon} alt="spreadsheet icon"></img>
+      <img className="img-stats" src={ListIcon} alt="spreadsheet icon"></img>
       <h1 className="black-header"> List of Activities </h1>
 
       <ToolkitProvider
@@ -190,8 +190,8 @@ function List() {
         }}
       >
         {(props) => (
-          <div class="bootstrap-table">
-            <ExportCSVButton {...props.csvProps} class="csv-btn">
+          <div className="bootstrap-table">
+            <ExportCSVButton {...props.csvProps} className="csv-btn">
               Download as CSV
             </ExportCSVButton>
             {isLargeScreen ? (
@@ -210,7 +210,7 @@ function List() {
               </>
             ) : (
               <>
-                <h2 className="stats-description">
+                <h2 className="stats-description" data-testid="hidden-table-description">
                   Please use a desktop or larger screen to see the list of activities.
                 </h2>
               </>

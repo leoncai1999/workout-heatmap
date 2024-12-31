@@ -38,12 +38,17 @@ function Settings() {
   return(
     <div>
       <Navigation />
-      <img class="img-stats" src={SettingsIcon} alt="settings icon"></img>
+      <img className="img-stats" src={SettingsIcon} alt="settings icon"></img>
       <h1 className="black-header">Settings</h1>
       <h3 className="stats-header">More settings coming soon</h3>
       {athlete_id !== "0" ? (
         <>
-          <Button variant="danger" style={{ marginLeft: "20px" }} onClick={() => deleteAccount()}>
+          <Button
+            data-testid="delete-account-button"
+            variant="danger"
+            style={{ marginLeft: "20px" }}
+            onClick={() => deleteAccount()}
+          >
             Delete my account
           </Button>
 
