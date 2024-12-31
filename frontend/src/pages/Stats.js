@@ -129,7 +129,7 @@ function Stats() {
       </h2>
 
       <h3 className="stats-header">Activities by City</h3>
-      <div className="bootstrap-table">
+      <div className="bootstrap-table" data-testid="cities-table">
         <BootstrapTable
           keyField="id"
           data={cities}
@@ -143,18 +143,22 @@ function Stats() {
       </div>
 
       <h3 className="stats-header">Activities by Year and Month</h3>
-      <YearlyLineChart lineAttr={lineAttr} setLineAttr={setLineAttr} activities={activities} />
+      <YearlyLineChart
+        lineAttr={lineAttr}
+        setLineAttr={setLineAttr}
+        activities={activities}
+      />
 
       {isLargeScreen && (
         <>
           <h3 className="stats-header">Activities by Day of Week</h3>
-          <div className="radar-chart">
+          <div className="radar-chart" data-testid="day-of-week-chart">
             <Radar
               data={getActivitiesByDayOfWeekRadar(activities)}
               options={{ responsive: true, maintainAspectRatio: true }}
             />
           </div>
-          <div className="day-table">
+          <div className="day-table" data-testid="day-of-week-table">
             <BootstrapTable
               keyField="id"
               data={getActivitiesByDayOfWeekTable(activities)}
@@ -169,7 +173,7 @@ function Stats() {
       )}
 
       <h3 className="stats-header">Activities by Time of Day</h3>
-      <div className="stats-chart">
+      <div className="stats-chart" data-testid="activities-time-chart">
         <Bar
           data={getActivitiesByTimeOfDay(activities)}
           height={450}
@@ -181,9 +185,10 @@ function Stats() {
         <>
           <h3 className="stats-header">Activities by Intensity</h3>
           <DropdownButton className="button-position" title={doughnutAttr}>
-            {["Number of Activities", "Total Time (Hours)"].map((attr) => {
+            {["Number of Activities", "Total Time (Hours)"].map((attr, i) => {
               return (
                 <Dropdown.Item
+                  key={i}
                   onClick={(e) => {
                     setDoughnutAttr(attr);
                   }}
@@ -193,7 +198,7 @@ function Stats() {
               );
             })}
           </DropdownButton>
-          <div className="doughnut-chart">
+          <div className="doughnut-chart" data-testid="intensity-chart">
             <Doughnut
               data={getActivitiesByIntensityDoughnut(
                 activities,
@@ -203,7 +208,7 @@ function Stats() {
               options={{ responsive: true, maintainAspectRatio: true }}
             />
           </div>
-          <div className="heart-rate-table">
+          <div className="heart-rate-table" data-testid="intensity-table">
             <BootstrapTable
               keyField="id"
               data={getActivitiesByIntensityTable(activities, heartRateZones)}

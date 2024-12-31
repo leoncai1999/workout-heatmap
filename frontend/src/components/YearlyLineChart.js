@@ -6,19 +6,20 @@ import "../styles/Stats.css";
 
 function YearlyLineChart({ lineAttr, setLineAttr, activities }) {
   return (
-    <div className="stats-chart">
+    <div className="stats-chart" data-testid="activities-line-chart">
       <DropdownButton id="dropdown-basic-button" title={lineAttr}>
         {[
           "Distance (Miles)",
           "Elevation Gain (Feet)",
           "Number of Activities",
           "Pace (Minutes per Mile)",
-        ].map((attr) => {
+        ].map((attr, i) => {
           return (
             <Dropdown.Item
               onClick={(e) => {
                 setLineAttr(attr);
               }}
+              key={i}
             >
               {attr}
             </Dropdown.Item>

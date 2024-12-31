@@ -51,6 +51,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^12.1.5",
+    "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom-sixteen": "^2.0.0",
     "react-router-dom": "^6.22.3"
   },
