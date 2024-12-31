@@ -19,9 +19,9 @@ function About() {
         Workout Heatmap provides additional insights on your Strava activites
         including an interactive map of everywhere that you've exercised, and
         statistics describing when, where and how you workout. The data is
-        retrieved by connecting your Strava account, and none of your data is
-        uploaded externally to any servers. Additionally, you may revoke access
-        to your Strava account at any time.
+        retrieved by connecting your Strava account, and you can optionally
+        store your data in our databases for quicker access next time.
+        Additionally, you can delete your data at any time.
       </p>
       <p className="about-description">
         The Heatmap will only show workouts recorded with a GPS enabled device

@@ -7,9 +7,7 @@ export const requestStravaPermissions = (isLocalhost) => {
     : "https://www.workoutheatmap.me/";
 
   // User is redirected to Strava's website to login and give site permission to access acount information
-  window.location.assign(
-    `https://www.strava.com/oauth/authorize?client_id=${process.env.REACT_APP_STRAVA_CLIENT_ID}&redirect_uri=${base_url}callback&response_type=code&scope=activity:read_all,profile:read_all&approval_prompt=force&state=strava`
-  );
+  window.location.href = `https://www.strava.com/oauth/authorize?client_id=${process.env.REACT_APP_STRAVA_CLIENT_ID}&redirect_uri=${base_url}callback&response_type=code&scope=activity:read_all,profile:read_all&approval_prompt=force&state=strava`
 };
 
 export const getAuthenticatedUser = async (url) => {

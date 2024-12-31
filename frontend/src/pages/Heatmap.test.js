@@ -9,7 +9,7 @@ import mockCities from "../test_files/mock-cities.json";
 // Mock the data we will use for our tests
 beforeEach(() => {
   sessionStorage.setItem("activities", JSON.stringify(mockActivities));
-  sessionStorage.setItem("cities", JSON.stringify(mockCities))
+  sessionStorage.setItem("cities", JSON.stringify(mockCities));
 });
 
 // Mock the map we will use for our tests

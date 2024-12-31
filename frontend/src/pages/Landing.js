@@ -126,6 +126,7 @@ function Landing({ mode }) {
       {mode !== "normal" && fetchComplete && <Navigate to="/map" />}
       <Modal
         show={!fetchComplete && !askToStoreData}
+        data-testid="loading-modal"
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
@@ -171,23 +172,32 @@ function Landing({ mode }) {
         </Modal.Body>
       </Modal>
 
-      <img className="img-center" src={Logo} alt="app logo"></img>
-      <h1> Workout Heatmap </h1>
-      <h5>
+      <img
+        className="img-center"
+        src={Logo}
+        data-testid="app-logo"
+        alt="app logo"/>
+      <h1 data-testid="app-name">Workout Heatmap</h1>
+      <h5 data-testid="app-description">
         Build an interactive heatmap of your outdoor activites from your Strava
         account!
       </h5>
       <div className="button-center">
         <img
           src={StravaButton}
+          data-testid="connect-strava-button"
           onClick={(e) => {
-            requestStravaPermissions(isLocalhost).bind(this);
+            requestStravaPermissions(isLocalhost);
           }}
           alt="connect with strava button"
         ></img>
       </div>
       <Nav.Link href="/sample">
-        <h6 className="demo-text"> Not a Strava user? See a demo account </h6>
+        <h6
+          className="demo-text"
+          data-testid="demo-account-text">
+          Not a Strava user? See a demo account
+        </h6>
       </Nav.Link>
       <Branding />
     </div>
